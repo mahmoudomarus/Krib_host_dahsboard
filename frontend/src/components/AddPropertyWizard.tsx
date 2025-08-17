@@ -69,13 +69,13 @@ export function AddPropertyWizard() {
   const progress = ((currentStepIndex + 1) / steps.length) * 100
 
   const handleBasicInfoSubmit = () => {
-    if (propertyData.title && propertyData.location && propertyData.propertyType) {
+    if (propertyData.title && propertyData.address && propertyData.property_type) {
       setCurrentStep('ai-description')
       // Simulate AI conversation start
       setAiMessages([
         {
           role: 'ai',
-          content: `Great! I can see you're adding "${propertyData.title}" in ${propertyData.location}. Let me generate a compelling description for your ${propertyData.propertyType.toLowerCase()}. I'll highlight the key features and make it attractive to potential guests.`
+          content: `Great! I can see you're adding "${propertyData.title}" in ${propertyData.city}, ${propertyData.state}. Let me generate a compelling description for your ${propertyData.property_type.toLowerCase()}. I'll highlight the key features and make it attractive to potential guests.`
         }
       ])
     }
@@ -86,7 +86,7 @@ export function AddPropertyWizard() {
     
     // Simulate API call to generate description
     setTimeout(() => {
-      const generatedDescription = `Experience the perfect blend of comfort and style at this stunning ${propertyData.propertyType.toLowerCase()} in ${propertyData.location}. This beautifully appointed ${propertyData.bedrooms}-bedroom space offers a serene retreat for up to ${propertyData.maxGuests} guests.
+      const generatedDescription = `Experience the perfect blend of comfort and style at this stunning ${propertyData.property_type.toLowerCase()} in ${propertyData.city}, ${propertyData.state}. This beautifully appointed ${propertyData.bedrooms}-bedroom space offers a serene retreat for up to ${propertyData.max_guests} guests.
 
 The space features modern amenities and thoughtful design throughout. Whether you're here for business or leisure, you'll find everything you need for a memorable stay. The location provides easy access to local attractions while maintaining a peaceful atmosphere.
 
@@ -132,12 +132,15 @@ Perfect for families, couples, or business travelers looking for a home away fro
     try {
       const propertyPayload = {
         title: propertyData.title,
-        location: propertyData.location,
-        propertyType: propertyData.propertyType,
+        address: propertyData.address,
+        city: propertyData.city,
+        state: propertyData.state,
+        country: propertyData.country,
+        property_type: propertyData.property_type,
         bedrooms: parseInt(propertyData.bedrooms),
         bathrooms: parseInt(propertyData.bathrooms),
-        maxGuests: parseInt(propertyData.maxGuests),
-        price: parseInt(propertyData.price),
+        max_guests: parseInt(propertyData.max_guests),
+        price_per_night: parseInt(propertyData.price_per_night),
         description: propertyData.description,
         images: propertyData.images,
         amenities: propertyData.amenities
@@ -184,20 +187,40 @@ Perfect for families, couples, or business travelers looking for a home away fro
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="location">Location</Label>
+                  <Label htmlFor="address">Address</Label>
                   <Input 
-                    id="location"
-                    placeholder="e.g., New York, NY"
-                    value={propertyData.location}
-                    onChange={(e) => setPropertyData(prev => ({ ...prev, location: e.target.value }))}
+                    id="address"
+                    placeholder="123 Main St"
+                    value={propertyData.address}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, address: e.target.value }))}
                   />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City</Label>
+                    <Input 
+                      id="city"
+                      placeholder="New York"
+                      value={propertyData.city}
+                      onChange={(e) => setPropertyData(prev => ({ ...prev, city: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="state">State</Label>
+                    <Input 
+                      id="state"
+                      placeholder="NY"
+                      value={propertyData.state}
+                      onChange={(e) => setPropertyData(prev => ({ ...prev, state: e.target.value }))}
+                    />
+                  </div>
                 </div>
               </div>
               
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="propertyType">Property Type</Label>
-                  <Select value={propertyData.propertyType} onValueChange={(value) => setPropertyData(prev => ({ ...prev, propertyType: value }))}>
+                  <Label htmlFor="property_type">Property Type</Label>
+                  <Select value={propertyData.property_type} onValueChange={(value) => setPropertyData(prev => ({ ...prev, property_type: value }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
@@ -238,8 +261,8 @@ Perfect for families, couples, or business travelers looking for a home away fro
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxGuests">Max Guests</Label>
-                  <Select value={propertyData.maxGuests} onValueChange={(value) => setPropertyData(prev => ({ ...prev, maxGuests: value }))}>
+                  <Label htmlFor="max_guests">Max Guests</Label>
+                  <Select value={propertyData.max_guests} onValueChange={(value) => setPropertyData(prev => ({ ...prev, max_guests: value }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Guests" />
                     </SelectTrigger>
@@ -253,13 +276,13 @@ Perfect for families, couples, or business travelers looking for a home away fro
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="price">Price per Night (USD)</Label>
+                <Label htmlFor="price_per_night">Price per Night (USD)</Label>
                 <Input 
-                  id="price"
+                  id="price_per_night"
                   type="number"
                   placeholder="150"
-                  value={propertyData.price}
-                  onChange={(e) => setPropertyData(prev => ({ ...prev, price: e.target.value }))}
+                  value={propertyData.price_per_night}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, price_per_night: e.target.value }))}
                 />
               </div>
               
@@ -469,15 +492,15 @@ Perfect for families, couples, or business travelers looking for a home away fro
                     <h2 className="text-xl font-semibold">{propertyData.title}</h2>
                     <p className="text-muted-foreground flex items-center gap-1">
                       <MapPin className="h-4 w-4" />
-                      {propertyData.location}
+                      {propertyData.city}, {propertyData.state}
                     </p>
                   </div>
                   
                   <div className="flex gap-4 text-sm">
                     <span>{propertyData.bedrooms} bed</span>
                     <span>{propertyData.bathrooms} bath</span>
-                    <span>{propertyData.maxGuests} guests</span>
-                    <span className="font-semibold">${propertyData.price}/night</span>
+                    <span>{propertyData.max_guests} guests</span>
+                    <span className="font-semibold">${propertyData.price_per_night}/night</span>
                   </div>
                   
                   <p className="text-sm">{propertyData.description}</p>
