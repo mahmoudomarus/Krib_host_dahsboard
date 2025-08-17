@@ -19,6 +19,12 @@ class S3StorageService:
         self.bucket_name = settings.s3_bucket_name
         self.region = settings.aws_region
         
+        # Check if S3 configuration is available
+        if not self.bucket_name or not settings.aws_access_key_id or not settings.aws_secret_access_key:
+            logger.warning("S3 configuration incomplete. S3 service disabled. Required: S3_BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY")
+            self.s3_client = None
+            return
+        
         # Initialize S3 client (Supabase S3-compatible)
         try:
             client_config = {
@@ -33,15 +39,19 @@ class S3StorageService:
             
             self.s3_client = boto3.client('s3', **client_config)
             
-            # Test connection
-            self.s3_client.head_bucket(Bucket=self.bucket_name)
-            logger.info(f"S3 connection established for bucket: {self.bucket_name}")
+            # Test connection only if bucket name is valid
+            if self.bucket_name:
+                self.s3_client.head_bucket(Bucket=self.bucket_name)
+                logger.info(f"S3 connection established for bucket: {self.bucket_name}")
             
         except NoCredentialsError:
             logger.warning("AWS credentials not found. S3 service disabled.")
             self.s3_client = None
         except ClientError as e:
             logger.error(f"S3 initialization failed: {e}")
+            self.s3_client = None
+        except Exception as e:
+            logger.error(f"S3 service initialization failed: {e}")
             self.s3_client = None
     
     async def upload_property_image(

@@ -26,8 +26,8 @@ pydantic[email]>=2.5.0,<3.0.0
 pydantic-settings>=2.1.0
 email-validator>=2.1.0
 
-# HTTP clients and utilities - compatible with supabase 1.2.0
-httpx>=0.24.0,<0.25.0
+# HTTP clients and utilities - compatible with supabase 1.2.0 and anthropic
+httpx>=0.24.0
 aiofiles>=23.2.1
 
 # Data validation and serialization

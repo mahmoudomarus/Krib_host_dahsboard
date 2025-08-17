@@ -18,12 +18,25 @@ class AIService:
         
         # Initialize OpenAI if API key is available
         if settings.openai_api_key:
-            openai.api_key = settings.openai_api_key
-            self.openai_client = openai
+            try:
+                openai.api_key = settings.openai_api_key
+                self.openai_client = openai
+                logger.info("OpenAI client initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize OpenAI client: {e}")
+        else:
+            logger.warning("OpenAI API key not provided. OpenAI features will be disabled.")
         
         # Initialize Anthropic if API key is available
         if settings.anthropic_api_key:
-            self.anthropic_client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+            try:
+                self.anthropic_client = anthropic.Anthropic(api_key=settings.anthropic_api_key)
+                logger.info("Anthropic client initialized successfully")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Anthropic client: {e}")
+                self.anthropic_client = None
+        else:
+            logger.warning("Anthropic API key not provided. Anthropic features will be disabled.")
     
     async def generate_property_description(
         self,
