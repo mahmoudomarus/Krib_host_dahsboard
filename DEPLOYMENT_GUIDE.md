@@ -1,6 +1,6 @@
 # 🚀 Deployment Guide
 
-This guide will help you deploy your RentalAI Dashboard to production using Vercel (frontend) and Render (backend).
+This guide will help you deploy your Krib AI Dashboard to production using Vercel (frontend) and Render (backend).
 
 ## 📋 Prerequisites
 
@@ -29,7 +29,7 @@ rental-ai-dashboard/
    ```bash
    git init
    git add .
-   git commit -m "Initial commit: RentalAI Dashboard"
+   git commit -m "Initial commit: Krib AI Dashboard"
    git remote add origin https://github.com/mahmoudomarus/Krib_host_dahsboard.git
    git push -u origin main
    ```
@@ -128,7 +128,7 @@ Visit: `https://your-backend.onrender.com/docs`
 
 ### Test Frontend  
 Visit: `https://your-app.vercel.app`
-- Should load the RentalAI dashboard
+- Should load the Krib AI dashboard
 - Try signing up/logging in
 - Test creating a property
 
@@ -163,7 +163,7 @@ Visit: `https://your-app.vercel.app`
 
 ## 🎉 Success!
 
-Once deployed, your RentalAI Dashboard will be live with:
+Once deployed, your Krib AI Dashboard will be live with:
 - ✅ Production-ready frontend on Vercel
 - ✅ Scalable backend on Render  
 - ✅ Real database with Supabase

@@ -1,6 +1,6 @@
-# 🚀 RentalAI Upgrade Guide: From Mock to Real
+# 🚀 Krib AI Upgrade Guide: From Mock to Real
 
-This guide will help you upgrade your RentalAI project from mockup data to a fully functional application with FastAPI backend, real AI integration, and S3 storage.
+This guide will help you upgrade your Krib AI project from mockup data to a fully functional application with FastAPI backend, real AI integration, and S3 storage.
 
 ## 📋 What We've Built
 

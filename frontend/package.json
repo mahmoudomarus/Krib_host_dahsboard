@@ -1,7 +1,7 @@
 {
-  "name": "rental-ai-dashboard",
+  "name": "krib-ai-dashboard",
   "version": "1.0.0",
-  "description": "AI-powered rental property management dashboard",
+  "description": "Krib AI - AI-powered rental property management dashboard",
   "private": true,
   "scripts": {
     "dev": "vite",

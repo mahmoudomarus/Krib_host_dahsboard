@@ -16,7 +16,7 @@ export function AuthForm() {
   
   // Sign In Form State
   const [signInData, setSignInData] = useState({
-    email: "demo@rentalai.com",
+    email: "demo@kribai.com",
     password: "demo123"
   })
   

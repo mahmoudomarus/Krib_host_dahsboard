@@ -70,7 +70,7 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
             <Bot className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-lg text-sidebar-foreground">RentalAI</h2>
+            <h2 className="text-lg text-sidebar-foreground">Krib AI</h2>
             <p className="text-sm text-sidebar-foreground/60">Property Dashboard</p>
           </div>
         </div>

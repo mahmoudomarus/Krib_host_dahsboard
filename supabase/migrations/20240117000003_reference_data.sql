@@ -1,4 +1,4 @@
--- Production Reference Data for RentalAI
+-- Production Reference Data for Krib AI
 -- This file creates reference tables and lookup data needed for production operation
 
 -- Create amenity suggestions table for the application

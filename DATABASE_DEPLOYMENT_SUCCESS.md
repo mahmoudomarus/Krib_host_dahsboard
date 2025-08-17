@@ -2,7 +2,7 @@
 
 ## ✅ Successfully Deployed Production Schema
 
-Your RentalAI database schema has been successfully deployed to Supabase using the CLI. Here's what was accomplished:
+Your Krib AI database schema has been successfully deployed to Supabase using the CLI. Here's what was accomplished:
 
 ### 📊 Database Tables Created
 

@@ -1,4 +1,4 @@
-# 🏠 RentalAI Dashboard
+# 🏠 Krib AI Dashboard
 
 An AI-powered rental property management platform with automated listing generation, analytics, and booking management.
 

@@ -1,6 +1,6 @@
-# RentalAI FastAPI Backend
+# Krib AI FastAPI Backend
 
-A modern, AI-powered backend for the RentalAI property management platform.
+A modern, AI-powered backend for the Krib AI property management platform.
 
 ## 🚀 Features
 

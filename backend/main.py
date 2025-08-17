@@ -23,16 +23,16 @@ from app.core.supabase_client import supabase_client
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    print("🚀 Starting RentalAI Backend...")
+    print("🚀 Starting Krib AI Backend...")
     await init_db()
     print("✅ Database initialized")
     yield
     # Shutdown
-    print("🛑 Shutting down RentalAI Backend...")
+    print("🛑 Shutting down Krib AI Backend...")
 
 app = FastAPI(
-    title="RentalAI API",
-    description="AI-Powered Property Rental Management Platform",
+    title="Krib AI API",
+    description="Krib AI - AI-Powered Property Rental Management Platform",
     version="1.0.0",
     lifespan=lifespan
 )

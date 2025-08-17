@@ -1,5 +1,5 @@
 """
-Configuration settings for RentalAI backend
+Configuration settings for Krib AI backend
 """
 
 from pydantic_settings import BaseSettings
@@ -9,7 +9,7 @@ import os
 
 class Settings(BaseSettings):
     # Application
-    app_name: str = "RentalAI API"
+    app_name: str = "Krib AI API"
     debug: bool = True
     secret_key: str = "your-super-secret-key-change-in-production"
     
