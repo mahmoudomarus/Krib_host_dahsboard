@@ -42,11 +42,13 @@ rental-ai-dashboard/
 3. Import your GitHub repository: `mahmoudomarus/Krib_host_dahsboard`
 
 ### Step 2: Configure Project
-- **Framework**: Vite (auto-detected)
-- **Root Directory**: `frontend`
-- **Build Command**: `npm run build`
-- **Output Directory**: `dist`
-- **Install Command**: `npm install`
+- **Framework**: Other (or leave blank)
+- **Root Directory**: Leave blank (use root)
+- **Build Command**: `cd frontend && npm run build`
+- **Output Directory**: `frontend/dist`
+- **Install Command**: `cd frontend && npm install`
+
+> **Note**: The `vercel.json` file in the root handles the monorepo structure automatically.
 
 ### Step 3: Environment Variables
 Add these environment variables in Vercel:
