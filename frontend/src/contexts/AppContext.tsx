@@ -203,15 +203,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   async function getCurrentUser() {
     try {
-      const userData = await makeAPIRequest('/auth/me')
-      setUser(userData)
+      // Get user data from Supabase session instead of backend
+      const { data: { session } } = await supabase.auth.getSession()
       
-      // Load user data
-      await Promise.all([
-        loadProperties(),
-        loadBookings(),
-        getAnalytics()
-      ])
+      if (session?.user) {
+        setUser({
+          id: session.user.id,
+          email: session.user.email || '',
+          name: session.user.user_metadata?.full_name || session.user.email || 'User',
+          created_at: session.user.created_at,
+          updated_at: session.user.updated_at || session.user.created_at
+        })
+        
+        // Load user data from Supabase directly instead of backend
+        // TODO: Replace these with direct Supabase queries
+        console.log('User authenticated with Supabase:', session.user)
+      } else {
+        console.log('No Supabase session found')
+      }
     } catch (error) {
       console.error('Get current user error:', error)
       localStorage.removeItem('auth_token')
