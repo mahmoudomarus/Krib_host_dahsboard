@@ -34,10 +34,8 @@ export function AuthForm() {
     setError("")
 
     try {
-      const success = await signIn(signInData.email, signInData.password)
-      if (!success) {
-        setError("Invalid email or password. Please try again.")
-      }
+      await signIn(signInData.email, signInData.password)
+      // signIn will throw an error if it fails, so reaching here means success
     } catch (error) {
       setError("An error occurred during sign in. Please try again.")
     } finally {
@@ -63,10 +61,8 @@ export function AuthForm() {
     }
 
     try {
-      const success = await signUp(signUpData.email, signUpData.password, signUpData.name)
-      if (!success) {
-        setError("Failed to create account. Please try again.")
-      }
+      await signUp(signUpData.email, signUpData.password, signUpData.name)
+      // signUp will throw an error if it fails, so reaching here means success
     } catch (error) {
       setError("An error occurred during sign up. Please try again.")
     } finally {
@@ -79,10 +75,8 @@ export function AuthForm() {
     setError("")
 
     try {
-      const success = await signInWithGoogle()
-      if (!success) {
-        setError("Google sign-in failed. Please try again.")
-      }
+      await signInWithGoogle()
+      // signInWithGoogle will throw an error if it fails, so reaching here means success
     } catch (error: any) {
       if (error.message.includes('Google authentication is not properly configured')) {
         setError("Google authentication needs to be configured in your Supabase project. Please see the setup instructions below.")

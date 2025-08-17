@@ -28,9 +28,9 @@ export function SettingsPage() {
   const { user, signOut } = useApp()
   const [isLoading, setIsLoading] = useState(false)
   const [settings, setSettings] = useState<UserSettings>({
-    displayName: user?.user_metadata?.name || '',
+    displayName: (user?.user_metadata as any)?.name || '',
     email: user?.email || '',
-    phoneNumber: user?.user_metadata?.phone || '',
+    phoneNumber: (user?.user_metadata as any)?.phone || '',
     notifications: {
       bookings: true,
       marketing: false,
