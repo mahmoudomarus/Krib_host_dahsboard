@@ -87,13 +87,20 @@ export function PropertyList() {
           <Card key={property.id} className="overflow-hidden">
             <div className="aspect-video relative">
               <ImageWithFallback
-                src={property.images[0] || "/placeholder-property.jpg"}
+                src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 
+                  ? property.images[0] 
+                  : "/placeholder-property.jpg"}
                 alt={property.title}
                 className="object-cover w-full h-full"
               />
               <Badge className={`absolute top-2 right-2 ${getStatusColor(property.status)}`}>
                 {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
               </Badge>
+              {property.images && property.images[0] && property.images[0].startsWith('blob:') && (
+                <div className="absolute bottom-2 left-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
+                  Image Upload Issue
+                </div>
+              )}
             </div>
             <CardHeader className="pb-2">
               <div className="flex items-start justify-between">

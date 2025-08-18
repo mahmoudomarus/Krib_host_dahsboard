@@ -95,10 +95,22 @@ export function AnalyticsDashboard() {
     const loadAnalytics = async () => {
       setLoading(true)
       try {
+        console.log('Loading analytics data...')
         const data = await getAnalytics()
+        console.log('Analytics data received:', data)
         setAnalyticsData(data)
       } catch (error) {
         console.error('Failed to load analytics:', error)
+        console.error('Error details:', error.message, error.status)
+        // Set some default data so the page isn't completely empty
+        setAnalyticsData({
+          totalRevenue: 0,
+          totalBookings: 0,
+          totalProperties: 0,
+          occupancyRate: 0,
+          monthlyData: [],
+          propertyPerformance: []
+        })
       } finally {
         setLoading(false)
       }
