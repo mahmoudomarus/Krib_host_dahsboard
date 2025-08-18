@@ -122,7 +122,15 @@ interface AppContextType {
   updateBooking: (id: string, bookingData: Partial<Booking>) => Promise<Booking>
   
   // Analytics methods
-  getAnalytics: () => Promise<void>
+  getAnalytics: () => Promise<any>
+  
+  // Financial methods
+  getFinancialSummary: (period?: string) => Promise<any>
+  getBankAccounts: () => Promise<any>
+  addBankAccount: (accountData: any) => Promise<any>
+  requestPayout: (amount: number) => Promise<any>
+  getTransactions: (limit?: number) => Promise<any>
+  updatePayoutSettings: (settings: any) => Promise<any>
   
   // Settings methods
   updateUserSettings: (settings: Partial<User>) => Promise<void>
@@ -396,8 +404,74 @@ export function AppProvider({ children }: { children: ReactNode }) {
     try {
       const analyticsData = await makeAPIRequest('/analytics')
       setAnalytics(analyticsData)
+      return analyticsData
     } catch (error) {
       console.error('Get analytics error:', error)
+      throw error
+    }
+  }
+
+  // Financial methods
+  async function getFinancialSummary(period: string = '30days') {
+    try {
+      return await makeAPIRequest(`/financials/summary?period=${period}`)
+    } catch (error) {
+      console.error('Get financial summary error:', error)
+      throw error
+    }
+  }
+
+  async function getBankAccounts() {
+    try {
+      return await makeAPIRequest('/financials/bank-accounts')
+    } catch (error) {
+      console.error('Get bank accounts error:', error)
+      throw error
+    }
+  }
+
+  async function addBankAccount(accountData: any) {
+    try {
+      return await makeAPIRequest('/financials/bank-accounts', {
+        method: 'POST',
+        body: JSON.stringify(accountData)
+      })
+    } catch (error) {
+      console.error('Add bank account error:', error)
+      throw error
+    }
+  }
+
+  async function requestPayout(amount: number) {
+    try {
+      return await makeAPIRequest('/financials/payouts/request', {
+        method: 'POST',
+        body: JSON.stringify({ amount })
+      })
+    } catch (error) {
+      console.error('Request payout error:', error)
+      throw error
+    }
+  }
+
+  async function getTransactions(limit: number = 50) {
+    try {
+      return await makeAPIRequest(`/financials/transactions?limit=${limit}`)
+    } catch (error) {
+      console.error('Get transactions error:', error)
+      throw error
+    }
+  }
+
+  async function updatePayoutSettings(settings: any) {
+    try {
+      return await makeAPIRequest('/financials/payout-settings', {
+        method: 'PUT',
+        body: JSON.stringify(settings)
+      })
+    } catch (error) {
+      console.error('Update payout settings error:', error)
+      throw error
     }
   }
 
@@ -438,6 +512,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
     
     // Analytics methods
     getAnalytics,
+    
+    // Financial methods
+    getFinancialSummary,
+    getBankAccounts,
+    addBankAccount,
+    requestPayout,
+    getTransactions,
+    updatePayoutSettings,
     
     // Settings methods
     updateUserSettings,
