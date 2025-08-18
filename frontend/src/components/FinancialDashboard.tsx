@@ -100,23 +100,17 @@ export function FinancialDashboard() {
     }
   }
 
-  async function requestPayout() {
+  async function handleRequestPayout() {
     if (!payoutAmount || !selectedBankAccount) return
     
     try {
-      const payout = await makeAPIRequest('/financials/payouts/request', {
-        method: 'POST',
-        body: JSON.stringify({
-          amount: parseFloat(payoutAmount),
-          bank_account_id: selectedBankAccount
-        })
-      })
+      const payout = await requestPayout(parseFloat(payoutAmount))
       
       setPayouts(prev => [payout, ...prev])
       setPayoutAmount("")
       
       // Reload summary to update available balance
-      const updatedSummary = await makeAPIRequest('/financials/summary')
+      const updatedSummary = await getFinancialSummary()
       setSummary(updatedSummary)
       
     } catch (error) {
@@ -263,7 +257,7 @@ export function FinancialDashboard() {
                   </div>
                   <div className="flex items-end">
                     <Button 
-                      onClick={requestPayout}
+                      onClick={handleRequestPayout}
                       disabled={!payoutAmount || parseFloat(payoutAmount) <= 0}
                       className="w-full"
                     >
