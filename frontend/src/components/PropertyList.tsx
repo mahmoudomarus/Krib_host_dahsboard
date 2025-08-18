@@ -82,10 +82,10 @@ export function PropertyList() {
         </Select>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredProperties.map((property) => (
           <Card key={property.id} className="overflow-hidden property-card">
-            <div className="aspect-video relative">
+            <div className="aspect-[4/3] relative">
               <ImageWithFallback
                 src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 
                   ? property.images[0] 
@@ -102,13 +102,13 @@ export function PropertyList() {
                 </div>
               )}
             </div>
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-3 pt-4 px-4">
               <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <CardTitle className="text-lg leading-tight">{property.title}</CardTitle>
-                  <CardDescription className="flex items-center">
-                    <MapPin className="h-3 w-3 mr-1" />
-                    {property.city}, {property.state}
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base font-semibold leading-tight truncate">{property.title}</CardTitle>
+                  <CardDescription className="flex items-center mt-1 text-sm">
+                    <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{property.city}, {property.state}</span>
                   </CardDescription>
                 </div>
                 <DropdownMenu>
@@ -137,39 +137,37 @@ export function PropertyList() {
                 </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-muted-foreground">
-                    {property.bedrooms} bed • {property.bathrooms} bath • {property.max_guests} guests
-                  </span>
+            <CardContent className="pt-0 px-4 pb-4">
+              <div className="space-y-3">
+                <div className="text-xs text-muted-foreground">
+                  {property.bedrooms} bed • {property.bathrooms} bath • {property.max_guests} guests
                 </div>
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center">
+                  <div className="flex items-baseline">
                     <DollarSign className="h-4 w-4 text-green-600" />
-                    <span className="font-semibold text-lg">${property.price_per_night}</span>
-                    <span className="text-muted-foreground ml-1">/night</span>
+                    <span className="font-semibold text-base">${property.price_per_night}</span>
+                    <span className="text-muted-foreground text-sm ml-1">/night</span>
                   </div>
                   {property.rating && (
                     <div className="flex items-center">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 text-sm font-medium">{property.rating}</span>
+                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                      <span className="ml-1 text-xs font-medium">{property.rating}</span>
                       {property.review_count && (
-                        <span className="ml-1 text-sm text-muted-foreground">
+                        <span className="ml-1 text-xs text-muted-foreground">
                           ({property.review_count})
                         </span>
                       )}
                     </div>
                   )}
                 </div>
-                <div className="grid grid-cols-2 gap-2 pt-2 border-t">
+                <div className="grid grid-cols-2 gap-2 pt-2 border-t border-gray-100">
                   <div className="text-center">
-                    <div className="text-sm font-medium">{property.booking_count || 0}</div>
-                    <div className="text-xs text-muted-foreground">Bookings</div>
+                    <div className="text-xs font-medium">{property.booking_count || 0}</div>
+                    <div className="text-[10px] text-muted-foreground">Bookings</div>
                   </div>
                   <div className="text-center">
-                    <div className="text-sm font-medium">${property.total_revenue || 0}</div>
-                    <div className="text-xs text-muted-foreground">Revenue</div>
+                    <div className="text-xs font-medium text-green-600">${property.total_revenue || 0}</div>
+                    <div className="text-[10px] text-muted-foreground">Revenue</div>
                   </div>
                 </div>
               </div>

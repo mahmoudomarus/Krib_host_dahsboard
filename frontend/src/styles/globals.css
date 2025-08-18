@@ -258,11 +258,22 @@ html {
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     border: 1px solid rgba(0, 0, 0, 0.05);
+    max-width: 320px;
+    margin: 0 auto;
   }
   
   .property-card:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
     transform: translateY(-2px);
+  }
+  
+  /* Compact property card styling */
+  .property-card .card-header {
+    padding: 12px 16px 8px 16px;
+  }
+  
+  .property-card .card-content {
+    padding: 0 16px 12px 16px;
   }
   
   /* Form section shadows */
