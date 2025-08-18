@@ -20,7 +20,7 @@ services:
       - key: AWS_REGION
         value: "us-east-1"
       - key: S3_BUCKET_NAME
-        value: "make-3c640fc2-property-images"
+        value: "krib_host"
       - key: S3_ENDPOINT_URL
         value: "https://bpomacnqaqzgeuahhlka.storage.supabase.co/storage/v1/s3"
       - key: OPENAI_API_KEY

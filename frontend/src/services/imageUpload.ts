@@ -15,32 +15,13 @@ export async function uploadImageToSupabase(file: File, folder: string = 'proper
 
     console.log('Uploading file:', file.name, 'to path:', filePath)
 
-    // Try uploading to both possible buckets
-    let uploadData, uploadError
-    
-    // First try the generated bucket name
-    const bucket1Result = await supabase.storage
-      .from('make-3c640fc2-property-images')
+    // Upload to krib_host bucket
+    const { data: uploadData, error: uploadError } = await supabase.storage
+      .from('krib_host')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
       })
-    
-    if (bucket1Result.error) {
-      console.log('First bucket failed, trying krib_host bucket:', bucket1Result.error)
-      // Try the krib_host bucket
-      const bucket2Result = await supabase.storage
-        .from('krib_host')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false
-        })
-      uploadData = bucket2Result.data
-      uploadError = bucket2Result.error
-    } else {
-      uploadData = bucket1Result.data
-      uploadError = bucket1Result.error
-    }
 
     if (uploadError) {
       console.error('Upload error:', uploadError)
@@ -52,12 +33,9 @@ export async function uploadImageToSupabase(file: File, folder: string = 'proper
 
     console.log('Upload successful:', uploadData)
 
-    // Determine which bucket was used and get the public URL
-    const bucketName = uploadData?.path?.includes('krib_host') ? 'krib_host' : 'make-3c640fc2-property-images'
-    console.log('Using bucket for URL generation:', bucketName)
-    
+    // Get the public URL from krib_host bucket
     const { data: urlData } = supabase.storage
-      .from(bucketName)
+      .from('krib_host')
       .getPublicUrl(filePath)
 
     if (!urlData.publicUrl) {
