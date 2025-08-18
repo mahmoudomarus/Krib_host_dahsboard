@@ -192,10 +192,22 @@ export function AddPropertyWizard() {
   const generateDescription = async () => {
     setIsGeneratingDescription(true)
     try {
-      const description = await generateAIDescription(propertyData)
+      console.log('Generating AI description with data:', propertyData)
+      const description = await generateAIDescription({
+        property_type: propertyData.property_type,
+        city: propertyData.city,
+        state: propertyData.state,
+        bedrooms: propertyData.bedrooms,
+        bathrooms: propertyData.bathrooms,
+        max_guests: propertyData.max_guests,
+        amenities: propertyData.amenities,
+        address: propertyData.address
+      })
+      console.log('Generated description:', description)
       setPropertyData(prev => ({ ...prev, description }))
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to generate description:', error)
+      console.error('Error details:', error.message, error.status)
       // Fallback to a simple description
       const fallbackDescription = `Beautiful ${propertyData.property_type.toLowerCase()} in ${propertyData.city}, ${propertyData.state}. This ${propertyData.bedrooms}-bedroom property can accommodate up to ${propertyData.max_guests} guests. Perfect for your next getaway!`
       setPropertyData(prev => ({ ...prev, description: fallbackDescription }))
