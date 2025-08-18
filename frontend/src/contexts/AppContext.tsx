@@ -373,11 +373,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   async function generateAIDescription(propertyData: Partial<Property>): Promise<string> {
+    const requestBody = {
+      property_data: propertyData,
+      use_anthropic: false  // Default to OpenAI, can be made configurable later
+    }
+    
+    console.log('Sending AI description request:', requestBody)
+    
     const response = await makeAPIRequest('/properties/ai/generate-description', {
       method: 'POST',
-      body: JSON.stringify(propertyData)
+      body: JSON.stringify(requestBody)
     })
     
+    console.log('AI description response:', response)
     return response.description
   }
 
