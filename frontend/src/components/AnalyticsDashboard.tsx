@@ -117,7 +117,7 @@ export function AnalyticsDashboard() {
     }
 
     loadAnalytics()
-  }, [getAnalytics, selectedPeriod])
+  }, [selectedPeriod])
 
   const exportReport = () => {
     // Mock export functionality
