@@ -84,7 +84,7 @@ export function PropertyList() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {filteredProperties.map((property) => (
-          <Card key={property.id} className="overflow-hidden">
+          <Card key={property.id} className="overflow-hidden property-card">
             <div className="aspect-video relative">
               <ImageWithFallback
                 src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 

@@ -277,7 +277,7 @@ export function AddPropertyWizard() {
                   placeholder="e.g., Cozy Downtown Apartment"
                   value={propertyData.title}
                   onChange={(e) => setPropertyData(prev => ({ ...prev, title: e.target.value }))}
-                  className={errors.title ? 'border-red-500' : ''}
+                  className={`input-enhanced ${errors.title ? 'border-red-500' : ''}`}
                 />
                 {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
               </div>
@@ -414,7 +414,7 @@ export function AddPropertyWizard() {
               <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Photos</h3>
               <p className="text-gray-600 mb-4">Add up to 10 high-quality photos of your property</p>
-              <Button onClick={handleImageUpload} size="lg" disabled={isUploadingImages}>
+              <Button onClick={handleImageUpload} size="lg" disabled={isUploadingImages} className="btn-shadow">
                 <Upload className="h-4 w-4 mr-2" />
                 {isUploadingImages ? 'Uploading...' : 'Choose Photos'}
               </Button>
@@ -656,8 +656,8 @@ export function AddPropertyWizard() {
       </div>
 
       {/* Step Content */}
-      <Card className="mb-8">
-        <CardContent className="p-8">
+      <Card className="mb-8 card-elevated">
+        <CardContent className="p-8 form-section">
           {renderStepContent()}
         </CardContent>
       </Card>
@@ -684,7 +684,7 @@ export function AddPropertyWizard() {
               {isPublishing ? 'Publishing...' : 'Publish Property'}
             </Button>
           ) : (
-            <Button onClick={nextStep} size="lg" className="px-8">
+            <Button onClick={nextStep} size="lg" className="px-8 btn-shadow">
               Next
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>
