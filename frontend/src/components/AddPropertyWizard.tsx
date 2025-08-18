@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, ArrowRight, Bot, Upload, Check, MapPin, Home, Camera, Sparkles, X, Plus, Star, AlertCircle } from "lucide-react"
+import { ArrowLeft, ArrowRight, Bot, Upload, Check, MapPin, Home, Camera, Sparkles, X, Plus, Star, AlertCircle, Building, FileText, DollarSign } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
@@ -11,6 +11,7 @@ import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Alert, AlertDescription } from "./ui/alert"
 import { useApp } from "../contexts/AppContext"
+import { uploadMultipleImages } from "../services/imageUpload"
 
 type WizardStep = 'basic-info' | 'details' | 'images' | 'amenities' | 'pricing' | 'preview' | 'published'
 
@@ -52,6 +53,7 @@ export function AddPropertyWizard() {
   const [currentStep, setCurrentStep] = useState<WizardStep>('basic-info')
   const [isPublishing, setIsPublishing] = useState(false)
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
+  const [isUploadingImages, setIsUploadingImages] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [propertyData, setPropertyData] = useState<PropertyData>({
     title: '',
@@ -70,11 +72,11 @@ export function AddPropertyWizard() {
   })
 
   const steps = [
-    { id: 'basic-info', title: 'Basic Info', icon: Home, description: 'Property basics' },
-    { id: 'details', title: 'Details', icon: MapPin, description: 'Size & capacity' },
+    { id: 'basic-info', title: 'Basic Info', icon: Building, description: 'Property basics' },
+    { id: 'details', title: 'Details', icon: Home, description: 'Size & capacity' },
     { id: 'images', title: 'Photos', icon: Camera, description: 'Upload images' },
     { id: 'amenities', title: 'Amenities', icon: Sparkles, description: 'Features & perks' },
-    { id: 'pricing', title: 'Pricing', icon: Star, description: 'Set your rate' },
+    { id: 'pricing', title: 'Pricing', icon: DollarSign, description: 'Set your rate' },
     { id: 'preview', title: 'Preview', icon: Check, description: 'Review & publish' },
   ]
 
@@ -123,23 +125,48 @@ export function AddPropertyWizard() {
     }
   }
 
-  const handleImageUpload = () => {
+  const handleImageUpload = async () => {
     // Create a file input element
     const input = document.createElement('input')
     input.type = 'file'
     input.multiple = true
     input.accept = 'image/*'
     
-    input.onchange = (e) => {
+    input.onchange = async (e) => {
       const files = (e.target as HTMLInputElement).files
-      if (files) {
-        // For now, we'll simulate the upload by creating object URLs
-        // In production, you'd upload to your storage service
-        const newImages = Array.from(files).map(file => URL.createObjectURL(file))
-        setPropertyData(prev => ({
-          ...prev,
-          images: [...prev.images, ...newImages].slice(0, 10) // Limit to 10 images
-        }))
+      if (files && files.length > 0) {
+        setIsUploadingImages(true)
+        setErrors(prev => ({ ...prev, images: '' }))
+        
+        try {
+          console.log('Starting upload of', files.length, 'files')
+          const uploadResults = await uploadMultipleImages(files, 'properties')
+          
+          const successfulUploads = uploadResults
+            .filter(result => result.success && result.url)
+            .map(result => result.url!)
+          
+          const failedUploads = uploadResults.filter(result => !result.success)
+          
+          if (successfulUploads.length > 0) {
+            setPropertyData(prev => ({
+              ...prev,
+              images: [...prev.images, ...successfulUploads].slice(0, 10) // Limit to 10 images
+            }))
+            console.log('Successfully uploaded', successfulUploads.length, 'images')
+          }
+          
+          if (failedUploads.length > 0) {
+            const errorMsg = `Failed to upload ${failedUploads.length} image(s). ${failedUploads[0]?.error || 'Unknown error'}`
+            setErrors(prev => ({ ...prev, images: errorMsg }))
+            console.error('Upload failures:', failedUploads)
+          }
+        } catch (error: any) {
+          console.error('Upload error:', error)
+          setErrors(prev => ({ ...prev, images: 'Failed to upload images. Please try again.' }))
+        } finally {
+          setIsUploadingImages(false)
+        }
       }
     }
     
@@ -375,10 +402,11 @@ export function AddPropertyWizard() {
               <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Photos</h3>
               <p className="text-gray-600 mb-4">Add up to 10 high-quality photos of your property</p>
-              <Button onClick={handleImageUpload} size="lg">
+              <Button onClick={handleImageUpload} size="lg" disabled={isUploadingImages}>
                 <Upload className="h-4 w-4 mr-2" />
-                Choose Photos
+                {isUploadingImages ? 'Uploading...' : 'Choose Photos'}
               </Button>
+              {errors.images && <p className="text-red-500 text-sm mt-2">{errors.images}</p>}
             </div>
             
             {propertyData.images.length > 0 && (

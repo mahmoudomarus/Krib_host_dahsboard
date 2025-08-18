@@ -93,6 +93,7 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
                     onClick={() => onSectionChange(item.id)}
                     isActive={activeSection === item.id}
                     tooltip={item.description}
+                    className={activeSection === item.id ? 'bg-sidebar-accent text-sidebar-accent-foreground' : ''}
                   >
                     <item.icon className="h-4 w-4" />
                     <span>{item.title}</span>
