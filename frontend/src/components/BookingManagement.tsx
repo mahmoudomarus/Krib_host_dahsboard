@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Calendar, Search, Filter, MoreHorizontal, MapPin, User, Phone, Mail, CheckCircle, Clock, XCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Input } from "./ui/input"
@@ -7,115 +7,25 @@ import { Badge } from "./ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
+import { useApp } from "../contexts/AppContext"
 
 interface Booking {
   id: string
-  property: string
-  propertyImage: string
-  guest: {
-    name: string
-    email: string
-    phone: string
-    avatar?: string
-  }
-  checkIn: string
-  checkOut: string
+  property_id: string
+  property_title?: string
+  guest_name: string
+  guest_email: string
+  guest_phone?: string
+  check_in: string
+  check_out: string
   nights: number
   guests: number
-  amount: number
-  status: 'confirmed' | 'pending' | 'cancelled' | 'completed'
-  bookingDate: string
-  specialRequests?: string
+  total_amount: number
+  status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'no_show'
+  created_at: string
+  special_requests?: string
+  internal_notes?: string
 }
-
-const bookings: Booking[] = [
-  {
-    id: "BK001",
-    property: "Modern Downtown Loft",
-    propertyImage: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop",
-    guest: {
-      name: "Sarah Chen",
-      email: "sarah.chen@email.com",
-      phone: "+1 (555) 123-4567"
-    },
-    checkIn: "2024-12-15",
-    checkOut: "2024-12-18",
-    nights: 3,
-    guests: 2,
-    amount: 450,
-    status: "confirmed",
-    bookingDate: "2024-12-01",
-    specialRequests: "Late check-in requested"
-  },
-  {
-    id: "BK002",
-    property: "Cozy Beach House",
-    propertyImage: "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=400&h=300&fit=crop",
-    guest: {
-      name: "Mike Johnson",
-      email: "mike.j@email.com",
-      phone: "+1 (555) 987-6543"
-    },
-    checkIn: "2024-12-20",
-    checkOut: "2024-12-27",
-    nights: 7,
-    guests: 4,
-    amount: 1540,
-    status: "pending",
-    bookingDate: "2024-12-05"
-  },
-  {
-    id: "BK003",
-    property: "Mountain Cabin Retreat",
-    propertyImage: "https://images.unsplash.com/photo-1449824913935-59a10b8d2000?w=400&h=300&fit=crop",
-    guest: {
-      name: "Emma Davis",
-      email: "emma.davis@email.com",
-      phone: "+1 (555) 456-7890"
-    },
-    checkIn: "2024-12-22",
-    checkOut: "2024-12-25",
-    nights: 3,
-    guests: 6,
-    amount: 540,
-    status: "confirmed",
-    bookingDate: "2024-11-28"
-  },
-  {
-    id: "BK004",
-    property: "Urban Studio",
-    propertyImage: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop",
-    guest: {
-      name: "Alex Rodriguez",
-      email: "alex.rodriguez@email.com",
-      phone: "+1 (555) 321-0987"
-    },
-    checkIn: "2024-11-30",
-    checkOut: "2024-12-03",
-    nights: 3,
-    guests: 1,
-    amount: 360,
-    status: "completed",
-    bookingDate: "2024-11-15"
-  },
-  {
-    id: "BK005",
-    property: "Modern Downtown Loft",
-    propertyImage: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop",
-    guest: {
-      name: "Lisa Thompson",
-      email: "lisa.t@email.com",
-      phone: "+1 (555) 654-3210"
-    },
-    checkIn: "2024-12-10",
-    checkOut: "2024-12-12",
-    nights: 2,
-    guests: 2,
-    amount: 300,
-    status: "cancelled",
-    bookingDate: "2024-11-20"
-  }
-]
 
 const getStatusColor = (status: string) => {
   switch (status) {
@@ -123,6 +33,7 @@ const getStatusColor = (status: string) => {
     case 'pending': return 'secondary'
     case 'cancelled': return 'destructive'
     case 'completed': return 'outline'
+    case 'no_show': return 'destructive'
     default: return 'secondary'
   }
 }
@@ -133,18 +44,42 @@ const getStatusIcon = (status: string) => {
     case 'pending': return Clock
     case 'cancelled': return XCircle
     case 'completed': return CheckCircle
+    case 'no_show': return XCircle
     default: return Clock
   }
 }
 
 export function BookingManagement() {
+  const { bookings, loadBookings, properties, loadProperties } = useApp()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [activeTab, setActiveTab] = useState("all")
+  const [loading, setLoading] = useState(true)
 
-  const filteredBookings = bookings.filter(booking => {
-    const matchesSearch = booking.guest.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         booking.property.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  useEffect(() => {
+    async function loadData() {
+      try {
+        setLoading(true)
+        await Promise.all([loadBookings(), loadProperties()])
+      } catch (error) {
+        console.error('Failed to load booking data:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    loadData()
+  }, [])
+
+  // Enrich bookings with property information
+  const enrichedBookings = bookings.map(booking => ({
+    ...booking,
+    property_title: properties.find(p => p.id === booking.property_id)?.title || 'Unknown Property'
+  }))
+
+  const filteredBookings = enrichedBookings.filter(booking => {
+    const matchesSearch = booking.guest_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         (booking.property_title?.toLowerCase().includes(searchTerm.toLowerCase())) ||
                          booking.id.toLowerCase().includes(searchTerm.toLowerCase())
     
     const matchesStatus = statusFilter === "all" || booking.status === statusFilter
@@ -153,24 +88,53 @@ export function BookingManagement() {
     return matchesSearch && matchesStatus && matchesTab
   })
 
-  const upcomingBookings = bookings.filter(booking => 
-    booking.status === 'confirmed' && new Date(booking.checkIn) > new Date()
+  const upcomingBookings = enrichedBookings.filter(booking => 
+    booking.status === 'confirmed' && new Date(booking.check_in) > new Date()
   )
 
-  const todayCheckIns = bookings.filter(booking => {
+  const todayCheckIns = enrichedBookings.filter(booking => {
     const today = new Date().toISOString().split('T')[0]
-    return booking.checkIn === today && booking.status === 'confirmed'
+    return booking.check_in === today && booking.status === 'confirmed'
   })
 
-  const todayCheckOuts = bookings.filter(booking => {
+  const todayCheckOuts = enrichedBookings.filter(booking => {
     const today = new Date().toISOString().split('T')[0]
-    return booking.checkOut === today && booking.status === 'confirmed'
+    return booking.check_out === today && booking.status === 'confirmed'
   })
+
+  async function updateBookingStatus(bookingId: string, newStatus: string) {
+    try {
+      // This would call your backend API to update booking status
+      console.log('Updating booking', bookingId, 'to status', newStatus)
+      // await makeAPIRequest(`/bookings/${bookingId}`, {
+      //   method: 'PUT',
+      //   body: JSON.stringify({ status: newStatus })
+      // })
+      // await loadBookings() // Reload bookings after update
+    } catch (error) {
+      console.error('Failed to update booking:', error)
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-32 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="p-6 space-y-6">
       <div>
-        <h1 className="mb-2">Booking Management</h1>
+        <h1 className="text-2xl font-bold">Booking Management</h1>
         <p className="text-muted-foreground">
           Manage reservations and guest communications for all your properties.
         </p>
@@ -233,6 +197,7 @@ export function BookingManagement() {
             <SelectItem value="pending">Pending</SelectItem>
             <SelectItem value="completed">Completed</SelectItem>
             <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="no_show">No Show</SelectItem>
           </SelectContent>
         </Select>
         <Button variant="outline" size="sm">
@@ -257,7 +222,10 @@ export function BookingManagement() {
                 <Calendar className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No bookings found</h3>
                 <p className="text-muted-foreground">
-                  Try adjusting your search or filter criteria.
+                  {bookings.length === 0 
+                    ? "You don't have any bookings yet. Create some properties to start receiving bookings!"
+                    : "Try adjusting your search or filter criteria."
+                  }
                 </p>
               </CardContent>
             </Card>
@@ -270,16 +238,14 @@ export function BookingManagement() {
                   <Card key={booking.id}>
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <img 
-                          src={booking.propertyImage} 
-                          alt={booking.property}
-                          className="w-20 h-20 rounded-lg object-cover"
-                        />
+                        <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center">
+                          <MapPin className="h-8 w-8 text-gray-400" />
+                        </div>
                         
                         <div className="flex-1 space-y-3">
                           <div className="flex items-start justify-between">
                             <div>
-                              <h3 className="font-medium">{booking.property}</h3>
+                              <h3 className="font-medium">{booking.property_title}</h3>
                               <p className="text-sm text-muted-foreground">Booking #{booking.id}</p>
                             </div>
                             <div className="flex items-center gap-2">
@@ -297,9 +263,21 @@ export function BookingManagement() {
                                   <DropdownMenuItem>View Details</DropdownMenuItem>
                                   <DropdownMenuItem>Contact Guest</DropdownMenuItem>
                                   <DropdownMenuItem>Modify Booking</DropdownMenuItem>
-                                  <DropdownMenuItem className="text-destructive">
-                                    Cancel Booking
-                                  </DropdownMenuItem>
+                                  {booking.status === 'pending' && (
+                                    <>
+                                      <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'confirmed')}>
+                                        Confirm Booking
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'cancelled')}>
+                                        Decline Booking
+                                      </DropdownMenuItem>
+                                    </>
+                                  )}
+                                  {booking.status === 'confirmed' && (
+                                    <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'cancelled')} className="text-destructive">
+                                      Cancel Booking
+                                    </DropdownMenuItem>
+                                  )}
                                 </DropdownMenuContent>
                               </DropdownMenu>
                             </div>
@@ -311,24 +289,26 @@ export function BookingManagement() {
                               <div className="space-y-1 text-muted-foreground">
                                 <div className="flex items-center gap-2">
                                   <User className="h-4 w-4" />
-                                  <span>{booking.guest.name}</span>
+                                  <span>{booking.guest_name}</span>
                                 </div>
                                 <div className="flex items-center gap-2">
                                   <Mail className="h-4 w-4" />
-                                  <span>{booking.guest.email}</span>
+                                  <span>{booking.guest_email}</span>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <Phone className="h-4 w-4" />
-                                  <span>{booking.guest.phone}</span>
-                                </div>
+                                {booking.guest_phone && (
+                                  <div className="flex items-center gap-2">
+                                    <Phone className="h-4 w-4" />
+                                    <span>{booking.guest_phone}</span>
+                                  </div>
+                                )}
                               </div>
                             </div>
                             
                             <div>
                               <h4 className="font-medium mb-1">Stay Details</h4>
                               <div className="space-y-1 text-muted-foreground">
-                                <div>Check-in: {new Date(booking.checkIn).toLocaleDateString()}</div>
-                                <div>Check-out: {new Date(booking.checkOut).toLocaleDateString()}</div>
+                                <div>Check-in: {new Date(booking.check_in).toLocaleDateString()}</div>
+                                <div>Check-out: {new Date(booking.check_out).toLocaleDateString()}</div>
                                 <div>{booking.nights} nights • {booking.guests} guests</div>
                               </div>
                             </div>
@@ -336,10 +316,10 @@ export function BookingManagement() {
                             <div>
                               <h4 className="font-medium mb-1">Booking Summary</h4>
                               <div className="space-y-1 text-muted-foreground">
-                                <div>Total: ${booking.amount}</div>
-                                <div>Booked: {new Date(booking.bookingDate).toLocaleDateString()}</div>
-                                {booking.specialRequests && (
-                                  <div className="text-xs">Special: {booking.specialRequests}</div>
+                                <div>Total: ${booking.total_amount}</div>
+                                <div>Booked: {new Date(booking.created_at).toLocaleDateString()}</div>
+                                {booking.special_requests && (
+                                  <div className="text-xs">Special: {booking.special_requests}</div>
                                 )}
                               </div>
                             </div>
@@ -355,8 +335,12 @@ export function BookingManagement() {
                             </Button>
                             {booking.status === 'pending' && (
                               <>
-                                <Button size="sm">Confirm</Button>
-                                <Button variant="outline" size="sm">Decline</Button>
+                                <Button size="sm" onClick={() => updateBookingStatus(booking.id, 'confirmed')}>
+                                  Confirm
+                                </Button>
+                                <Button variant="outline" size="sm" onClick={() => updateBookingStatus(booking.id, 'cancelled')}>
+                                  Decline
+                                </Button>
                               </>
                             )}
                           </div>
