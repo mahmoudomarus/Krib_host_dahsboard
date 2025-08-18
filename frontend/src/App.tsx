@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { SidebarProvider } from "./components/ui/sidebar"
+import { SidebarProvider, SidebarInset } from "./components/ui/sidebar"
 import { AppProvider, useApp } from "./contexts/AppContext"
 import { AuthForm } from "./components/AuthForm"
 import { DashboardSidebar } from "./components/DashboardSidebar"
@@ -52,15 +52,13 @@ function DashboardApp() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full">
-        <DashboardSidebar 
-          activeSection={activeSection} 
-          onSectionChange={setActiveSection}
-        />
-        <main className="flex-1 overflow-auto bg-background">
-          {renderContent()}
-        </main>
-      </div>
+      <DashboardSidebar 
+        activeSection={activeSection} 
+        onSectionChange={setActiveSection}
+      />
+      <SidebarInset>
+        {renderContent()}
+      </SidebarInset>
     </SidebarProvider>
   )
 }
