@@ -85,13 +85,13 @@ export function PropertyList() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {filteredProperties.map((property) => (
           <Card key={property.id} className="overflow-hidden property-card">
-            <div className="h-40 relative">
+            <div className="aspect-[3/2] relative">
               <ImageWithFallback
                 src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 
                   ? property.images[0] 
                   : "/placeholder-property.jpg"}
                 alt={property.title}
-                className="object-cover w-full h-full"
+                className="object-cover w-full h-full rounded-t-lg"
               />
               <Badge className={`absolute top-2 right-2 ${getStatusColor(property.status)}`}>
                 {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
@@ -102,11 +102,11 @@ export function PropertyList() {
                 </div>
               )}
             </div>
-            <CardHeader className="pb-2 pt-3 px-3">
+            <CardHeader className="pb-2 pt-4 px-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <CardTitle className="text-sm font-semibold leading-tight truncate">{property.title}</CardTitle>
-                  <CardDescription className="flex items-center mt-0.5 text-xs">
+                  <CardDescription className="flex items-center mt-1 text-xs">
                     <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span className="truncate">{property.city}, {property.state}</span>
                   </CardDescription>
@@ -137,7 +137,7 @@ export function PropertyList() {
                 </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 px-3 pb-3">
+            <CardContent className="pt-0 px-4 pb-4">
               <div className="space-y-2">
                 <div className="text-[10px] text-muted-foreground">
                   {property.bedrooms}bd • {property.bathrooms}ba • {property.max_guests} guests
