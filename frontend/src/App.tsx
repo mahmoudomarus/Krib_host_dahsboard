@@ -1,4 +1,5 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { SidebarProvider } from "./components/ui/sidebar"
 import { AppProvider, useApp } from "./contexts/AppContext"
 import { AuthForm } from "./components/AuthForm"
@@ -13,9 +14,31 @@ import { SettingsPage } from "./components/SettingsPage"
 
 export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'settings'
 
-function DashboardApp() {
+function DashboardContent() {
   const { user, isLoading } = useApp()
-  const [activeSection, setActiveSection] = useState<NavigationItem>('overview')
+  const location = useLocation()
+  const navigate = useNavigate()
+  
+  // Map URL paths to navigation items
+  const getActiveSection = (pathname: string): NavigationItem => {
+    const path = pathname.replace('/', '') || 'overview'
+    return ['overview', 'properties', 'add-property', 'analytics', 'bookings', 'financials', 'settings'].includes(path) 
+      ? path as NavigationItem 
+      : 'overview'
+  }
+  
+  const [activeSection, setActiveSection] = useState<NavigationItem>(getActiveSection(location.pathname))
+  
+  // Update active section when URL changes
+  useEffect(() => {
+    setActiveSection(getActiveSection(location.pathname))
+  }, [location.pathname])
+  
+  // Handle section changes with navigation
+  const handleSectionChange = (section: NavigationItem) => {
+    setActiveSection(section)
+    navigate(section === 'overview' ? '/' : `/${section}`)
+  }
 
   if (isLoading) {
     return (
@@ -32,39 +55,37 @@ function DashboardApp() {
     return <AuthForm />
   }
 
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'overview':
-        return <DashboardOverview />
-      case 'properties':
-        return <PropertyList />
-      case 'add-property':
-        return <AddPropertyWizard />
-      case 'analytics':
-        return <AnalyticsDashboard />
-      case 'bookings':
-        return <BookingManagement />
-      case 'financials':
-        return <FinancialDashboard />
-      case 'settings':
-        return <SettingsPage />
-      default:
-        return <DashboardOverview />
-    }
-  }
+
 
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-        <DashboardSidebar 
+                <DashboardSidebar 
           activeSection={activeSection} 
-          onSectionChange={setActiveSection}
+          onSectionChange={handleSectionChange} 
         />
         <main className="flex-1 overflow-auto bg-background" style={{ marginLeft: '16rem' }}>
-          {renderContent()}
+          <Routes>
+            <Route path="/" element={<DashboardOverview />} />
+            <Route path="/overview" element={<DashboardOverview />} />
+            <Route path="/properties" element={<PropertyList />} />
+            <Route path="/add-property" element={<AddPropertyWizard />} />
+            <Route path="/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/bookings" element={<BookingManagement />} />
+            <Route path="/financials" element={<FinancialDashboard />} />
+            <Route path="/settings" element={<SettingsPage />} />
+          </Routes>
         </main>
       </div>
     </SidebarProvider>
+  )
+}
+
+function DashboardApp() {
+  return (
+    <Router>
+      <DashboardContent />
+    </Router>
   )
 }
 

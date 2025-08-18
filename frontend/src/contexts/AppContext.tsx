@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 import { supabase } from '../utils/supabase/client'
 
 // Environment configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://krib-host-dahsboard-backend.onrender.com/api'
 
 interface User {
   id: string
