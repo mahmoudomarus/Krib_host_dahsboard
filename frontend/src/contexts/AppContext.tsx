@@ -147,7 +147,9 @@ class APIError extends Error {
 }
 
 async function makeAPIRequest(endpoint: string, options: RequestInit = {}) {
-  const token = localStorage.getItem('auth_token')
+  // Get the current Supabase session token
+  const { data: { session } } = await supabase.auth.getSession()
+  const token = session?.access_token
   
   const config: RequestInit = {
     ...options,

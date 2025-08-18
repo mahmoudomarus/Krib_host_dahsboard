@@ -54,7 +54,14 @@ interface Payout {
 }
 
 export function FinancialDashboard() {
-  const { makeAPIRequest } = useApp()
+  const { 
+    getFinancialSummary, 
+    getBankAccounts, 
+    addBankAccount, 
+    requestPayout, 
+    getTransactions, 
+    updatePayoutSettings 
+  } = useApp()
   const [summary, setSummary] = useState<FinancialSummary | null>(null)
   const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([])
   const [payouts, setPayouts] = useState<Payout[]>([])
@@ -70,15 +77,15 @@ export function FinancialDashboard() {
     try {
       setLoading(true)
       
-      const [summaryData, bankAccountsData, payoutsData] = await Promise.all([
-        makeAPIRequest('/financials/summary'),
-        makeAPIRequest('/financials/bank-accounts'),
-        makeAPIRequest('/financials/payouts')
+      const [summaryData, bankAccountsData, transactionsData] = await Promise.all([
+        getFinancialSummary(),
+        getBankAccounts(),
+        getTransactions(20)
       ])
       
       setSummary(summaryData)
       setBankAccounts(bankAccountsData)
-      setPayouts(payoutsData)
+      setPayouts(transactionsData || [])
       
       // Set default bank account
       const primaryAccount = bankAccountsData.find((account: BankAccount) => account.is_primary)

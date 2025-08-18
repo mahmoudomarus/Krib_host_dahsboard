@@ -17,7 +17,7 @@ export async function uploadImageToSupabase(file: File, folder: string = 'proper
 
     // Upload file to Supabase Storage
     const { data: uploadData, error: uploadError } = await supabase.storage
-      .from('property-images')
+      .from('make-3c640fc2-property-images')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: false
@@ -35,7 +35,7 @@ export async function uploadImageToSupabase(file: File, folder: string = 'proper
 
     // Get the public URL
     const { data: urlData } = supabase.storage
-      .from('property-images')
+      .from('make-3c640fc2-property-images')
       .getPublicUrl(filePath)
 
     if (!urlData.publicUrl) {
