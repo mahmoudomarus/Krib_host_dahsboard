@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { ArrowLeft, ArrowRight, Bot, User, Upload, Check, MapPin, Home, Camera, Sparkles } from "lucide-react"
+import { ArrowLeft, ArrowRight, Bot, Upload, Check, MapPin, Home, Camera, Sparkles, X, Plus, Star, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
@@ -9,9 +9,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Checkbox } from "./ui/checkbox"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
+import { Alert, AlertDescription } from "./ui/alert"
 import { useApp } from "../contexts/AppContext"
 
-type WizardStep = 'basic-info' | 'ai-description' | 'images' | 'amenities' | 'preview' | 'published'
+type WizardStep = 'basic-info' | 'details' | 'images' | 'amenities' | 'pricing' | 'preview' | 'published'
 
 interface PropertyData {
   title: string
@@ -20,10 +21,10 @@ interface PropertyData {
   state: string
   country: string
   property_type: string
-  bedrooms: string
-  bathrooms: string
-  max_guests: string
-  price_per_night: string
+  bedrooms: number
+  bathrooms: number
+  max_guests: number
+  price_per_night: number
   description: string
   images: string[]
   amenities: string[]
@@ -31,14 +32,27 @@ interface PropertyData {
 
 const amenitiesList = [
   "WiFi", "Kitchen", "Washing Machine", "Air Conditioning", "Heating", "TV", "Parking",
-  "Pool", "Hot Tub", "Gym", "Balcony", "Garden", "Pet Friendly", "Smoking Allowed",
-  "Fireplace", "Elevator", "Wheelchair Accessible", "Beach Access", "Mountain View"
+  "Pool", "Hot Tub", "Gym", "Balcony", "Garden", "Pet Friendly", "Fireplace", 
+  "Elevator", "Wheelchair Accessible", "Beach Access", "Mountain View", "Ocean View",
+  "City View", "Workspace", "Coffee Maker", "Dishwasher", "Microwave", "Oven"
+]
+
+const propertyTypes = [
+  { value: "apartment", label: "Apartment" },
+  { value: "house", label: "House" }, 
+  { value: "condo", label: "Condominium" },
+  { value: "villa", label: "Villa" },
+  { value: "studio", label: "Studio" },
+  { value: "cabin", label: "Cabin" },
+  { value: "other", label: "Other" }
 ]
 
 export function AddPropertyWizard() {
   const { createProperty, generateAIDescription } = useApp()
   const [currentStep, setCurrentStep] = useState<WizardStep>('basic-info')
   const [isPublishing, setIsPublishing] = useState(false)
+  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
+  const [errors, setErrors] = useState<Record<string, string>>({})
   const [propertyData, setPropertyData] = useState<PropertyData>({
     title: '',
     address: '',
@@ -46,75 +60,97 @@ export function AddPropertyWizard() {
     state: '',
     country: 'USA',
     property_type: '',
-    bedrooms: '',
-    bathrooms: '',
-    max_guests: '',
-    price_per_night: '',
+    bedrooms: 1,
+    bathrooms: 1,
+    max_guests: 2,
+    price_per_night: 100,
     description: '',
     images: [],
     amenities: []
   })
-  const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
-  const [aiMessages, setAiMessages] = useState<Array<{role: 'user' | 'ai', content: string}>>([])
 
   const steps = [
-    { id: 'basic-info', title: 'Basic Information', icon: Home },
-    { id: 'ai-description', title: 'AI Description', icon: Bot },
-    { id: 'images', title: 'Images', icon: Camera },
-    { id: 'amenities', title: 'Amenities', icon: Sparkles },
-    { id: 'preview', title: 'Preview', icon: Check },
+    { id: 'basic-info', title: 'Basic Info', icon: Home, description: 'Property basics' },
+    { id: 'details', title: 'Details', icon: MapPin, description: 'Size & capacity' },
+    { id: 'images', title: 'Photos', icon: Camera, description: 'Upload images' },
+    { id: 'amenities', title: 'Amenities', icon: Sparkles, description: 'Features & perks' },
+    { id: 'pricing', title: 'Pricing', icon: Star, description: 'Set your rate' },
+    { id: 'preview', title: 'Preview', icon: Check, description: 'Review & publish' },
   ]
 
   const currentStepIndex = steps.findIndex(step => step.id === currentStep)
   const progress = ((currentStepIndex + 1) / steps.length) * 100
 
-  const handleBasicInfoSubmit = () => {
-    if (propertyData.title && propertyData.address && propertyData.property_type) {
-      setCurrentStep('ai-description')
-      // Simulate AI conversation start
-      setAiMessages([
-        {
-          role: 'ai',
-          content: `Great! I can see you're adding "${propertyData.title}" in ${propertyData.city}, ${propertyData.state}. Let me generate a compelling description for your ${propertyData.property_type.toLowerCase()}. I'll highlight the key features and make it attractive to potential guests.`
-        }
-      ])
+  const validateStep = (step: WizardStep): boolean => {
+    const newErrors: Record<string, string> = {}
+    
+    switch (step) {
+      case 'basic-info':
+        if (!propertyData.title.trim()) newErrors.title = 'Property title is required'
+        if (!propertyData.address.trim()) newErrors.address = 'Address is required'
+        if (!propertyData.city.trim()) newErrors.city = 'City is required'
+        if (!propertyData.state.trim()) newErrors.state = 'State is required'
+        if (!propertyData.property_type) newErrors.property_type = 'Property type is required'
+        break
+      case 'details':
+        if (propertyData.bedrooms < 0) newErrors.bedrooms = 'Bedrooms cannot be negative'
+        if (propertyData.bathrooms < 0) newErrors.bathrooms = 'Bathrooms cannot be negative'
+        if (propertyData.max_guests < 1) newErrors.max_guests = 'Must accommodate at least 1 guest'
+        break
+      case 'pricing':
+        if (propertyData.price_per_night < 1) newErrors.price_per_night = 'Price must be at least $1'
+        if (!propertyData.description.trim()) newErrors.description = 'Description is required'
+        break
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
+
+  const nextStep = () => {
+    if (validateStep(currentStep)) {
+      const nextIndex = currentStepIndex + 1
+      if (nextIndex < steps.length) {
+        setCurrentStep(steps[nextIndex].id as WizardStep)
+      }
     }
   }
 
-  const generateDescription = () => {
-    setIsGeneratingDescription(true)
-    
-    // Simulate API call to generate description
-    setTimeout(() => {
-      const generatedDescription = `Experience the perfect blend of comfort and style at this stunning ${propertyData.property_type.toLowerCase()} in ${propertyData.city}, ${propertyData.state}. This beautifully appointed ${propertyData.bedrooms}-bedroom space offers a serene retreat for up to ${propertyData.max_guests} guests.
-
-The space features modern amenities and thoughtful design throughout. Whether you're here for business or leisure, you'll find everything you need for a memorable stay. The location provides easy access to local attractions while maintaining a peaceful atmosphere.
-
-Perfect for families, couples, or business travelers looking for a home away from home. Book now for an unforgettable experience!`
-
-      setPropertyData(prev => ({ ...prev, description: generatedDescription }))
-      setAiMessages(prev => [...prev, 
-        {
-          role: 'user',
-          content: 'Please generate a description for my property.'
-        },
-        {
-          role: 'ai',
-          content: 'Perfect! I\'ve created a compelling description for your property. Here\'s what I came up with:'
-        }
-      ])
-      setIsGeneratingDescription(false)
-    }, 2000)
+  const prevStep = () => {
+    const prevIndex = currentStepIndex - 1
+    if (prevIndex >= 0) {
+      setCurrentStep(steps[prevIndex].id as WizardStep)
+    }
   }
 
   const handleImageUpload = () => {
-    // Simulate image upload
-    const sampleImages = [
-      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=400&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=400&h=300&fit=crop",
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=400&h=300&fit=crop"
-    ]
-    setPropertyData(prev => ({ ...prev, images: sampleImages }))
+    // Create a file input element
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.multiple = true
+    input.accept = 'image/*'
+    
+    input.onchange = (e) => {
+      const files = (e.target as HTMLInputElement).files
+      if (files) {
+        // For now, we'll simulate the upload by creating object URLs
+        // In production, you'd upload to your storage service
+        const newImages = Array.from(files).map(file => URL.createObjectURL(file))
+        setPropertyData(prev => ({
+          ...prev,
+          images: [...prev.images, ...newImages].slice(0, 10) // Limit to 10 images
+        }))
+      }
+    }
+    
+    input.click()
+  }
+
+  const removeImage = (index: number) => {
+    setPropertyData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }))
   }
 
   const toggleAmenity = (amenity: string) => {
@@ -126,10 +162,28 @@ Perfect for families, couples, or business travelers looking for a home away fro
     }))
   }
 
+  const generateDescription = async () => {
+    setIsGeneratingDescription(true)
+    try {
+      const description = await generateAIDescription(propertyData)
+      setPropertyData(prev => ({ ...prev, description }))
+    } catch (error) {
+      console.error('Failed to generate description:', error)
+      // Fallback to a simple description
+      const fallbackDescription = `Beautiful ${propertyData.property_type.toLowerCase()} in ${propertyData.city}, ${propertyData.state}. This ${propertyData.bedrooms}-bedroom property can accommodate up to ${propertyData.max_guests} guests. Perfect for your next getaway!`
+      setPropertyData(prev => ({ ...prev, description: fallbackDescription }))
+    } finally {
+      setIsGeneratingDescription(false)
+    }
+  }
+
   const handlePublish = async () => {
     setIsPublishing(true)
+    setErrors({})
     
     try {
+      console.log('Publishing property with data:', propertyData)
+      
       const propertyPayload = {
         title: propertyData.title,
         address: propertyData.address,
@@ -137,25 +191,30 @@ Perfect for families, couples, or business travelers looking for a home away fro
         state: propertyData.state,
         country: propertyData.country,
         property_type: propertyData.property_type,
-        bedrooms: parseInt(propertyData.bedrooms),
-        bathrooms: parseInt(propertyData.bathrooms),
-        max_guests: parseInt(propertyData.max_guests),
-        price_per_night: parseInt(propertyData.price_per_night),
+        bedrooms: propertyData.bedrooms,
+        bathrooms: propertyData.bathrooms,
+        max_guests: propertyData.max_guests,
+        price_per_night: propertyData.price_per_night,
         description: propertyData.description,
         images: propertyData.images,
-        amenities: propertyData.amenities
+        amenities: propertyData.amenities,
+        status: 'active'
       }
 
+      console.log('Sending payload to backend:', propertyPayload)
       const createdProperty = await createProperty(propertyPayload)
+      console.log('Property created successfully:', createdProperty)
       
       if (createdProperty) {
         setCurrentStep('published')
       } else {
-        // Handle error - could show a toast or error message
-        console.error('Failed to create property')
+        setErrors({ general: 'Failed to create property. Please try again.' })
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error creating property:', error)
+      setErrors({ 
+        general: error.message || 'Failed to create property. Please check your connection and try again.' 
+      })
     } finally {
       setIsPublishing(false)
     }
@@ -165,401 +224,347 @@ Perfect for families, couples, or business travelers looking for a home away fro
     switch (currentStep) {
       case 'basic-info':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Home className="h-5 w-5" />
-                Basic Property Information
-              </CardTitle>
-              <CardDescription>
-                Let's start with the essential details about your property.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="title">Property Title</Label>
-                  <Input 
-                    id="title"
-                    placeholder="e.g., Cozy Downtown Apartment"
-                    value={propertyData.title}
-                    onChange={(e) => setPropertyData(prev => ({ ...prev, title: e.target.value }))}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input 
-                    id="address"
-                    placeholder="123 Main St"
-                    value={propertyData.address}
-                    onChange={(e) => setPropertyData(prev => ({ ...prev, address: e.target.value }))}
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City</Label>
-                    <Input 
-                      id="city"
-                      placeholder="New York"
-                      value={propertyData.city}
-                      onChange={(e) => setPropertyData(prev => ({ ...prev, city: e.target.value }))}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State</Label>
-                    <Input 
-                      id="state"
-                      placeholder="NY"
-                      value={propertyData.state}
-                      onChange={(e) => setPropertyData(prev => ({ ...prev, state: e.target.value }))}
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="property_type">Property Type</Label>
-                  <Select value={propertyData.property_type} onValueChange={(value) => setPropertyData(prev => ({ ...prev, property_type: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="apartment">Apartment</SelectItem>
-                      <SelectItem value="house">House</SelectItem>
-                      <SelectItem value="condo">Condo</SelectItem>
-                      <SelectItem value="studio">Studio</SelectItem>
-                      <SelectItem value="cabin">Cabin</SelectItem>
-                      <SelectItem value="villa">Villa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bedrooms">Bedrooms</Label>
-                  <Select value={propertyData.bedrooms} onValueChange={(value) => setPropertyData(prev => ({ ...prev, bedrooms: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Beds" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1,2,3,4,5,6].map(num => (
-                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="bathrooms">Bathrooms</Label>
-                  <Select value={propertyData.bathrooms} onValueChange={(value) => setPropertyData(prev => ({ ...prev, bathrooms: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Baths" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1,2,3,4,5,6].map(num => (
-                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="max_guests">Max Guests</Label>
-                  <Select value={propertyData.max_guests} onValueChange={(value) => setPropertyData(prev => ({ ...prev, max_guests: value }))}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Guests" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {[1,2,3,4,5,6,7,8,9,10].map(num => (
-                        <SelectItem key={num} value={num.toString()}>{num}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="price_per_night">Price per Night (USD)</Label>
-                <Input 
-                  id="price_per_night"
-                  type="number"
-                  placeholder="150"
-                  value={propertyData.price_per_night}
-                  onChange={(e) => setPropertyData(prev => ({ ...prev, price_per_night: e.target.value }))}
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Let's start with the basics</h2>
+              <p className="text-gray-600">Tell us about your property</p>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="md:col-span-2">
+                <Label htmlFor="title">Property Title *</Label>
+                <Input
+                  id="title"
+                  placeholder="e.g., Cozy Downtown Apartment"
+                  value={propertyData.title}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, title: e.target.value }))}
+                  className={errors.title ? 'border-red-500' : ''}
                 />
+                {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
               </div>
               
-              <Button onClick={handleBasicInfoSubmit} className="w-full">
-                Continue to AI Description
-                <ArrowRight className="h-4 w-4 ml-2" />
-              </Button>
-            </CardContent>
-          </Card>
+              <div className="md:col-span-2">
+                <Label htmlFor="address">Address *</Label>
+                <Input
+                  id="address"
+                  placeholder="123 Main Street"
+                  value={propertyData.address}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, address: e.target.value }))}
+                  className={errors.address ? 'border-red-500' : ''}
+                />
+                {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
+              </div>
+              
+              <div>
+                <Label htmlFor="city">City *</Label>
+                <Input
+                  id="city"
+                  placeholder="San Francisco"
+                  value={propertyData.city}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, city: e.target.value }))}
+                  className={errors.city ? 'border-red-500' : ''}
+                />
+                {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+              </div>
+              
+              <div>
+                <Label htmlFor="state">State *</Label>
+                <Input
+                  id="state"
+                  placeholder="CA"
+                  value={propertyData.state}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, state: e.target.value }))}
+                  className={errors.state ? 'border-red-500' : ''}
+                />
+                {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+              </div>
+              
+              <div>
+                <Label htmlFor="country">Country</Label>
+                <Select value={propertyData.country} onValueChange={(value) => setPropertyData(prev => ({ ...prev, country: value }))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="USA">United States</SelectItem>
+                    <SelectItem value="Canada">Canada</SelectItem>
+                    <SelectItem value="UK">United Kingdom</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label htmlFor="property_type">Property Type *</Label>
+                <Select value={propertyData.property_type} onValueChange={(value) => setPropertyData(prev => ({ ...prev, property_type: value }))}>
+                  <SelectTrigger className={errors.property_type ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {propertyTypes.map(type => (
+                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {errors.property_type && <p className="text-red-500 text-sm mt-1">{errors.property_type}</p>}
+              </div>
+            </div>
+          </div>
         )
 
-      case 'ai-description':
+      case 'details':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Bot className="h-5 w-5" />
-                AI-Powered Description Generation
-              </CardTitle>
-              <CardDescription>
-                Let our AI create a compelling description for your property.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* AI Chat Interface */}
-              <div className="border rounded-lg p-4 h-64 overflow-y-auto bg-muted/20">
-                {aiMessages.map((message, index) => (
-                  <div key={index} className={`flex gap-3 mb-4 ${message.role === 'user' ? 'justify-end' : ''}`}>
-                    <div className={`flex gap-3 max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : ''}`}>
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                        message.role === 'ai' ? 'bg-primary text-primary-foreground' : 'bg-secondary'
-                      }`}>
-                        {message.role === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                      </div>
-                      <div className={`rounded-lg p-3 ${
-                        message.role === 'ai' ? 'bg-secondary' : 'bg-primary text-primary-foreground'
-                      }`}>
-                        <p className="text-sm">{message.content}</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-                
-                {isGeneratingDescription && (
-                  <div className="flex gap-3 mb-4">
-                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center">
-                      <Bot className="h-4 w-4" />
-                    </div>
-                    <div className="bg-secondary rounded-lg p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full"></div>
-                        <span className="text-sm">Generating description...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Property Details</h2>
+              <p className="text-gray-600">Help guests understand your space</p>
+            </div>
+            
+            <div className="grid gap-6 md:grid-cols-3">
+              <div>
+                <Label htmlFor="bedrooms">Bedrooms</Label>
+                <Input
+                  id="bedrooms"
+                  type="number"
+                  min="0"
+                  value={propertyData.bedrooms}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, bedrooms: parseInt(e.target.value) || 0 }))}
+                  className={errors.bedrooms ? 'border-red-500' : ''}
+                />
+                {errors.bedrooms && <p className="text-red-500 text-sm mt-1">{errors.bedrooms}</p>}
               </div>
               
-              {!propertyData.description ? (
-                <Button onClick={generateDescription} disabled={isGeneratingDescription} className="w-full">
-                  Generate Description with AI
-                </Button>
-              ) : (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label>Generated Description</Label>
-                    <Textarea 
-                      value={propertyData.description}
-                      onChange={(e) => setPropertyData(prev => ({ ...prev, description: e.target.value }))}
-                      className="min-h-[120px]"
-                    />
-                  </div>
-                  <div className="flex gap-2">
-                    <Button onClick={generateDescription} variant="outline">
-                      Regenerate
-                    </Button>
-                    <Button onClick={() => setCurrentStep('images')} className="flex-1">
-                      Continue to Images
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+              <div>
+                <Label htmlFor="bathrooms">Bathrooms</Label>
+                <Input
+                  id="bathrooms"
+                  type="number"
+                  min="0"
+                  step="0.5"
+                  value={propertyData.bathrooms}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, bathrooms: parseFloat(e.target.value) || 0 }))}
+                  className={errors.bathrooms ? 'border-red-500' : ''}
+                />
+                {errors.bathrooms && <p className="text-red-500 text-sm mt-1">{errors.bathrooms}</p>}
+              </div>
+              
+              <div>
+                <Label htmlFor="max_guests">Max Guests</Label>
+                <Input
+                  id="max_guests"
+                  type="number"
+                  min="1"
+                  value={propertyData.max_guests}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, max_guests: parseInt(e.target.value) || 1 }))}
+                  className={errors.max_guests ? 'border-red-500' : ''}
+                />
+                {errors.max_guests && <p className="text-red-500 text-sm mt-1">{errors.max_guests}</p>}
+              </div>
+            </div>
+          </div>
         )
 
       case 'images':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Camera className="h-5 w-5" />
-                Property Images
-              </CardTitle>
-              <CardDescription>
-                Add photos to showcase your property. Great photos increase bookings by 40%.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {propertyData.images.length === 0 ? (
-                <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-                  <Upload className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-                  <h3 className="font-medium mb-2">Upload Property Photos</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Add up to 20 high-quality photos of your property
-                  </p>
-                  <Button onClick={handleImageUpload}>
-                    <Upload className="h-4 w-4 mr-2" />
-                    Upload Photos
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    {propertyData.images.map((image, index) => (
-                      <div key={index} className="relative">
-                        <img 
-                          src={image} 
-                          alt={`Property ${index + 1}`}
-                          className="w-full h-32 object-cover rounded-lg"
-                        />
-                        {index === 0 && (
-                          <Badge className="absolute top-2 left-2">Main Photo</Badge>
-                        )}
-                      </div>
-                    ))}
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Photos</h2>
+              <p className="text-gray-600">Show off your space with beautiful photos</p>
+            </div>
+            
+            <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
+              <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Photos</h3>
+              <p className="text-gray-600 mb-4">Add up to 10 high-quality photos of your property</p>
+              <Button onClick={handleImageUpload} size="lg">
+                <Upload className="h-4 w-4 mr-2" />
+                Choose Photos
+              </Button>
+            </div>
+            
+            {propertyData.images.length > 0 && (
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {propertyData.images.map((image, index) => (
+                  <div key={index} className="relative group">
+                    <img 
+                      src={image} 
+                      alt={`Property ${index + 1}`}
+                      className="w-full h-32 object-cover rounded-lg"
+                    />
+                    <button
+                      onClick={() => removeImage(index)}
+                      className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
                   </div>
-                  <div className="flex gap-2">
-                    <Button variant="outline" onClick={handleImageUpload}>
-                      Add More Photos
-                    </Button>
-                    <Button onClick={() => setCurrentStep('amenities')} className="flex-1">
-                      Continue to Amenities
-                      <ArrowRight className="h-4 w-4 ml-2" />
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                ))}
+              </div>
+            )}
+          </div>
         )
 
       case 'amenities':
         return (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Sparkles className="h-5 w-5" />
-                Property Amenities
-              </CardTitle>
-              <CardDescription>
-                Select all amenities available at your property.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                {amenitiesList.map((amenity) => (
-                  <div key={amenity} className="flex items-center space-x-2">
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Amenities</h2>
+              <p className="text-gray-600">What does your property offer?</p>
+            </div>
+            
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+              {amenitiesList.map((amenity) => (
+                <div
+                  key={amenity}
+                  onClick={() => toggleAmenity(amenity)}
+                  className={`p-3 border rounded-lg cursor-pointer transition-all ${
+                    propertyData.amenities.includes(amenity)
+                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      : 'border-gray-300 hover:border-gray-400'
+                  }`}
+                >
+                  <div className="flex items-center space-x-2">
                     <Checkbox 
-                      id={amenity}
                       checked={propertyData.amenities.includes(amenity)}
-                      onCheckedChange={() => toggleAmenity(amenity)}
+                      onChange={() => {}} // Controlled by div onClick
                     />
-                    <Label htmlFor={amenity} className="text-sm">{amenity}</Label>
+                    <span className="text-sm font-medium">{amenity}</span>
                   </div>
-                ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+
+      case 'pricing':
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Set Your Price</h2>
+              <p className="text-gray-600">How much do you want to charge per night?</p>
+            </div>
+            
+            <div className="max-w-md mx-auto">
+              <Label htmlFor="price_per_night">Price per Night (USD)</Label>
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                <Input
+                  id="price_per_night"
+                  type="number"
+                  min="1"
+                  value={propertyData.price_per_night}
+                  onChange={(e) => setPropertyData(prev => ({ ...prev, price_per_night: parseInt(e.target.value) || 1 }))}
+                  className={`pl-8 text-lg ${errors.price_per_night ? 'border-red-500' : ''}`}
+                />
               </div>
-              
-              <div className="pt-4">
-                <Button onClick={() => setCurrentStep('preview')} className="w-full">
-                  Continue to Preview
-                  <ArrowRight className="h-4 w-4 ml-2" />
+              {errors.price_per_night && <p className="text-red-500 text-sm mt-1">{errors.price_per_night}</p>}
+            </div>
+            
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <Label htmlFor="description">Description</Label>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={generateDescription}
+                  disabled={isGeneratingDescription}
+                >
+                  <Bot className="h-4 w-4 mr-2" />
+                  {isGeneratingDescription ? 'Generating...' : 'AI Generate'}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+              <Textarea
+                id="description"
+                placeholder="Describe your property..."
+                value={propertyData.description}
+                onChange={(e) => setPropertyData(prev => ({ ...prev, description: e.target.value }))}
+                rows={6}
+                className={errors.description ? 'border-red-500' : ''}
+              />
+              {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
+            </div>
+          </div>
         )
 
       case 'preview':
         return (
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Check className="h-5 w-5" />
-                  Preview Your Listing
-                </CardTitle>
-                <CardDescription>
-                  Review how your property will appear to potential guests.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Review Your Listing</h2>
+              <p className="text-gray-600">Make sure everything looks perfect</p>
+            </div>
             
-            {/* Property Preview */}
+            {errors.general && (
+              <Alert className="mb-4">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{errors.general}</AlertDescription>
+              </Alert>
+            )}
+            
             <Card>
-              <CardContent className="p-0">
-                {propertyData.images[0] && (
-                  <img 
-                    src={propertyData.images[0]} 
-                    alt={propertyData.title}
-                    className="w-full h-64 object-cover rounded-t-lg"
-                  />
-                )}
-                <div className="p-6 space-y-4">
+              <CardContent className="p-6">
+                <div className="space-y-4">
                   <div>
-                    <h2 className="text-xl font-semibold">{propertyData.title}</h2>
-                    <p className="text-muted-foreground flex items-center gap-1">
-                      <MapPin className="h-4 w-4" />
-                      {propertyData.city}, {propertyData.state}
-                    </p>
+                    <h3 className="text-xl font-bold">{propertyData.title}</h3>
+                    <p className="text-gray-600">{propertyData.address}, {propertyData.city}, {propertyData.state}</p>
                   </div>
                   
-                  <div className="flex gap-4 text-sm">
+                  <div className="flex gap-4 text-sm text-gray-600">
                     <span>{propertyData.bedrooms} bed</span>
                     <span>{propertyData.bathrooms} bath</span>
                     <span>{propertyData.max_guests} guests</span>
-                    <span className="font-semibold">${propertyData.price_per_night}/night</span>
+                    <span className="font-bold text-gray-900">${propertyData.price_per_night}/night</span>
                   </div>
                   
-                  <p className="text-sm">{propertyData.description}</p>
-                  
-                  <div>
-                    <h4 className="font-medium mb-2">Amenities</h4>
-                    <div className="flex flex-wrap gap-2">
-                      {propertyData.amenities.slice(0, 6).map((amenity) => (
-                        <Badge key={amenity} variant="secondary">{amenity}</Badge>
+                  {propertyData.images.length > 0 && (
+                    <div className="grid grid-cols-3 gap-2">
+                      {propertyData.images.slice(0, 3).map((image, index) => (
+                        <img 
+                          key={index}
+                          src={image} 
+                          alt={`Property ${index + 1}`}
+                          className="w-full h-24 object-cover rounded"
+                        />
                       ))}
-                      {propertyData.amenities.length > 6 && (
-                        <Badge variant="outline">+{propertyData.amenities.length - 6} more</Badge>
-                      )}
                     </div>
-                  </div>
+                  )}
+                  
+                  <p className="text-gray-700">{propertyData.description}</p>
+                  
+                  {propertyData.amenities.length > 0 && (
+                    <div>
+                      <h4 className="font-medium mb-2">Amenities</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {propertyData.amenities.map((amenity) => (
+                          <Badge key={amenity} variant="secondary">{amenity}</Badge>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
-            
-            <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setCurrentStep('basic-info')}>
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Edit Details
-              </Button>
-              <Button onClick={handlePublish} className="flex-1" disabled={isPublishing}>
-                {isPublishing ? (
-                  <div className="flex items-center gap-2">
-                    <div className="animate-spin h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full"></div>
-                    Publishing...
-                  </div>
-                ) : (
-                  "Publish Property"
-                )}
-              </Button>
-            </div>
           </div>
         )
 
       case 'published':
         return (
-          <Card>
-            <CardContent className="p-8 text-center space-y-4">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-                <Check className="h-8 w-8 text-green-600" />
-              </div>
-              <h2 className="text-2xl font-semibold">Property Published Successfully!</h2>
-              <p className="text-muted-foreground">
-                Your property "{propertyData.title}" is now live and available for booking.
-              </p>
-              <div className="flex gap-2 justify-center">
-                <Button onClick={() => setCurrentStep('basic-info')}>
-                  Add Another Property
-                </Button>
-                <Button variant="outline">
-                  View Property
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="text-center space-y-6">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+              <Check className="h-10 w-10 text-green-600" />
+            </div>
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">🎉 Property Published!</h2>
+              <p className="text-gray-600">Your property is now live and ready to receive bookings.</p>
+            </div>
+            <div className="space-y-3">
+              <Button onClick={() => setCurrentStep('basic-info')} variant="outline">
+                Add Another Property
+              </Button>
+              <Button onClick={() => window.location.reload()}>
+                View My Properties
+              </Button>
+            </div>
+          </div>
         )
 
       default:
@@ -569,58 +574,83 @@ Perfect for families, couples, or business travelers looking for a home away fro
 
   if (currentStep === 'published') {
     return (
-      <div className="p-6">
+      <div className="p-6 max-w-2xl mx-auto">
         {renderStepContent()}
       </div>
     )
   }
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="mb-2">Add New Property</h1>
-        <p className="text-muted-foreground">
-          Create a stunning property listing with AI assistance.
-        </p>
+    <div className="p-6 max-w-4xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Add New Property</h1>
+        <p className="text-gray-600">Create a stunning listing for your rental property</p>
       </div>
 
       {/* Progress Bar */}
-      <div className="space-y-2">
-        <div className="flex justify-between text-sm">
-          <span>Progress</span>
-          <span>{Math.round(progress)}% Complete</span>
-        </div>
-        <Progress value={progress} className="h-2" />
-      </div>
-
-      {/* Step Indicators */}
-      <div className="flex justify-center">
-        <div className="flex items-center gap-2 overflow-x-auto pb-2">
-          {steps.map((step, index) => {
-            const isActive = step.id === currentStep
-            const isCompleted = index < currentStepIndex
-            const Icon = step.icon
-            
-            return (
-              <div key={step.id} className="flex items-center gap-2">
-                <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${
-                  isActive ? 'bg-primary text-primary-foreground border-primary' :
-                  isCompleted ? 'bg-secondary text-secondary-foreground border-secondary' :
-                  'bg-background border-border'
-                }`}>
-                  <Icon className="h-4 w-4" />
-                  <span className="text-sm font-medium hidden sm:inline">{step.title}</span>
-                </div>
-                {index < steps.length - 1 && (
-                  <ArrowRight className="h-4 w-4 text-muted-foreground" />
-                )}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          {steps.map((step, index) => (
+            <div key={step.id} className="flex items-center">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                index <= currentStepIndex 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-gray-200 text-gray-500'
+              }`}>
+                <step.icon className="h-5 w-5" />
               </div>
-            )
-          })}
+              {index < steps.length - 1 && (
+                <div className={`w-16 h-1 mx-2 ${
+                  index < currentStepIndex ? 'bg-blue-600' : 'bg-gray-200'
+                }`} />
+              )}
+            </div>
+          ))}
+        </div>
+        <div className="text-center">
+          <p className="text-sm text-gray-600">
+            Step {currentStepIndex + 1} of {steps.length}: {steps[currentStepIndex]?.description}
+          </p>
         </div>
       </div>
 
-      {renderStepContent()}
+      {/* Step Content */}
+      <Card className="mb-8">
+        <CardContent className="p-8">
+          {renderStepContent()}
+        </CardContent>
+      </Card>
+
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <Button 
+          variant="outline" 
+          onClick={prevStep}
+          disabled={currentStepIndex === 0}
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Previous
+        </Button>
+        
+        <div className="flex gap-2">
+          {currentStepIndex === steps.length - 1 ? (
+            <Button 
+              onClick={handlePublish}
+              disabled={isPublishing}
+              size="lg"
+              className="px-8"
+            >
+              {isPublishing ? 'Publishing...' : 'Publish Property'}
+            </Button>
+          ) : (
+            <Button onClick={nextStep} size="lg" className="px-8">
+              Next
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
