@@ -105,8 +105,8 @@ export function PropertyList() {
             <CardHeader className="pb-2 pt-4 px-4">
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
-                  <CardTitle className="text-sm font-semibold leading-tight truncate">{property.title}</CardTitle>
-                  <CardDescription className="flex items-center mt-1 text-xs">
+                  <CardTitle className="leading-tight truncate">{property.title}</CardTitle>
+                  <CardDescription className="flex items-center mt-1">
                     <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                     <span className="truncate">{property.city}, {property.state}</span>
                   </CardDescription>
@@ -139,18 +139,18 @@ export function PropertyList() {
             </CardHeader>
             <CardContent className="pt-0 px-4 pb-4">
               <div className="space-y-2">
-                <div className="text-[10px] text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   {property.bedrooms}bd • {property.bathrooms}ba • {property.max_guests} guests
-                </div>
+                </p>
                 <div className="flex items-center justify-between">
                   <div className="flex items-baseline">
-                    <span className="font-bold text-sm text-green-600">${property.price_per_night}</span>
-                    <span className="text-muted-foreground text-[10px] ml-1">/night</span>
+                    <span className="font-bold text-green-600">${property.price_per_night}</span>
+                    <span className="text-muted-foreground ml-1">/night</span>
                   </div>
                   {property.rating && (
                     <div className="flex items-center">
                       <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 text-[10px] font-medium">{property.rating}</span>
+                      <span className="ml-1 font-medium text-sm">{property.rating}</span>
                     </div>
                   )}
                 </div>
