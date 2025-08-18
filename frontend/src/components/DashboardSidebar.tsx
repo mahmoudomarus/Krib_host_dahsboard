@@ -1,4 +1,4 @@
-import { Home, Building2, Plus, BarChart3, Calendar, Settings, Bot, LogOut, User } from "lucide-react"
+import { Home, Building2, Plus, BarChart3, Calendar, Settings, Bot, LogOut, User, DollarSign } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
@@ -50,6 +50,12 @@ const navigationItems = [
     title: 'Bookings',
     icon: Calendar,
     description: 'Manage reservations'
+  },
+  {
+    id: 'financials' as NavigationItem,
+    title: 'Financials',
+    icon: DollarSign,
+    description: 'Earnings & payouts'
   },
   {
     id: 'settings' as NavigationItem,

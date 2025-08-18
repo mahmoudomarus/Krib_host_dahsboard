@@ -20,8 +20,8 @@ class Settings(BaseSettings):
     
     # Supabase
     supabase_url: str = "https://bpomacnqaqzgeuahhlka.supabase.co"
-    supabase_anon_key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwb21hY25xYXF6Z2V1YWhobGthIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTU0NTcyMjUsImV4cCI6MjA3MTAzMzIyNX0.wiDqoFa0KjqE_pRnZIGILmpVJ_3-xZb4dSURCyzDNTs"
-    supabase_service_role_key: str = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJwb21hY25xYXF6Z2V1YWhobGthIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1NTQ1NzIyNSwiZXhwIjoyMDcxMDMzMjI1fQ.Esc_wEXe2WnbDiMpsHa3Za9eon6BVjdFYzBXftPBWAc"
+    supabase_anon_key: str = ""
+    supabase_service_role_key: str = ""
     
     # Supabase S3-Compatible Storage
     aws_access_key_id: Optional[str] = None

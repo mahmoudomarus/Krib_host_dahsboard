@@ -8,9 +8,10 @@ import { PropertyList } from "./components/PropertyList"
 import { AddPropertyWizard } from "./components/AddPropertyWizard"
 import { AnalyticsDashboard } from "./components/AnalyticsDashboard"
 import { BookingManagement } from "./components/BookingManagement"
+import { FinancialDashboard } from "./components/FinancialDashboard"
 import { SettingsPage } from "./components/SettingsPage"
 
-export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'settings'
+export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'settings'
 
 function DashboardApp() {
   const { user, isLoading } = useApp()
@@ -43,6 +44,8 @@ function DashboardApp() {
         return <AnalyticsDashboard />
       case 'bookings':
         return <BookingManagement />
+      case 'financials':
+        return <FinancialDashboard />
       case 'settings':
         return <SettingsPage />
       default:

@@ -16,7 +16,7 @@ load_dotenv()
 # Import our modules
 from app.core.config import settings
 from app.core.database import init_db
-from app.api.routes import auth, properties, bookings, analytics, upload
+from app.api.routes import auth, properties, bookings, analytics, upload, financials
 from app.core.supabase_client import supabase_client
 
 # Initialize FastAPI app
@@ -55,6 +55,7 @@ app.include_router(properties.router, prefix="/api/properties", tags=["propertie
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])
 app.include_router(upload.router, prefix="/api/upload", tags=["upload"])
+app.include_router(financials.router, prefix="/api/financials", tags=["financials"])
 
 @app.get("/")
 async def root():

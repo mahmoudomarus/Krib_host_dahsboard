@@ -40,6 +40,34 @@ class PaymentStatus(str, Enum):
     refunded = "refunded"
 
 
+class TransactionType(str, Enum):
+    booking_payment = "booking_payment"
+    refund = "refund"
+    cancellation_fee = "cancellation_fee"
+    cleaning_fee = "cleaning_fee"
+    security_deposit = "security_deposit"
+
+
+class PayoutStatus(str, Enum):
+    pending = "pending"
+    processing = "processing"
+    completed = "completed"
+    failed = "failed"
+    cancelled = "cancelled"
+
+
+class PayoutFrequency(str, Enum):
+    daily = "daily"
+    weekly = "weekly"
+    biweekly = "biweekly"
+    monthly = "monthly"
+
+
+class AccountType(str, Enum):
+    checking = "checking"
+    savings = "savings"
+
+
 # User Models
 class UserCreate(BaseModel):
     name: str = Field(..., min_length=1, max_length=100)
@@ -309,6 +337,92 @@ class Token(BaseModel):
 class LoginRequest(BaseModel):
     email: EmailStr
     password: str
+
+
+# Financial Models
+class BankAccountCreate(BaseModel):
+    account_holder_name: str = Field(..., min_length=1, max_length=255)
+    bank_name: str = Field(..., min_length=1, max_length=255)
+    account_number_last4: str = Field(..., min_length=4, max_length=4)
+    routing_number: Optional[str] = Field(None, min_length=9, max_length=9)
+    account_type: AccountType = AccountType.checking
+    is_primary: bool = False
+
+
+class BankAccountResponse(BaseModel):
+    id: str
+    account_holder_name: str
+    bank_name: str
+    account_number_last4: str
+    account_type: str
+    is_primary: bool
+    is_verified: bool
+    verification_status: str
+    created_at: datetime
+
+
+class PayoutRequest(BaseModel):
+    amount: float = Field(..., gt=0)
+    bank_account_id: str
+
+
+class PayoutResponse(BaseModel):
+    id: str
+    amount: float
+    status: str
+    bank_account_id: str
+    bank_info: Optional[Dict[str, Any]] = None
+    requested_at: datetime
+    completed_at: Optional[datetime] = None
+    estimated_arrival: Optional[str] = None
+    failure_reason: Optional[str] = None
+
+
+class TransactionResponse(BaseModel):
+    id: str
+    booking_id: str
+    property_title: str
+    guest_name: str
+    transaction_type: str
+    gross_amount: float
+    platform_fee: float
+    payment_processing_fee: float
+    net_amount: float
+    status: str
+    payment_date: Optional[datetime]
+    created_at: datetime
+
+
+class FinancialSummary(BaseModel):
+    total_balance: float
+    pending_earnings: float
+    total_earnings: float
+    total_payouts: float
+    platform_fees: float
+    recent_transactions: List[Dict[str, Any]]
+    payout_frequency: str
+    next_payout_date: Optional[str] = None
+
+
+class PayoutSettingsUpdate(BaseModel):
+    payout_frequency: Optional[PayoutFrequency] = None
+    minimum_payout_amount: Optional[float] = Field(None, ge=1)
+    auto_payout_enabled: Optional[bool] = None
+    payout_day_of_week: Optional[int] = Field(None, ge=0, le=6)
+    payout_day_of_month: Optional[int] = Field(None, ge=1, le=31)
+    hold_period_days: Optional[int] = Field(None, ge=0, le=30)
+
+
+class PayoutSettingsResponse(BaseModel):
+    id: str
+    payout_frequency: str
+    minimum_payout_amount: float
+    auto_payout_enabled: bool
+    payout_day_of_week: Optional[int]
+    payout_day_of_month: Optional[int]
+    hold_period_days: int
+    created_at: datetime
+    updated_at: datetime
 
 
 # General Response Models
