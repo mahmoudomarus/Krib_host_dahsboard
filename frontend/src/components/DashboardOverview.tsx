@@ -1,12 +1,15 @@
 import { useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Building2, TrendingUp, Calendar, DollarSign, Star } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Progress } from "./ui/progress"
 import { Badge } from "./ui/badge"
+import { Button } from "./ui/button"
 import { useApp } from "../contexts/AppContext"
 
 export function DashboardOverview() {
   const { properties, bookings, analytics, getAnalytics } = useApp()
+  const navigate = useNavigate()
 
   useEffect(() => {
     getAnalytics()
@@ -192,18 +195,46 @@ export function DashboardOverview() {
             <CardDescription>Common tasks to manage your properties</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2">
-            <button className="w-full text-left p-2 rounded hover:bg-muted">
-              📝 Add New Property
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted">
-              📊 View Analytics
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted">
-              📅 Manage Bookings
-            </button>
-            <button className="w-full text-left p-2 rounded hover:bg-muted">
-              ⚙️ Settings
-            </button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => navigate('/add-property')}
+            >
+              <span className="mr-2">📝</span>
+              Add New Property
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => navigate('/analytics')}
+            >
+              <span className="mr-2">📊</span>
+              View Analytics
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => navigate('/bookings')}
+            >
+              <span className="mr-2">📅</span>
+              Manage Bookings
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => navigate('/financials')}
+            >
+              <span className="mr-2">💰</span>
+              Financial Dashboard
+            </Button>
+            <Button 
+              variant="ghost" 
+              className="w-full justify-start h-auto p-3 text-left"
+              onClick={() => navigate('/settings')}
+            >
+              <span className="mr-2">⚙️</span>
+              Settings
+            </Button>
           </CardContent>
         </Card>
 
