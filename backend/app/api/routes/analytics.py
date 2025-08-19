@@ -154,6 +154,10 @@ async def get_analytics(
         # Calculate occupancy rate
         occupancy_rate = _calculate_occupancy_rate(properties, bookings)
         
+        # Calculate average rating from properties
+        ratings = [float(p.get("rating", 0)) for p in properties if p.get("rating")]
+        average_rating = sum(ratings) / len(ratings) if ratings else 0.0
+        
         # Generate monthly data
         monthly_data = _generate_monthly_data(bookings, period)
         
@@ -174,6 +178,7 @@ async def get_analytics(
             total_bookings=total_bookings,
             total_properties=total_properties,
             occupancy_rate=occupancy_rate,
+            average_rating=average_rating,
             monthly_data=monthly_data,
             property_performance=property_performance,
             market_insights=market_insights,
@@ -309,6 +314,7 @@ def _empty_analytics_response() -> AnalyticsResponse:
         total_bookings=0,
         total_properties=0,
         occupancy_rate=0,
+        average_rating=0.0,
         monthly_data=[],
         property_performance=[],
         market_insights={

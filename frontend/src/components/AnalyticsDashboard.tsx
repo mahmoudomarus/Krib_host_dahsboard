@@ -120,7 +120,7 @@ export function AnalyticsDashboard() {
     },
     {
       title: "Average Rating",
-      value: "4.8",
+      value: analyticsData ? (analyticsData.average_rating || 0).toFixed(1) : "0.0",
       change: "+0.2",
       trend: "up",
       icon: Star,
@@ -283,8 +283,8 @@ export function AnalyticsDashboard() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>Dubai Market Forecast</CardTitle>
-                <CardDescription>Real Dubai seasonal patterns and revenue predictions</CardDescription>
+                <CardTitle>UAE Market Forecast</CardTitle>
+                <CardDescription>Real UAE seasonal patterns and revenue predictions</CardDescription>
               </CardHeader>
               <CardContent>
                 {forecastData?.forecast_data ? (
@@ -322,7 +322,7 @@ export function AnalyticsDashboard() {
                   <div className="text-2xl font-bold text-green-600">
                     AED {forecastData?.next_quarter_revenue?.toLocaleString() || '0'}
                   </div>
-                  <div className="text-sm text-muted-foreground">Based on Dubai seasonality</div>
+                  <div className="text-sm text-muted-foreground">Based on UAE seasonality</div>
                 </div>
 
                 <div className="space-y-2">
@@ -357,8 +357,8 @@ export function AnalyticsDashboard() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Dubai Market Performance</CardTitle>
-                <CardDescription>Your performance vs Dubai market standards</CardDescription>
+                            <CardTitle>UAE Market Performance</CardTitle>
+            <CardDescription>Your performance vs UAE market standards</CardDescription>
               </CardHeader>
               <CardContent>
                 {marketInsights ? (
@@ -394,8 +394,8 @@ export function AnalyticsDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Dubai Seasonal Trends</CardTitle>
-                <CardDescription>Real Dubai seasonal demand patterns</CardDescription>
+                            <CardTitle>UAE Seasonal Trends</CardTitle>
+            <CardDescription>Real UAE seasonal demand patterns</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
@@ -434,7 +434,7 @@ export function AnalyticsDashboard() {
                 <Alert>
                   <TrendingUp className="h-4 w-4" />
                   <AlertDescription>
-                    Dubai winter season (Dec-Mar) offers premium pricing opportunities with 40-50% higher demand.
+                    UAE winter season (Dec-Mar) offers premium pricing opportunities with 40-50% higher demand.
                   </AlertDescription>
                 </Alert>
               </CardContent>
@@ -445,8 +445,8 @@ export function AnalyticsDashboard() {
         <TabsContent value="pricing" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Dubai Dynamic Pricing</CardTitle>
-              <CardDescription>Real-time pricing optimization based on Dubai events, seasons, and demand</CardDescription>
+              <CardTitle>UAE Dynamic Pricing</CardTitle>
+              <CardDescription>Real-time pricing optimization based on UAE events, seasons, and demand</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
@@ -459,7 +459,7 @@ export function AnalyticsDashboard() {
 
                 <div className="grid gap-4 md:grid-cols-2">
                   <div className="space-y-4">
-                    <h4 className="font-medium">Dubai Seasonal Pricing Strategy</h4>
+                    <h4 className="font-medium">UAE Seasonal Pricing Strategy</h4>
                     <div className="space-y-3">
                       <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                         <div>
@@ -563,14 +563,14 @@ export function AnalyticsDashboard() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Dubai Market Competition</CardTitle>
-                <CardDescription>Competitive analysis is being developed for Dubai market</CardDescription>
+                <CardTitle>UAE Market Competition</CardTitle>
+                <CardDescription>Competitive analysis is being developed for UAE market</CardDescription>
               </CardHeader>
               <CardContent>
                 <Alert>
                   <MapPin className="h-4 w-4" />
                   <AlertDescription>
-                    Competitor tracking system is in development. Currently integrating with Dubai property listings to provide real competitive analysis.
+                    Competitor tracking system is in development. Currently integrating with UAE property listings to provide real competitive analysis.
                   </AlertDescription>
                 </Alert>
                 
@@ -606,7 +606,7 @@ export function AnalyticsDashboard() {
             <Card>
               <CardHeader>
                 <CardTitle>Market Positioning</CardTitle>
-                <CardDescription>Your competitive advantage in Dubai</CardDescription>
+                <CardDescription>Your competitive advantage in UAE</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 {marketInsights?.area_insights && (
@@ -634,7 +634,7 @@ export function AnalyticsDashboard() {
                     <Alert>
                       <Zap className="h-4 w-4" />
                       <AlertDescription>
-                        {marketInsights.area_recommendations?.[0] || "Optimize pricing based on Dubai seasonal patterns"}
+                        {marketInsights.area_recommendations?.[0] || "Optimize pricing based on UAE seasonal patterns"}
                       </AlertDescription>
                     </Alert>
                   </>
@@ -661,7 +661,7 @@ export function AnalyticsDashboard() {
                       </div>
                     </div>
                     <p className="text-muted-foreground">
-                      Increase rates by 40-50% during Dubai's peak winter season (December-February) when European tourists seek warm weather escapes.
+                      Increase rates by 40-50% during UAE's peak winter season (December-February) when European tourists seek warm weather escapes.
                     </p>
                   </div>
                 </div>
@@ -683,7 +683,7 @@ export function AnalyticsDashboard() {
                       </div>
                     </div>
                     <p className="text-muted-foreground">
-                      Implement automatic surge pricing for major Dubai events: F1 Grand Prix (+300%), Shopping Festival (+80%), GITEX (+60%).
+                      Implement automatic surge pricing for major UAE events: F1 Grand Prix (+300%), Shopping Festival (+80%), GITEX (+60%).
                     </p>
                   </div>
                 </div>
@@ -705,7 +705,7 @@ export function AnalyticsDashboard() {
                       </div>
                     </div>
                     <p className="text-muted-foreground">
-                      Dubai summer (May-September) requires 20-30% discount and focus on longer stays, business travelers, and local residents.
+                      UAE summer (May-September) requires 20-30% discount and focus on longer stays, business travelers, and local residents.
                     </p>
                   </div>
                 </div>
@@ -740,8 +740,8 @@ export function AnalyticsDashboard() {
 
             <Card>
               <CardHeader>
-                <CardTitle>Dubai Demand Patterns</CardTitle>
-                <CardDescription>Real Dubai seasonal and daily booking patterns</CardDescription>
+                <CardTitle>UAE Demand Patterns</CardTitle>
+                <CardDescription>Real UAE seasonal and daily booking patterns</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
