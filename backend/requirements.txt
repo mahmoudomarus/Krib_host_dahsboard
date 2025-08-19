@@ -44,18 +44,15 @@ sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.0
 
 # Redis for caching and sessions
-redis>=5.0.0
-redis-py>=5.0.0
-hiredis>=2.2.0
+redis>=4.5.0
+hiredis>=2.0.0
 
 # Background jobs and task queue
-celery>=5.3.0
-celery[redis]>=5.3.0
+celery>=5.2.0
 
 # Monitoring and observability
-prometheus-client>=0.18.0
-structlog>=23.2.0
-sentry-sdk[fastapi]>=1.40.0
+prometheus-client>=0.17.0
+sentry-sdk[fastapi]>=1.30.0
 
 # Rate limiting
-slowapi>=0.1.9
+slowapi>=0.1.8
