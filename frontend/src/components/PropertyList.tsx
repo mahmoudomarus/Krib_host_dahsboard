@@ -236,62 +236,64 @@ export function PropertyList() {
 
       {/* View Property Modal */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Property Details</DialogTitle>
+        <DialogContent className="max-w-2xl bg-white border shadow-lg">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="text-xl font-semibold text-gray-900">Property Details</DialogTitle>
           </DialogHeader>
           {selectedProperty && (
-            <div className="space-y-6">
+            <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="font-medium">Title</Label>
-                  <p className="text-sm text-muted-foreground">{selectedProperty.title}</p>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Title</Label>
+                  <p className="text-gray-900 mt-1">{selectedProperty.title}</p>
                 </div>
-                <div>
-                  <Label className="font-medium">Status</Label>
-                  <Badge className={getStatusColor(selectedProperty.status)}>
-                    {selectedProperty.status.charAt(0).toUpperCase() + selectedProperty.status.slice(1)}
-                  </Badge>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Status</Label>
+                  <div className="mt-1">
+                    <Badge className={getStatusColor(selectedProperty.status)}>
+                      {selectedProperty.status.charAt(0).toUpperCase() + selectedProperty.status.slice(1)}
+                    </Badge>
+                  </div>
                 </div>
               </div>
               
-              <div>
-                <Label className="font-medium">Description</Label>
-                <p className="text-sm text-muted-foreground mt-1">{selectedProperty.description || 'No description provided'}</p>
+              <div className="bg-white p-4 rounded-md border">
+                <Label className="font-semibold text-gray-700">Description</Label>
+                <p className="text-gray-900 mt-2 leading-relaxed">{selectedProperty.description || 'No description provided'}</p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
-                <div>
-                  <Label className="font-medium">Price per night</Label>
-                  <p className="text-sm text-muted-foreground">${selectedProperty.price_per_night}</p>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Price per night</Label>
+                  <p className="text-green-600 font-bold text-lg mt-1">${selectedProperty.price_per_night}</p>
                 </div>
-                <div>
-                  <Label className="font-medium">Bedrooms</Label>
-                  <p className="text-sm text-muted-foreground">{selectedProperty.bedrooms}</p>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Bedrooms</Label>
+                  <p className="text-gray-900 font-medium mt-1">{selectedProperty.bedrooms}</p>
                 </div>
-                <div>
-                  <Label className="font-medium">Bathrooms</Label>
-                  <p className="text-sm text-muted-foreground">{selectedProperty.bathrooms}</p>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Bathrooms</Label>
+                  <p className="text-gray-900 font-medium mt-1">{selectedProperty.bathrooms}</p>
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label className="font-medium">Max Guests</Label>
-                  <p className="text-sm text-muted-foreground">{selectedProperty.max_guests}</p>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Max Guests</Label>
+                  <p className="text-gray-900 font-medium mt-1">{selectedProperty.max_guests}</p>
                 </div>
-                <div>
-                  <Label className="font-medium">Location</Label>
-                  <p className="text-sm text-muted-foreground">{selectedProperty.city}, {selectedProperty.state}</p>
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Location</Label>
+                  <p className="text-gray-900 font-medium mt-1">{selectedProperty.city}, {selectedProperty.state}</p>
                 </div>
               </div>
 
               {selectedProperty.amenities && selectedProperty.amenities.length > 0 && (
-                <div>
-                  <Label className="font-medium">Amenities</Label>
-                  <div className="flex flex-wrap gap-2 mt-1">
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700">Amenities</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
                     {selectedProperty.amenities.map((amenity, index) => (
-                      <Badge key={index} variant="secondary" className="text-xs">
+                      <Badge key={index} variant="secondary" className="bg-blue-100 text-blue-800 hover:bg-blue-200">
                         {amenity}
                       </Badge>
                     ))}
@@ -305,50 +307,53 @@ export function PropertyList() {
 
       {/* Edit Property Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Property</DialogTitle>
+        <DialogContent className="max-w-2xl bg-white border shadow-lg">
+          <DialogHeader className="pb-4 border-b">
+            <DialogTitle className="text-xl font-semibold text-gray-900">Edit Property</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="edit-title">Title</Label>
+          <div className="space-y-4 p-6 bg-gray-50 rounded-lg">
+            <div className="bg-white p-4 rounded-md border">
+              <Label htmlFor="edit-title" className="font-semibold text-gray-700">Title</Label>
               <Input
                 id="edit-title"
                 value={editFormData.title || ''}
                 onChange={(e) => setEditFormData(prev => ({ ...prev, title: e.target.value }))}
+                className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
-            <div>
-              <Label htmlFor="edit-description">Description</Label>
+            <div className="bg-white p-4 rounded-md border">
+              <Label htmlFor="edit-description" className="font-semibold text-gray-700">Description</Label>
               <Textarea
                 id="edit-description"
                 value={editFormData.description || ''}
                 onChange={(e) => setEditFormData(prev => ({ ...prev, description: e.target.value }))}
                 rows={3}
+                className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="edit-price">Price per night ($)</Label>
+              <div className="bg-white p-4 rounded-md border">
+                <Label htmlFor="edit-price" className="font-semibold text-gray-700">Price per night ($)</Label>
                 <Input
                   id="edit-price"
                   type="number"
                   value={editFormData.price_per_night || ''}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, price_per_night: Number(e.target.value) }))}
+                  className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div>
-                <Label htmlFor="edit-status">Status</Label>
+              <div className="bg-white p-4 rounded-md border">
+                <Label htmlFor="edit-status" className="font-semibold text-gray-700">Status</Label>
                 <Select
                   value={editFormData.status || ''}
                   onValueChange={(value) => setEditFormData(prev => ({ ...prev, status: value as any }))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500">
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent className="bg-white border shadow-lg">
                     <SelectItem value="draft">Draft</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
@@ -359,43 +364,46 @@ export function PropertyList() {
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              <div>
-                <Label htmlFor="edit-bedrooms">Bedrooms</Label>
+              <div className="bg-white p-4 rounded-md border">
+                <Label htmlFor="edit-bedrooms" className="font-semibold text-gray-700">Bedrooms</Label>
                 <Input
                   id="edit-bedrooms"
                   type="number"
                   min="1"
                   value={editFormData.bedrooms || ''}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, bedrooms: Number(e.target.value) }))}
+                  className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div>
-                <Label htmlFor="edit-bathrooms">Bathrooms</Label>
+              <div className="bg-white p-4 rounded-md border">
+                <Label htmlFor="edit-bathrooms" className="font-semibold text-gray-700">Bathrooms</Label>
                 <Input
                   id="edit-bathrooms"
                   type="number"
                   min="1"
                   value={editFormData.bathrooms || ''}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, bathrooms: Number(e.target.value) }))}
+                  className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
-              <div>
-                <Label htmlFor="edit-max-guests">Max Guests</Label>
+              <div className="bg-white p-4 rounded-md border">
+                <Label htmlFor="edit-max-guests" className="font-semibold text-gray-700">Max Guests</Label>
                 <Input
                   id="edit-max-guests"
                   type="number"
                   min="1"
                   value={editFormData.max_guests || ''}
                   onChange={(e) => setEditFormData(prev => ({ ...prev, max_guests: Number(e.target.value) }))}
+                  className="mt-2 bg-white border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                 />
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button variant="outline" onClick={() => setIsEditModalOpen(false)}>
+            <div className="flex justify-end space-x-3 pt-6 border-t bg-white p-4 rounded-md">
+              <Button variant="outline" onClick={() => setIsEditModalOpen(false)} className="px-6">
                 Cancel
               </Button>
-              <Button onClick={handleUpdateProperty}>
+              <Button onClick={handleUpdateProperty} className="px-6 bg-blue-600 hover:bg-blue-700">
                 Save Changes
               </Button>
             </div>
