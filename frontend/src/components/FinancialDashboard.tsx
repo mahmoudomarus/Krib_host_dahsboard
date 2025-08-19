@@ -5,6 +5,10 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Alert, AlertDescription } from "./ui/alert"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { 
   DollarSign, 
   TrendingUp, 
@@ -68,6 +72,16 @@ export function FinancialDashboard() {
   const [loading, setLoading] = useState(true)
   const [payoutAmount, setPayoutAmount] = useState("")
   const [selectedBankAccount, setSelectedBankAccount] = useState("")
+  const [showAddBankModal, setShowAddBankModal] = useState(false)
+  const [addingBank, setAddingBank] = useState(false)
+  const [bankForm, setBankForm] = useState({
+    account_holder_name: "",
+    bank_name: "",
+    account_number: "",
+    routing_number: "",
+    account_type: "checking",
+    is_primary: false
+  })
 
   useEffect(() => {
     loadFinancialData()
@@ -116,6 +130,45 @@ export function FinancialDashboard() {
     } catch (error) {
       console.error('Failed to request payout:', error)
       alert('Failed to request payout. Please try again.')
+    }
+  }
+
+  async function handleAddBankAccount() {
+    if (!bankForm.account_holder_name || !bankForm.bank_name || !bankForm.account_number || !bankForm.routing_number) {
+      alert('Please fill in all required fields')
+      return
+    }
+
+    try {
+      setAddingBank(true)
+      
+      // Add last 4 digits of account number
+      const accountData = {
+        ...bankForm,
+        account_number_last4: bankForm.account_number.slice(-4)
+      }
+      
+      const newAccount = await addBankAccount(accountData)
+      setBankAccounts(prev => [...prev, newAccount])
+      
+      // Reset form and close modal
+      setBankForm({
+        account_holder_name: "",
+        bank_name: "",
+        account_number: "",
+        routing_number: "",
+        account_type: "checking",
+        is_primary: false
+      })
+      setShowAddBankModal(false)
+      
+      alert('Bank account added successfully!')
+      
+    } catch (error) {
+      console.error('Failed to add bank account:', error)
+      alert('Failed to add bank account. Please try again.')
+    } finally {
+      setAddingBank(false)
     }
   }
 
@@ -383,10 +436,96 @@ export function FinancialDashboard() {
                     </div>
                   </div>
                 ))}
-                <Button variant="outline" className="w-full">
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Bank Account
-                </Button>
+                <Dialog open={showAddBankModal} onOpenChange={setShowAddBankModal}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add Bank Account
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Add Bank Account</DialogTitle>
+                      <DialogDescription>
+                        Add a bank account for receiving payouts. Your account information is encrypted and secure.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="account_holder_name">Account Holder Name</Label>
+                        <Input
+                          id="account_holder_name"
+                          value={bankForm.account_holder_name}
+                          onChange={(e) => setBankForm(prev => ({...prev, account_holder_name: e.target.value}))}
+                          placeholder="Full name on account"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="bank_name">Bank Name</Label>
+                        <Input
+                          id="bank_name"
+                          value={bankForm.bank_name}
+                          onChange={(e) => setBankForm(prev => ({...prev, bank_name: e.target.value}))}
+                          placeholder="e.g., Emirates NBD, ADCB, FAB"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor="account_number">Account Number</Label>
+                          <Input
+                            id="account_number"
+                            type="password"
+                            value={bankForm.account_number}
+                            onChange={(e) => setBankForm(prev => ({...prev, account_number: e.target.value}))}
+                            placeholder="Full account number"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="routing_number">Routing Number / IBAN</Label>
+                          <Input
+                            id="routing_number"
+                            value={bankForm.routing_number}
+                            onChange={(e) => setBankForm(prev => ({...prev, routing_number: e.target.value}))}
+                            placeholder="IBAN or routing number"
+                          />
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="account_type">Account Type</Label>
+                        <Select 
+                          value={bankForm.account_type} 
+                          onValueChange={(value) => setBankForm(prev => ({...prev, account_type: value}))}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select account type" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="checking">Checking</SelectItem>
+                            <SelectItem value="savings">Savings</SelectItem>
+                            <SelectItem value="current">Current</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="is_primary"
+                          checked={bankForm.is_primary}
+                          onChange={(e) => setBankForm(prev => ({...prev, is_primary: e.target.checked}))}
+                        />
+                        <Label htmlFor="is_primary" className="text-sm">Set as primary account</Label>
+                      </div>
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                      <Button variant="outline" onClick={() => setShowAddBankModal(false)}>
+                        Cancel
+                      </Button>
+                      <Button onClick={handleAddBankAccount} disabled={addingBank}>
+                        {addingBank ? 'Adding...' : 'Add Account'}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
