@@ -320,6 +320,9 @@ class AnalyticsResponse(BaseModel):
     total_properties: int
     occupancy_rate: float
     average_rating: float
+    monthly_growth: float = 0.0
+    booking_growth: float = 0.0
+    rating_change: float = 0.0
     monthly_data: List[Dict[str, Any]]
     property_performance: List[Dict[str, Any]]
     market_insights: Dict[str, Any]

@@ -158,6 +158,9 @@ async def get_analytics(
         ratings = [float(p.get("rating", 0)) for p in properties if p.get("rating")]
         average_rating = sum(ratings) / len(ratings) if ratings else 0.0
         
+        # Calculate growth metrics (comparing current month vs previous month)
+        monthly_growth, booking_growth, rating_change = _calculate_growth_metrics(properties, bookings)
+        
         # Generate monthly data
         monthly_data = _generate_monthly_data(bookings, period)
         
@@ -179,6 +182,9 @@ async def get_analytics(
             total_properties=total_properties,
             occupancy_rate=occupancy_rate,
             average_rating=average_rating,
+            monthly_growth=monthly_growth,
+            booking_growth=booking_growth,
+            rating_change=rating_change,
             monthly_data=monthly_data,
             property_performance=property_performance,
             market_insights=market_insights,
@@ -330,6 +336,37 @@ def _empty_analytics_response() -> AnalyticsResponse:
         },
         recommendations=[]
     )
+
+
+def _calculate_growth_metrics(properties: List[Dict], bookings: List[Dict]) -> tuple[float, float, float]:
+    """Calculate month-over-month growth metrics"""
+    try:
+        current_month = datetime.now().replace(day=1)
+        previous_month = (current_month - timedelta(days=1)).replace(day=1)
+        
+        # Current month bookings and revenue
+        current_bookings = [b for b in bookings if 
+                           datetime.fromisoformat(b["created_at"].replace('Z', '+00:00')).replace(tzinfo=None) >= current_month and
+                           b["status"] in ["confirmed", "completed"]]
+        current_revenue = sum(float(b["total_amount"]) for b in current_bookings)
+        
+        # Previous month bookings and revenue
+        previous_bookings = [b for b in bookings if 
+                            datetime.fromisoformat(b["created_at"].replace('Z', '+00:00')).replace(tzinfo=None) >= previous_month and
+                            datetime.fromisoformat(b["created_at"].replace('Z', '+00:00')).replace(tzinfo=None) < current_month and
+                            b["status"] in ["confirmed", "completed"]]
+        previous_revenue = sum(float(b["total_amount"]) for b in previous_bookings)
+        
+        # Calculate growth percentages
+        monthly_growth = ((current_revenue - previous_revenue) / previous_revenue * 100) if previous_revenue > 0 else 0
+        booking_growth = ((len(current_bookings) - len(previous_bookings)) / len(previous_bookings) * 100) if len(previous_bookings) > 0 else 0
+        
+        # Rating change (simplified - in real app would track historical ratings)
+        rating_change = 0.0  # Would need historical rating data
+        
+        return monthly_growth, booking_growth, rating_change
+    except Exception:
+        return 0.0, 0.0, 0.0
 
 
 def _calculate_occupancy_rate(properties: List[Dict], bookings: List[Dict]) -> float:

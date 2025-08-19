@@ -105,7 +105,7 @@ export function AnalyticsDashboard() {
     {
       title: "Total Revenue",
       value: `$${analyticsData?.totalRevenue?.toLocaleString() || '0'}`,
-      change: "+12.5%",
+      change: analyticsData?.monthly_growth ? `${analyticsData.monthly_growth > 0 ? '+' : ''}${analyticsData.monthly_growth.toFixed(1)}%` : "0%",
       trend: "up",
       icon: DollarSign,
       color: "text-green-600"
@@ -113,7 +113,7 @@ export function AnalyticsDashboard() {
     {
       title: "Total Bookings",
       value: analyticsData?.totalBookings?.toString() || '0',
-      change: "+8.3%",
+      change: analyticsData?.booking_growth ? `${analyticsData.booking_growth > 0 ? '+' : ''}${analyticsData.booking_growth.toFixed(1)}%` : "0%",
       trend: "up",
       icon: Calendar,
       color: "text-blue-600"
@@ -121,7 +121,7 @@ export function AnalyticsDashboard() {
     {
       title: "Average Rating",
       value: analyticsData ? (analyticsData.average_rating || 0).toFixed(1) : "0.0",
-      change: "+0.2",
+      change: analyticsData?.rating_change ? `${analyticsData.rating_change > 0 ? '+' : ''}${analyticsData.rating_change.toFixed(1)}` : "0",
       trend: "up",
       icon: Star,
       color: "text-yellow-600"
@@ -255,7 +255,7 @@ export function AnalyticsDashboard() {
                   </div>
                   <div className="flex justify-between text-green-600">
                     <span className="text-sm">Growth</span>
-                    <span className="font-medium">+20.3%</span>
+                    <span className="font-medium">{forecastData?.confidence ? `${forecastData.confidence}%` : '0%'}</span>
                   </div>
                 </div>
                 
