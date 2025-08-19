@@ -81,9 +81,9 @@ export function DashboardOverview() {
     .slice(0, 3)
 
   return (
-    <div className="space-y-6">
+    <div className="p-6 space-y-6">
       <div>
-        <h1>Dashboard Overview</h1>
+        <h1 className="text-2xl font-bold">Dashboard Overview</h1>
         <p className="text-muted-foreground">
           Welcome back! Here's what's happening with your rental properties.
         </p>

@@ -47,14 +47,12 @@ export function PropertyList() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1>Properties</h1>
-          <p className="text-muted-foreground">
-            Manage your rental properties and track their performance.
-          </p>
-        </div>
+    <div className="p-6 space-y-6">
+      <div>
+        <h1>Properties</h1>
+        <p className="text-muted-foreground">
+          Manage your rental properties and track their performance.
+        </p>
       </div>
 
       <div className="flex items-center space-x-4">
@@ -102,7 +100,7 @@ export function PropertyList() {
                 </div>
               )}
             </div>
-            <CardHeader className="pb-2 pt-4 px-4">
+            <CardHeader>
               <div className="flex items-start justify-between">
                 <div className="flex-1 min-w-0">
                   <CardTitle className="leading-tight truncate">{property.title}</CardTitle>
@@ -137,7 +135,7 @@ export function PropertyList() {
                 </DropdownMenu>
               </div>
             </CardHeader>
-            <CardContent className="pt-0 px-4 pb-4">
+            <CardContent className="pt-0">
               <div className="space-y-2">
                 <p className="text-muted-foreground text-sm">
                   {property.bedrooms}bd • {property.bathrooms}ba • {property.max_guests} guests
