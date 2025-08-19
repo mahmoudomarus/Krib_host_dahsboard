@@ -443,63 +443,68 @@ export function FinancialDashboard() {
                       Add Bank Account
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="sm:max-w-[500px]">
-                    <DialogHeader>
-                      <DialogTitle>Add Bank Account</DialogTitle>
-                      <DialogDescription>
+                  <DialogContent className="sm:max-w-[500px] bg-white border shadow-lg">
+                    <DialogHeader className="pb-4 border-b">
+                      <DialogTitle className="text-xl font-semibold text-gray-900">Add Bank Account</DialogTitle>
+                      <DialogDescription className="text-gray-600">
                         Add a bank account for receiving payouts. Your account information is encrypted and secure.
                       </DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4 py-4">
+                    <div className="space-y-4 py-6 bg-gray-50 rounded-lg">
+                      <div className="space-y-4 bg-white p-4 rounded-md border">
                       <div className="space-y-2">
-                        <Label htmlFor="account_holder_name">Account Holder Name</Label>
+                        <Label htmlFor="account_holder_name" className="text-sm font-medium text-gray-700">Account Holder Name</Label>
                         <Input
                           id="account_holder_name"
                           value={bankForm.account_holder_name}
                           onChange={(e) => setBankForm(prev => ({...prev, account_holder_name: e.target.value}))}
                           placeholder="Full name on account"
+                          className="bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="bank_name">Bank Name</Label>
+                        <Label htmlFor="bank_name" className="text-sm font-medium text-gray-700">Bank Name</Label>
                         <Input
                           id="bank_name"
                           value={bankForm.bank_name}
                           onChange={(e) => setBankForm(prev => ({...prev, bank_name: e.target.value}))}
                           placeholder="e.g., Emirates NBD, ADCB, FAB"
+                          className="bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label htmlFor="account_number">Account Number</Label>
+                          <Label htmlFor="account_number" className="text-sm font-medium text-gray-700">Account Number</Label>
                           <Input
                             id="account_number"
                             type="password"
                             value={bankForm.account_number}
                             onChange={(e) => setBankForm(prev => ({...prev, account_number: e.target.value}))}
                             placeholder="Full account number"
+                            className="bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                           />
                         </div>
                         <div className="space-y-2">
-                          <Label htmlFor="routing_number">Routing Number / IBAN</Label>
+                          <Label htmlFor="routing_number" className="text-sm font-medium text-gray-700">Routing Number / IBAN</Label>
                           <Input
                             id="routing_number"
                             value={bankForm.routing_number}
                             onChange={(e) => setBankForm(prev => ({...prev, routing_number: e.target.value}))}
                             placeholder="IBAN or routing number"
+                            className="bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                           />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="account_type">Account Type</Label>
+                        <Label htmlFor="account_type" className="text-sm font-medium text-gray-700">Account Type</Label>
                         <Select 
                           value={bankForm.account_type} 
                           onValueChange={(value) => setBankForm(prev => ({...prev, account_type: value}))}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className="bg-white border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200">
                             <SelectValue placeholder="Select account type" />
                           </SelectTrigger>
-                          <SelectContent>
+                          <SelectContent className="bg-white border shadow-lg">
                             <SelectItem value="checking">Checking</SelectItem>
                             <SelectItem value="savings">Savings</SelectItem>
                             <SelectItem value="current">Current</SelectItem>
@@ -512,11 +517,13 @@ export function FinancialDashboard() {
                           id="is_primary"
                           checked={bankForm.is_primary}
                           onChange={(e) => setBankForm(prev => ({...prev, is_primary: e.target.checked}))}
+                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <Label htmlFor="is_primary" className="text-sm">Set as primary account</Label>
+                        <Label htmlFor="is_primary" className="text-sm text-gray-700">Set as primary account</Label>
+                      </div>
                       </div>
                     </div>
-                    <div className="flex justify-end space-x-2">
+                    <div className="flex justify-end space-x-2 pt-4 border-t bg-white p-4 rounded-b-lg">
                       <Button variant="outline" onClick={() => setShowAddBankModal(false)}>
                         Cancel
                       </Button>
