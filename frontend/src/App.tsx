@@ -60,11 +60,11 @@ function DashboardContent() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-                <DashboardSidebar 
+        <DashboardSidebar 
           activeSection={activeSection} 
           onSectionChange={handleSectionChange} 
         />
-        <main className="flex-1 overflow-auto bg-background" style={{ marginLeft: '16rem' }}>
+        <main className="flex-1 overflow-auto bg-background p-6">
           <Routes>
             <Route path="/" element={<DashboardOverview />} />
             <Route path="/overview" element={<DashboardOverview />} />

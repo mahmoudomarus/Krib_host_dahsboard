@@ -81,7 +81,7 @@ export function DashboardOverview() {
     .slice(0, 3)
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       <div>
         <h1>Dashboard Overview</h1>
         <p className="text-muted-foreground">
@@ -94,12 +94,12 @@ export function DashboardOverview() {
         {stats.map((stat) => (
           <Card key={stat.title} className="analytics-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle>{stat.title}</CardTitle>
+              <CardTitle className="text-sm">{stat.title}</CardTitle>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-muted-foreground">{stat.change}</p>
+              <p className="text-xs text-muted-foreground">{stat.change}</p>
             </CardContent>
           </Card>
         ))}
@@ -119,7 +119,7 @@ export function DashboardOverview() {
                   <div key={booking.id} className="flex items-center justify-between">
                     <div className="space-y-1">
                       <p className="font-medium">{booking.property_title || 'Property'}</p>
-                      <p className="text-muted-foreground">
+                      <p className="text-sm text-muted-foreground">
                         {booking.guest_name} • {new Date(booking.check_in).toLocaleDateString()} - {new Date(booking.check_out).toLocaleDateString()}
                       </p>
                     </div>
@@ -158,7 +158,7 @@ export function DashboardOverview() {
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="font-medium">{property.title}</p>
-                          <div className="flex items-center gap-2 text-muted-foreground">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <span>{property.booking_count || 0} bookings</span>
                             <span>•</span>
                             <div className="flex items-center gap-1">
@@ -169,7 +169,7 @@ export function DashboardOverview() {
                         </div>
                         <div className="text-right">
                           <p className="font-medium">${property.total_revenue || 0}</p>
-                          <p className="text-muted-foreground">{propertyOccupancy}% occupied</p>
+                          <p className="text-sm text-muted-foreground">{propertyOccupancy}% occupied</p>
                         </div>
                       </div>
                       <Progress value={propertyOccupancy} className="h-2" />
@@ -214,21 +214,21 @@ export function DashboardOverview() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <div className="flex items-center justify-between ">
+              <div className="flex items-center justify-between text-sm">
                 <span>Portfolio Occupancy</span>
                 <span>{occupancyRate}%</span>
               </div>
               <Progress value={occupancyRate} />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between ">
+              <div className="flex items-center justify-between text-sm">
                 <span>Active Properties</span>
                 <span>{properties.filter(p => p.status === 'active').length}</span>
               </div>
               <Progress value={properties.length > 0 ? (properties.filter(p => p.status === 'active').length / properties.length) * 100 : 0} />
             </div>
             <div className="space-y-2">
-              <div className="flex items-center justify-between ">
+              <div className="flex items-center justify-between text-sm">
                 <span>Average Rating</span>
                 <span>{averageRating.toFixed(1)}/5.0</span>
               </div>

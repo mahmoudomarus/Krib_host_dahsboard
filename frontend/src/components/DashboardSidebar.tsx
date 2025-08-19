@@ -76,8 +76,8 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
             <Bot className="h-5 w-5" />
           </div>
           <div>
-            <h2 className="text-sidebar-foreground">Krib AI</h2>
-            <p className="text-sidebar-foreground/60">Property Dashboard</p>
+            <h2 className="text-lg text-sidebar-foreground">Krib AI</h2>
+            <p className="text-sm text-sidebar-foreground/60">Property Dashboard</p>
           </div>
         </div>
       </SidebarHeader>
@@ -110,8 +110,8 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
           <div className="flex items-center gap-2 px-2">
             <User className="h-4 w-4 text-sidebar-foreground/60" />
             <div className="flex-1 min-w-0">
-              <p className="text-sidebar-foreground truncate">{user?.name || 'User'}</p>
-              <p className="text-sidebar-foreground/60 truncate">{user?.email}</p>
+              <p className="text-sm text-sidebar-foreground truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
             </div>
           </div>
           <Button

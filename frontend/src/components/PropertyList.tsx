@@ -50,7 +50,7 @@ export function PropertyList() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Properties</h2>
+          <h1>Properties</h1>
           <p className="text-muted-foreground">
             Manage your rental properties and track their performance.
           </p>
@@ -107,7 +107,7 @@ export function PropertyList() {
                 <div className="flex-1 min-w-0">
                   <CardTitle className="leading-tight truncate">{property.title}</CardTitle>
                   <CardDescription className="flex items-center mt-1">
-                    <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
                     <span className="truncate">{property.city}, {property.state}</span>
                   </CardDescription>
                 </div>
@@ -149,8 +149,8 @@ export function PropertyList() {
                   </div>
                   {property.rating && (
                     <div className="flex items-center">
-                      <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 font-medium text-sm">{property.rating}</span>
+                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                      <span className="ml-1 font-medium">{property.rating}</span>
                     </div>
                   )}
                 </div>
