@@ -4,6 +4,16 @@ import { supabase } from '../utils/supabase/client'
 // Environment configuration
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://krib-host-dahsboard-backend.onrender.com/api'
 
+// Ensure HTTPS is used in production
+const SECURE_API_URL = API_BASE_URL.replace('http://', 'https://')
+
+// Debug logging for API URL
+console.log('API Configuration:', {
+  original: API_BASE_URL,
+  secure: SECURE_API_URL,
+  environment: import.meta.env.VITE_API_URL
+})
+
 interface User {
   id: string
   email: string
@@ -160,7 +170,7 @@ async function makeAPIRequest(endpoint: string, options: RequestInit = {}) {
     },
   }
 
-  const response = await fetch(`${API_BASE_URL}${endpoint}`, config)
+  const response = await fetch(`${SECURE_API_URL}${endpoint}`, config)
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
