@@ -10,86 +10,17 @@ import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, Star, Eye, Heart
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, AreaChart, Area, ComposedChart, Scatter, ScatterChart } from "recharts"
 import { useApp } from "../contexts/AppContext"
 
-// Mock data for advanced analytics
-const forecastData = [
-  { month: 'Jan', historical: 4200, forecast: 4500, confidence: 85 },
-  { month: 'Feb', historical: 3800, forecast: 4100, confidence: 82 },
-  { month: 'Mar', historical: 5100, forecast: 5400, confidence: 88 },
-  { month: 'Apr', historical: 4900, forecast: 5200, confidence: 90 },
-  { month: 'May', historical: 6200, forecast: 6800, confidence: 87 },
-  { month: 'Jun', historical: 7800, forecast: 8500, confidence: 92 },
-  { month: 'Jul', forecast: 9200, confidence: 89 },
-  { month: 'Aug', forecast: 8800, confidence: 86 },
-  { month: 'Sep', forecast: 7500, confidence: 83 },
-  { month: 'Oct', forecast: 7000, confidence: 85 },
-  { month: 'Nov', forecast: 6200, confidence: 81 },
-  { month: 'Dec', forecast: 7400, confidence: 84 }
-]
+// Real forecast data will be loaded from API
 
-const marketComparisonData = [
-  { metric: 'Average Daily Rate', myProperty: 145, marketAverage: 138, percentile: 68 },
-  { metric: 'Occupancy Rate', myProperty: 73, marketAverage: 69, percentile: 72 },
-  { metric: 'RevPAR', myProperty: 106, marketAverage: 95, percentile: 78 },
-  { metric: 'Guest Rating', myProperty: 4.8, marketAverage: 4.5, percentile: 85 }
-]
-
-const pricingOptimizationData = [
-  { date: 'Mon 15', current: 120, suggested: 135, demand: 'High', events: ['Conference'] },
-  { date: 'Tue 16', current: 120, suggested: 110, demand: 'Low', events: [] },
-  { date: 'Wed 17', current: 120, suggested: 145, demand: 'Very High', events: ['Concert', 'Trade Show'] },
-  { date: 'Thu 18', current: 120, suggested: 125, demand: 'Medium', events: [] },
-  { date: 'Fri 19', current: 150, suggested: 165, demand: 'High', events: ['Weekend'] },
-  { date: 'Sat 20', current: 180, suggested: 195, demand: 'Very High', events: ['Weekend', 'Festival'] },
-  { date: 'Sun 21', current: 160, suggested: 145, demand: 'Medium', events: ['Weekend'] }
-]
-
-const competitorAnalysis = [
-  { name: 'Luxury Downtown Loft', distance: 0.3, rate: 165, rating: 4.9, bookings: 85 },
-  { name: 'Modern City Apartment', distance: 0.5, rate: 125, rating: 4.7, bookings: 78 },
-  { name: 'Executive Suite', distance: 0.8, rate: 195, rating: 4.8, bookings: 72 },
-  { name: 'Urban Retreat', distance: 1.2, rate: 110, rating: 4.6, bookings: 68 }
-]
-
-const demandPatternsData = [
-  { hour: '00', weekday: 2, weekend: 5 },
-  { hour: '06', weekday: 8, weekend: 12 },
-  { hour: '12', weekday: 25, weekend: 35 },
-  { hour: '18', weekday: 45, weekend: 65 },
-  { hour: '21', weekday: 35, weekend: 55 }
-]
-
-const insightsData = [
-  {
-    type: 'opportunity',
-    title: 'Pricing Opportunity',
-    description: 'You could increase revenue by 15% by adjusting weekend rates',
-    impact: 'High',
-    effort: 'Low',
-    icon: TrendingUp
-  },
-  {
-    type: 'warning',
-    title: 'Low Midweek Occupancy',
-    description: 'Consider offering weekday discounts or targeting business travelers',
-    impact: 'Medium',
-    effort: 'Medium',
-    icon: AlertTriangle
-  },
-  {
-    type: 'success',
-    title: 'Strong Performance',
-    description: 'Your properties are outperforming market average by 12%',
-    impact: 'High',
-    effort: 'None',
-    icon: CheckCircle
-  }
-]
+// All market data will be loaded from real Dubai market API
 
 export function AnalyticsDashboard() {
   const { getAnalytics } = useApp()
   const [analyticsData, setAnalyticsData] = useState<any>(null)
   const [selectedPeriod, setSelectedPeriod] = useState("12months")
   const [loading, setLoading] = useState(true)
+  const [marketInsights, setMarketInsights] = useState<any>(null)
+  const [forecastData, setForecastData] = useState<any>(null)
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -99,6 +30,14 @@ export function AnalyticsDashboard() {
         const data = await getAnalytics()
         console.log('Analytics data received:', data)
         setAnalyticsData(data)
+        
+        // Extract market insights and forecast from the analytics data
+        if (data.market_insights) {
+          setMarketInsights(data.market_insights)
+        }
+        if (data.forecast) {
+          setForecastData(data.forecast)
+        }
       } catch (error) {
         console.error('Failed to load analytics:', error)
         console.error('Error details:', error.message, error.status)
@@ -344,71 +283,71 @@ export function AnalyticsDashboard() {
           <div className="grid gap-4 md:grid-cols-3">
             <Card className="md:col-span-2">
               <CardHeader>
-                <CardTitle>Revenue Forecast</CardTitle>
-                <CardDescription>AI-powered 6-month revenue prediction with confidence intervals</CardDescription>
+                <CardTitle>Dubai Market Forecast</CardTitle>
+                <CardDescription>Real Dubai seasonal patterns and revenue predictions</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
-                  <AreaChart data={forecastData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="month" />
-                    <YAxis />
-                    <Tooltip />
-                    <Area 
-                      type="monotone" 
-                      dataKey="historical" 
-                      stackId="1"
-                      stroke="#2563eb" 
-                      fill="#2563eb"
-                      fillOpacity={0.6}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="forecast" 
-                      stackId="2"
-                      stroke="#10b981" 
-                      fill="#10b981"
-                      fillOpacity={0.3}
-                      strokeDasharray="5 5"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
+                {forecastData?.forecast_data ? (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <AreaChart data={forecastData.forecast_data}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="month" />
+                      <YAxis />
+                      <Tooltip formatter={(value, name) => [`AED ${value}`, 'Forecasted Revenue']} />
+                      <Area 
+                        type="monotone" 
+                        dataKey="forecasted_revenue" 
+                        stroke="#10b981" 
+                        fill="#10b981"
+                        fillOpacity={0.3}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-[300px] flex items-center justify-center text-muted-foreground">
+                    Loading forecast data...
+                  </div>
+                )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Forecast Insights</CardTitle>
-                <CardDescription>Key predictions and recommendations</CardDescription>
+                <CardTitle>Dubai Market Insights</CardTitle>
+                <CardDescription>Real market predictions and seasonal trends</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <h4 className="font-medium">Next Quarter Forecast</h4>
-                  <div className="text-2xl font-bold text-green-600">$24,500</div>
-                  <div className="text-sm text-muted-foreground">+15% vs last quarter</div>
+                  <div className="text-2xl font-bold text-green-600">
+                    AED {forecastData?.next_quarter_revenue?.toLocaleString() || '0'}
+                  </div>
+                  <div className="text-sm text-muted-foreground">Based on Dubai seasonality</div>
                 </div>
 
                 <div className="space-y-2">
                   <h4 className="font-medium">Confidence Level</h4>
                   <div className="flex items-center gap-2">
-                    <Progress value={87} className="flex-1" />
-                    <span className="text-sm font-medium">87%</span>
+                    <Progress value={forecastData?.confidence || 0} className="flex-1" />
+                    <span className="text-sm font-medium">{forecastData?.confidence || 0}%</span>
                   </div>
                 </div>
 
                 <div className="space-y-2">
                   <h4 className="font-medium">Peak Period</h4>
                   <div className="text-sm">
-                    <strong>July 2024</strong> - Expected $9,200 revenue
+                    <strong>{forecastData?.peak_period || 'Winter Season'}</strong>
                   </div>
                 </div>
 
-                <Alert>
-                  <Target className="h-4 w-4" />
-                  <AlertDescription>
-                    Book early for summer season to maximize forecast accuracy.
-                  </AlertDescription>
-                </Alert>
+                {forecastData?.insights && (
+                  <Alert>
+                    <Target className="h-4 w-4" />
+                    <AlertDescription>
+                      {forecastData.insights.seasonal_impact}
+                    </AlertDescription>
+                  </Alert>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -418,63 +357,76 @@ export function AnalyticsDashboard() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Market Benchmarking</CardTitle>
-                <CardDescription>Compare your performance against local market averages</CardDescription>
+                <CardTitle>Dubai Market Performance</CardTitle>
+                <CardDescription>Your performance vs Dubai market standards</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {marketComparisonData.map((item) => (
-                    <div key={item.metric} className="space-y-2">
+                {marketInsights ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm font-medium">{item.metric}</span>
-                        <Badge variant={item.percentile > 70 ? "default" : "secondary"}>
-                          {item.percentile}th percentile
+                        <span className="text-sm font-medium">Market Position</span>
+                        <Badge variant={marketInsights.competitive_position <= 3 ? "default" : "secondary"}>
+                          #{marketInsights.competitive_position} in area
                         </Badge>
                       </div>
                       <div className="flex justify-between text-sm">
-                        <span>Your Property: {item.myProperty}</span>
-                        <span className="text-muted-foreground">Market Avg: {item.marketAverage}</span>
+                        <span>Your Performance: {marketInsights.performance_vs_market}%</span>
+                        <span className="text-muted-foreground">vs Market Average</span>
                       </div>
-                      <Progress value={item.percentile} className="h-2" />
                     </div>
-                  ))}
-                </div>
+
+                    {marketInsights.area_insights && (
+                      <div className="space-y-2">
+                        <h4 className="font-medium">Area: {marketInsights.area_insights.area}</h4>
+                        <div className="text-sm text-muted-foreground">
+                          <p>Tier: {marketInsights.area_insights.tier}</p>
+                          <p>Primary Demand: {marketInsights.area_insights.primary_demand}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-muted-foreground">Loading market data...</div>
+                )}
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Market Trends</CardTitle>
-                <CardDescription>Local market insights and seasonality</CardDescription>
+                <CardTitle>Dubai Seasonal Trends</CardTitle>
+                <CardDescription>Real Dubai seasonal demand patterns</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <h4 className="font-medium">Market Health Score</h4>
                   <div className="flex items-center gap-2">
-                    <div className="text-2xl font-bold text-green-600">82</div>
+                    <div className="text-2xl font-bold text-green-600">
+                      {marketInsights?.market_health_score || 0}
+                    </div>
                     <div className="text-sm text-muted-foreground">/ 100</div>
                   </div>
-                  <Progress value={82} className="h-2" />
+                  <Progress value={marketInsights?.market_health_score || 0} className="h-2" />
                 </div>
 
                 <div className="space-y-2">
-                  <h4 className="font-medium">Seasonal Demand</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
+                  <h4 className="font-medium">Dubai Seasonal Demand</h4>
+                  <div className="grid grid-cols-1 gap-2 text-sm">
                     <div className="flex justify-between">
-                      <span>Spring</span>
-                      <span className="font-medium">High</span>
+                      <span>Winter Peak (Dec-Feb)</span>
+                      <span className="font-medium text-green-600">+50%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Summer</span>
-                      <span className="font-medium">Peak</span>
+                      <span>Winter High (Mar, Nov)</span>
+                      <span className="font-medium text-blue-600">+30%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Fall</span>
-                      <span className="font-medium">Medium</span>
+                      <span>Shoulder (Apr, Oct)</span>
+                      <span className="font-medium">Normal</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Winter</span>
-                      <span className="font-medium">Low</span>
+                      <span>Summer Low (May-Sep)</span>
+                      <span className="font-medium text-red-600">-30%</span>
                     </div>
                   </div>
                 </div>
@@ -482,7 +434,7 @@ export function AnalyticsDashboard() {
                 <Alert>
                   <TrendingUp className="h-4 w-4" />
                   <AlertDescription>
-                    Market demand is 23% higher than last year for your area.
+                    Dubai winter season (Dec-Mar) offers premium pricing opportunities with 40-50% higher demand.
                   </AlertDescription>
                 </Alert>
               </CardContent>

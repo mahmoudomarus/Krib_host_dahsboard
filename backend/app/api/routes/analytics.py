@@ -10,8 +10,121 @@ from decimal import Decimal
 from app.models.schemas import AnalyticsResponse
 from app.core.supabase_client import supabase_client
 from app.api.dependencies import get_current_user
+from app.services.dubai_market_service import dubai_market_service, DubaiArea
 
 router = APIRouter()
+
+
+@router.get("/pricing-calendar/{property_id}")
+async def get_pricing_calendar(
+    property_id: str,
+    days_ahead: int = 30,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get dynamic pricing calendar for a specific property"""
+    try:
+        # Get property details
+        property_result = supabase_client.table("properties").select("*").eq("id", property_id).eq("user_id", current_user["id"]).execute()
+        
+        if not property_result.data:
+            raise HTTPException(status_code=404, detail="Property not found")
+        
+        property_data = property_result.data[0]
+        
+        # Extract area from property location
+        area = "jlt"  # Default
+        address = property_data.get("address", "").lower()
+        city = property_data.get("city", "").lower()
+        
+        if "marina" in address or "marina" in city:
+            area = "marina"
+        elif "downtown" in address or "downtown" in city:
+            area = "downtown"
+        elif "business bay" in address or "business bay" in city:
+            area = "business_bay"
+        elif "jbr" in address or "jumeirah beach" in address:
+            area = "jbr"
+        elif "palm" in address:
+            area = "palm_jumeirah"
+        
+        # Generate pricing calendar
+        pricing_calendar = dubai_market_service.generate_pricing_calendar(
+            base_rate=float(property_data.get("price_per_night", 100)),
+            area=area,
+            days_ahead=days_ahead,
+            property_type=property_data.get("property_type", "apartment"),
+            bedrooms=property_data.get("bedrooms", 1)
+        )
+        
+        return {
+            "property_id": property_id,
+            "area": area,
+            "base_rate": property_data.get("price_per_night"),
+            "pricing_calendar": pricing_calendar
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to generate pricing calendar: {str(e)}"
+        )
+
+
+@router.get("/market-comparison/{property_id}")
+async def get_market_comparison(
+    property_id: str,
+    current_user: dict = Depends(get_current_user)
+):
+    """Get market comparison and benchmarks for a property"""
+    try:
+        # Get property details
+        property_result = supabase_client.table("properties").select("*").eq("id", property_id).eq("user_id", current_user["id"]).execute()
+        
+        if not property_result.data:
+            raise HTTPException(status_code=404, detail="Property not found")
+        
+        property_data = property_result.data[0]
+        
+        # Extract area from property location
+        area = "jlt"  # Default
+        address = property_data.get("address", "").lower()
+        
+        if "marina" in address:
+            area = "marina"
+        elif "downtown" in address:
+            area = "downtown"
+        elif "business bay" in address:
+            area = "business_bay"
+        
+        # Get market benchmarks
+        benchmarks = dubai_market_service.get_market_benchmarks(
+            area=area,
+            property_type=property_data.get("property_type", "apartment")
+        )
+        
+        # Compare with user's property
+        user_rate = float(property_data.get("price_per_night", 0))
+        market_rate = benchmarks["market_metrics"]["average_daily_rate"]
+        
+        comparison = {
+            "user_rate": user_rate,
+            "market_rate": market_rate,
+            "variance_percent": round(((user_rate - market_rate) / market_rate * 100), 1) if market_rate > 0 else 0,
+            "position": "Above Market" if user_rate > market_rate else "Below Market" if user_rate < market_rate else "At Market"
+        }
+        
+        return {
+            "property_id": property_id,
+            "area": area,
+            "benchmarks": benchmarks,
+            "comparison": comparison
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get market comparison: {str(e)}"
+        )
 
 
 @router.get("/", response_model=AnalyticsResponse)
@@ -47,11 +160,11 @@ async def get_analytics(
         # Generate property performance data
         property_performance = _generate_property_performance(properties, bookings)
         
-        # Generate market insights (simulated for now)
-        market_insights = _generate_market_insights(properties, bookings)
+        # Generate real Dubai market insights
+        market_insights = _generate_dubai_market_insights(properties, bookings)
         
-        # Generate forecast
-        forecast = _generate_forecast(monthly_data, total_revenue)
+        # Generate real forecast using Dubai market data
+        forecast = _generate_dubai_forecast(properties, total_revenue)
         
         # Generate recommendations
         recommendations = _generate_recommendations(properties, bookings, total_revenue)
@@ -297,48 +410,95 @@ def _generate_property_performance(properties: List[Dict], bookings: List[Dict])
     return performance_data[:5]  # Top 5 properties
 
 
-def _generate_market_insights(properties: List[Dict], bookings: List[Dict]) -> Dict[str, Any]:
-    """Generate market insights (simulated for now)"""
+def _generate_dubai_market_insights(properties: List[Dict], bookings: List[Dict]) -> Dict[str, Any]:
+    """Generate real Dubai market insights"""
     total_revenue = sum(float(b["total_amount"]) for b in bookings if b["status"] in ["confirmed", "completed"])
     
-    # Simulated market health score based on performance
-    market_health = min(100, max(0, 60 + len(bookings) * 2))
+    # Get primary area for market analysis (use first property or default to JLT)
+    primary_area = "jlt"  # Default
+    if properties:
+        # Extract area from address or use default mapping
+        first_property = properties[0]
+        address = first_property.get("address", "").lower()
+        city = first_property.get("city", "").lower()
+        
+        # Simple area detection based on address/city
+        if "marina" in address or "marina" in city:
+            primary_area = "marina"
+        elif "downtown" in address or "downtown" in city:
+            primary_area = "downtown"
+        elif "business bay" in address or "business bay" in city:
+            primary_area = "business_bay"
+        elif "jbr" in address or "jumeirah beach" in address:
+            primary_area = "jbr"
+        elif "palm" in address:
+            primary_area = "palm_jumeirah"
+    
+    # Get real market benchmarks for the area
+    benchmarks = dubai_market_service.get_market_benchmarks(primary_area)
+    
+    # Calculate relative performance
+    avg_booking_value = total_revenue / max(len(bookings), 1) if bookings else 0
+    market_adr = benchmarks["market_metrics"]["average_daily_rate"]
+    performance_vs_market = (avg_booking_value / market_adr * 100) if market_adr > 0 else 100
     
     return {
-        "market_health_score": market_health,
-        "competitive_position": 2 if total_revenue > 5000 else 4,  # Simplified ranking
+        "market_health_score": benchmarks["market_metrics"]["market_health_score"],
+        "competitive_position": 2 if performance_vs_market > 110 else 3 if performance_vs_market > 90 else 4,
+        "area_insights": benchmarks["area_insights"],
+        "performance_vs_market": round(performance_vs_market, 1),
         "seasonal_trends": {
-            "spring": "High",
-            "summer": "Peak",
-            "fall": "Medium", 
-            "winter": "Low"
+            "winter_peak": "Dec-Feb: 50% premium demand",
+            "winter_high": "Mar, Nov: 30% premium demand", 
+            "shoulder": "Apr, Oct: Normal demand",
+            "summer_low": "May-Sep: 30% discount needed"
         },
         "demand_patterns": [
-            {"hour": "00", "weekday": 2, "weekend": 5},
-            {"hour": "06", "weekday": 8, "weekend": 12},
-            {"hour": "12", "weekday": 25, "weekend": 35},
-            {"hour": "18", "weekday": 45, "weekend": 65},
-            {"hour": "21", "weekday": 35, "weekend": 55}
-        ]
+            {"period": "Winter Peak", "multiplier": 1.5, "months": "Dec-Feb"},
+            {"period": "Winter High", "multiplier": 1.3, "months": "Mar, Nov"},
+            {"period": "Shoulder", "multiplier": 1.0, "months": "Apr, Oct"},
+            {"period": "Summer Low", "multiplier": 0.7, "months": "May-Sep"}
+        ],
+        "area_recommendations": benchmarks["recommendations"]
     }
 
 
-def _generate_forecast(monthly_data: List[Dict], total_revenue: float) -> Dict[str, Any]:
-    """Generate revenue forecast"""
-    if not monthly_data:
-        return {"next_quarter_revenue": 0, "confidence": 0, "peak_period": None}
+def _generate_dubai_forecast(properties: List[Dict], total_revenue: float) -> Dict[str, Any]:
+    """Generate real Dubai market forecast"""
+    # Get comprehensive Dubai market forecast
+    market_forecast = dubai_market_service.get_market_forecast(12)
     
-    # Simple forecast based on recent trends
-    recent_avg = sum(month["revenue"] for month in monthly_data[-3:]) / 3 if len(monthly_data) >= 3 else 0
-    growth_rate = 1.1  # Assume 10% growth
+    # Calculate user's baseline performance
+    user_monthly_baseline = total_revenue / 12 if total_revenue > 0 else 1000
     
-    next_quarter_revenue = recent_avg * 3 * growth_rate
-    confidence = 85 if total_revenue > 1000 else 65
+    # Apply market forecast to user's baseline
+    forecasted_months = []
+    for month_data in market_forecast["forecast_data"]:
+        user_forecasted_revenue = user_monthly_baseline * month_data["seasonal_multiplier"]
+        forecasted_months.append({
+            "month": month_data["month_short"],
+            "forecasted_revenue": round(user_forecasted_revenue, 2),
+            "confidence": month_data["confidence"],
+            "season": month_data["season"],
+            "market_multiplier": month_data["seasonal_multiplier"]
+        })
+    
+    # Calculate next quarter (next 3 months)
+    next_quarter_revenue = sum(m["forecasted_revenue"] for m in forecasted_months[:3])
+    avg_confidence = sum(m["confidence"] for m in forecasted_months[:3]) / 3
+    
+    peak_month = market_forecast["insights"]["peak_month"]
     
     return {
         "next_quarter_revenue": round(next_quarter_revenue, 2),
-        "confidence": confidence,
-        "peak_period": "Summer 2024"
+        "confidence": round(avg_confidence, 1),
+        "peak_period": f"{peak_month['month']} (${peak_month['forecasted_revenue']:.0f} expected)",
+        "forecast_data": forecasted_months,
+        "insights": {
+            "seasonal_impact": "Dubai winter season (Dec-Mar) shows 40-50% higher demand",
+            "summer_strategy": "May-Sep requires 20-30% discount to maintain occupancy",
+            "event_opportunities": "F1 Grand Prix, Shopping Festival provide surge pricing opportunities"
+        }
     }
 
 
