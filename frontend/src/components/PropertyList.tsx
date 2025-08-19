@@ -1,12 +1,11 @@
 import { useState, useEffect } from "react"
-import { Search, Filter, MoreHorizontal, Edit, Eye, Trash2, MapPin, Star, DollarSign, Building2, ExternalLink } from "lucide-react"
+import { Search, Filter, Edit, Eye, Trash2, MapPin, Star, Building2 } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Textarea } from "./ui/textarea"
 import { Label } from "./ui/label"
 import { ImageWithFallback } from "./figma/ImageWithFallback"
@@ -122,97 +121,117 @@ export function PropertyList() {
         </Select>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="space-y-4">
         {filteredProperties.map((property) => (
-          <Card key={property.id} className="overflow-hidden property-card">
-            <div className="aspect-[3/2] relative">
-              <ImageWithFallback
-                src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 
-                  ? property.images[0] 
-                  : "/placeholder-property.jpg"}
-                alt={property.title}
-                className="object-cover w-full h-full rounded-t-lg"
-              />
-              <Badge className={`absolute top-2 right-2 ${getStatusColor(property.status)}`}>
-                {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-              </Badge>
-              {property.images && property.images[0] && property.images[0].startsWith('blob:') && (
-                <div className="absolute bottom-2 left-2 bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
-                  Image Upload Issue
-                </div>
-              )}
-            </div>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1 min-w-0">
-                  <CardTitle className="leading-tight truncate">{property.title}</CardTitle>
-                  <CardDescription className="flex items-center mt-1">
-                    <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                    <span className="truncate">{property.city}, {property.state}</span>
-                  </CardDescription>
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-6 w-6 p-0">
-                      <MoreHorizontal className="h-3 w-3" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => handleViewProperty(property)}>
-                      <Eye className="h-4 w-4 mr-2" />
-                      View Details
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleEditProperty(property)}>
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Property
-                    </DropdownMenuItem>
-                    <DropdownMenuItem 
-                      className="text-red-600"
-                      onClick={() => handleDeleteProperty(property.id)}
-                    >
-                      <Trash2 className="h-4 w-4 mr-2" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-0">
-              <div className="space-y-2">
-                <p className="text-muted-foreground text-sm">
-                  {property.bedrooms}bd • {property.bathrooms}ba • {property.max_guests} guests
-                </p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-baseline">
-                    <span className="font-bold text-green-600">${property.price_per_night}</span>
-                    <span className="text-muted-foreground ml-1">/night</span>
+          <Card key={property.id} className="p-6">
+            <div className="flex items-center gap-6">
+              {/* Property Image */}
+              <div className="w-32 h-24 relative flex-shrink-0">
+                <ImageWithFallback
+                  src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 
+                    ? property.images[0] 
+                    : "/placeholder-property.jpg"}
+                  alt={property.title}
+                  className="object-cover w-full h-full rounded-lg"
+                />
+                {property.images && property.images[0] && property.images[0].startsWith('blob:') && (
+                  <div className="absolute bottom-1 left-1 bg-yellow-100 text-yellow-800 text-xs px-1 py-0.5 rounded text-[10px]">
+                    Image Issue
                   </div>
-                  {property.rating && (
-                    <div className="flex items-center">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                      <span className="ml-1 font-medium">{property.rating}</span>
+                )}
+              </div>
+
+              {/* Property Info */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-3 mb-2">
+                      <h3 className="font-semibold text-lg truncate">{property.title}</h3>
+                      <Badge className={getStatusColor(property.status)}>
+                        {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                      </Badge>
                     </div>
-                  )}
+                    
+                    <div className="flex items-center text-muted-foreground mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span className="text-sm">{property.city}, {property.state}</span>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
+                      <span>{property.bedrooms} bed</span>
+                      <span>{property.bathrooms} bath</span>
+                      <span>{property.max_guests} guests</span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-baseline">
+                        <span className="font-bold text-lg text-green-600">${property.price_per_night}</span>
+                        <span className="text-muted-foreground text-sm ml-1">/night</span>
+                      </div>
+                      {property.rating && (
+                        <div className="flex items-center">
+                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="ml-1 text-sm font-medium">{property.rating}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 ml-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewProperty(property)}
+                      className="h-8"
+                    >
+                      <Eye className="h-4 w-4 mr-1" />
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditProperty(property)}
+                      className="h-8"
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteProperty(property.id)}
+                      className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <Trash2 className="h-4 w-4 mr-1" />
+                      Delete
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </CardContent>
+            </div>
           </Card>
         ))}
       </div>
 
       {filteredProperties.length === 0 && (
-        <div className="text-center py-12">
-          <Building2 className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-          <h3 className="text-lg font-medium mb-2">No properties found</h3>
-          <p className="text-muted-foreground mb-4">
-            {properties.length === 0 
-              ? "You haven't created any properties yet. Get started by adding your first property!" 
-              : "Try adjusting your search or filter criteria."}
-          </p>
-          {properties.length === 0 && (
-            <Button>Add Your First Property</Button>
-          )}
-        </div>
+        <Card className="p-12">
+          <div className="text-center">
+            <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
+            <h3 className="text-xl font-semibold mb-3">No properties found</h3>
+            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+              {properties.length === 0 
+                ? "You haven't created any properties yet. Get started by adding your first property to begin managing your rentals!" 
+                : "Try adjusting your search terms or filter criteria to find the properties you're looking for."}
+            </p>
+            {properties.length === 0 && (
+              <Button size="lg" className="bg-primary hover:bg-primary/90">
+                <Building2 className="h-5 w-5 mr-2" />
+                Add Your First Property
+              </Button>
+            )}
+          </div>
+        </Card>
       )}
 
       {/* View Property Modal */}
