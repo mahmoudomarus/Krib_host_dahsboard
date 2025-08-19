@@ -30,8 +30,11 @@ const supabase = createClient(
 // Initialize storage on startup
 initializeStorage();
 
-// Create demo user for testing
+// Create demo user for testing (DISABLED for production)
 async function createDemoUser() {
+  // PRODUCTION: Demo user creation disabled
+  console.log("Demo user creation is disabled in production");
+  return;
   try {
     // Check if demo user already exists in Supabase Auth
     const { data: existingUsers } =
@@ -227,8 +230,8 @@ async function createDemoUser() {
   }
 }
 
-// Initialize demo user
-createDemoUser();
+// Initialize demo user (DISABLED for production)
+// createDemoUser();
 
 // Enhanced error handler
 function handleError(error: any, context: string) {
