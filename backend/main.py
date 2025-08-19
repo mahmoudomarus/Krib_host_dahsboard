@@ -16,19 +16,39 @@ load_dotenv()
 # Import our modules
 from app.core.config import settings
 from app.core.database import init_db
+from app.core.redis_client import redis_client
+from app.core.monitoring import init_sentry, metrics_middleware, metrics_endpoint, health_check_with_metrics
+from app.core.rate_limiter import limiter, custom_rate_limit_handler
 from app.api.routes import auth, properties, bookings, analytics, upload, financials
 from app.core.supabase_client import supabase_client
+from slowapi.errors import RateLimitExceeded
 
 # Initialize FastAPI app
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     print("🚀 Starting Krib AI Backend...")
+    
+    # Initialize Sentry error tracking
+    init_sentry()
+    print("✅ Sentry error tracking initialized")
+    
     await init_db()
     print("✅ Database initialized")
+    
+    # Initialize Redis
+    await redis_client.connect()
+    if redis_client.is_connected:
+        print("✅ Redis cache connected")
+    else:
+        print("⚠️ Redis cache unavailable - running without cache")
+    
     yield
+    
     # Shutdown
     print("🛑 Shutting down Krib AI Backend...")
+    await redis_client.disconnect()
+    print("✅ Redis connection closed")
 
 app = FastAPI(
     title="Krib AI API",
@@ -37,7 +57,8 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS Configuration
+# Middleware Configuration
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000", "http://localhost:5173", "*"],  # Add your frontend URLs
@@ -45,6 +66,13 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Metrics and monitoring
+app.middleware("http")(metrics_middleware)
+
+# Rate Limiting
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, custom_rate_limit_handler)
 
 # Security
 security = HTTPBearer()
@@ -67,20 +95,13 @@ async def root():
 
 @app.get("/health")
 async def health_check():
-    try:
-        # Test Supabase connection
-        response = supabase_client.table("users").select("count").execute()
-        return {
-            "status": "healthy",
-            "database": "connected",
-            "timestamp": "2024-01-01T00:00:00Z"
-        }
-    except Exception as e:
-        return {
-            "status": "unhealthy",
-            "database": "disconnected",
-            "error": str(e)
-        }
+    """Enhanced health check with monitoring"""
+    return await health_check_with_metrics()
+
+@app.get("/metrics")
+async def get_metrics():
+    """Prometheus metrics endpoint"""
+    return await metrics_endpoint()
 
 if __name__ == "__main__":
     import uvicorn

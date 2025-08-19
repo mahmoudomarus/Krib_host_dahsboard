@@ -10,6 +10,8 @@ from decimal import Decimal
 from app.models.schemas import AnalyticsResponse
 from app.core.supabase_client import supabase_client
 from app.api.dependencies import get_current_user
+from app.services.cache_service import cache_service
+from app.core.monitoring import metrics
 from app.services.dubai_market_service import dubai_market_service, DubaiArea
 
 router = APIRouter()
@@ -133,6 +135,16 @@ async def get_analytics(
     current_user: dict = Depends(get_current_user)
 ):
     """Get comprehensive analytics for user's properties"""
+    user_id = current_user["id"]
+    
+    # Try to get from cache first
+    cached_analytics = await cache_service.get_analytics_data(user_id, period)
+    if cached_analytics:
+        metrics.record_cache_hit("analytics")
+        return AnalyticsResponse(**cached_analytics)
+    
+    metrics.record_cache_miss("analytics")
+    
     try:
         # Get user's properties
         properties_result = supabase_client.table("properties").select("*").eq("user_id", current_user["id"]).execute()
@@ -176,7 +188,7 @@ async def get_analytics(
         # Generate recommendations
         recommendations = _generate_recommendations(properties, bookings, total_revenue)
         
-        return AnalyticsResponse(
+        analytics_response = AnalyticsResponse(
             total_revenue=total_revenue,
             total_bookings=total_bookings,
             total_properties=total_properties,
@@ -191,6 +203,11 @@ async def get_analytics(
             forecast=forecast,
             recommendations=recommendations
         )
+        
+        # Cache the results
+        await cache_service.cache_analytics_data(user_id, period, analytics_response.dict())
+        
+        return analytics_response
         
     except Exception as e:
         raise HTTPException(

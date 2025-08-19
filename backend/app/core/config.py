@@ -37,6 +37,15 @@ class Settings(BaseSettings):
     # Redis
     redis_url: str = "redis://localhost:6379"
     
+    # Monitoring and Observability
+    sentry_dsn: Optional[str] = None
+    enable_metrics: bool = True
+    log_level: str = "INFO"
+    
+    # Rate Limiting
+    enable_rate_limiting: bool = True
+    default_rate_limit: str = "1000/hour"
+    
     # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000

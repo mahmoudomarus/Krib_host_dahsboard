@@ -33,3 +33,11 @@ services:
         generateValue: true
       - key: JWT_SECRET_KEY
         generateValue: true
+      - key: REDIS_URL
+        fromSecret: true
+      - key: SENTRY_DSN
+        fromSecret: true
+      - key: ENABLE_METRICS
+        value: "True"
+      - key: ENABLE_RATE_LIMITING
+        value: "True"
