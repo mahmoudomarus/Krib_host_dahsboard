@@ -16,8 +16,8 @@ export function AuthForm() {
   
   // Sign In Form State
   const [signInData, setSignInData] = useState({
-    email: "demo@kribai.com",
-    password: "demo123"
+    email: "",
+    password: ""
   })
   
   // Sign Up Form State
@@ -108,7 +108,7 @@ export function AuthForm() {
               <Bot className="h-7 w-7" />
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to RentalAI</CardTitle>
+          <CardTitle className="text-2xl">Welcome to Krib AI</CardTitle>
           <CardDescription>
             Manage your rental properties with AI assistance
           </CardDescription>
@@ -299,11 +299,7 @@ export function AuthForm() {
             </TabsContent>
           </Tabs>
           
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            <p>Demo credentials for testing:</p>
-            <p>Email: demo@rentalai.com</p>
-            <p>Password: demo123</p>
-          </div>
+
 
           {/* Google OAuth Setup Instructions - Show if error mentions configuration */}
           {error.includes('Google authentication needs to be configured') && (
