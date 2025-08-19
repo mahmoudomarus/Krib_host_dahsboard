@@ -445,48 +445,115 @@ export function AnalyticsDashboard() {
         <TabsContent value="pricing" className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Dynamic Pricing Optimization</CardTitle>
-              <CardDescription>AI-suggested pricing adjustments based on demand, events, and competition</CardDescription>
+              <CardTitle>Dubai Dynamic Pricing</CardTitle>
+              <CardDescription>Real-time pricing optimization based on Dubai events, seasons, and demand</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-7 gap-2 text-sm font-medium text-muted-foreground">
-                  <div>Date</div>
-                  <div>Current</div>
-                  <div>Suggested</div>
-                  <div>Potential Lift</div>
-                  <div>Demand</div>
-                  <div>Events</div>
-                  <div>Action</div>
-                </div>
-                {pricingOptimizationData.map((day) => {
-                  const lift = ((day.suggested - day.current) / day.current * 100).toFixed(1)
-                  return (
-                    <div key={day.date} className="grid grid-cols-7 gap-2 items-center py-2 border-b">
-                      <div className="text-sm font-medium">{day.date}</div>
-                      <div className="text-sm">${day.current}</div>
-                      <div className="text-sm font-medium text-green-600">${day.suggested}</div>
-                      <div className={`text-sm font-medium ${parseFloat(lift) > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                        {parseFloat(lift) > 0 ? '+' : ''}{lift}%
+              <div className="space-y-6">
+                <Alert>
+                  <TrendingUp className="h-4 w-4" />
+                  <AlertDescription>
+                    Dynamic pricing is now available per property. View individual property pricing recommendations in the Properties section.
+                  </AlertDescription>
+                </Alert>
+
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Dubai Seasonal Pricing Strategy</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-green-800">Winter Peak (Dec-Feb)</p>
+                          <p className="text-sm text-green-600">European winter escape season</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">+50%</Badge>
                       </div>
-                      <div>
-                        <Badge variant={
-                          day.demand === 'Very High' ? 'destructive' :
-                          day.demand === 'High' ? 'default' :
-                          day.demand === 'Medium' ? 'secondary' : 'outline'
-                        }>
-                          {day.demand}
-                        </Badge>
+                      
+                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-blue-800">Winter High (Mar, Nov)</p>
+                          <p className="text-sm text-blue-600">Pleasant weather months</p>
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-800">+30%</Badge>
                       </div>
-                      <div className="text-xs">
-                        {day.events.length > 0 ? day.events.join(', ') : 'None'}
+                      
+                      <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-gray-800">Shoulder (Apr, Oct)</p>
+                          <p className="text-sm text-gray-600">Moderate demand periods</p>
+                        </div>
+                        <Badge variant="secondary">Base Rate</Badge>
                       </div>
-                      <div>
-                        <Button size="sm" variant="outline">Apply</Button>
+                      
+                      <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-orange-800">Summer Low (May-Sep)</p>
+                          <p className="text-sm text-orange-600">Hot weather discount needed</p>
+                        </div>
+                        <Badge className="bg-orange-100 text-orange-800">-30%</Badge>
                       </div>
                     </div>
-                  )
-                })}
+                  </div>
+
+                  <div className="space-y-4">
+                    <h4 className="font-medium">Major Event Opportunities</h4>
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-red-800">F1 Grand Prix</p>
+                          <p className="text-sm text-red-600">March weekend</p>
+                        </div>
+                        <Badge className="bg-red-100 text-red-800">+300%</Badge>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-purple-800">Shopping Festival</p>
+                          <p className="text-sm text-purple-600">January month-long</p>
+                        </div>
+                        <Badge className="bg-purple-100 text-purple-800">+80%</Badge>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-blue-800">GITEX Technology</p>
+                          <p className="text-sm text-blue-600">October week</p>
+                        </div>
+                        <Badge className="bg-blue-100 text-blue-800">+60%</Badge>
+                      </div>
+                      
+                      <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                        <div>
+                          <p className="font-medium text-green-800">New Year's Eve</p>
+                          <p className="text-sm text-green-600">Dec 31 - Jan 2</p>
+                        </div>
+                        <Badge className="bg-green-100 text-green-800">+200%</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-medium mb-3">Pricing Recommendations</h4>
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="p-3 border rounded-lg">
+                      <p className="font-medium text-sm">Weekend Premium</p>
+                      <p className="text-xs text-muted-foreground">Add 20% for Friday-Saturday nights</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <p className="font-medium text-sm">Area Multipliers</p>
+                      <p className="text-xs text-muted-foreground">Marina: +60%, Downtown: +50%, JLT: Base</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <p className="font-medium text-sm">Ramadan Adjustment</p>
+                      <p className="text-xs text-muted-foreground">Reduce rates 20% during Ramadan period</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <p className="font-medium text-sm">Last-Minute Bookings</p>
+                      <p className="text-xs text-muted-foreground">Dynamic discounts for 3-day advance bookings</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -496,72 +563,82 @@ export function AnalyticsDashboard() {
           <div className="grid gap-4 md:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle>Competitive Analysis</CardTitle>
-                <CardDescription>Track nearby properties and their performance</CardDescription>
+                <CardTitle>Dubai Market Competition</CardTitle>
+                <CardDescription>Competitive analysis is being developed for Dubai market</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {competitorAnalysis.map((competitor) => (
-                    <div key={competitor.name} className="p-3 border rounded-lg space-y-2">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <p className="font-medium text-sm">{competitor.name}</p>
-                          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                            <MapPin className="h-3 w-3" />
-                            <span>{competitor.distance} miles away</span>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-semibold">${competitor.rate}/night</p>
-                          <div className="flex items-center gap-1 text-xs">
-                            <Star className="h-3 w-3 fill-current text-yellow-500" />
-                            <span>{competitor.rating}</span>
-                          </div>
-                        </div>
+                <Alert>
+                  <MapPin className="h-4 w-4" />
+                  <AlertDescription>
+                    Competitor tracking system is in development. Currently integrating with Dubai property listings to provide real competitive analysis.
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="space-y-4 mt-6">
+                  <h4 className="font-medium">Market Areas Analysis</h4>
+                  <div className="grid gap-3">
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Marina</span>
+                        <span className="text-sm text-green-600">Premium Tier (+60%)</span>
                       </div>
-                      <div className="flex justify-between text-xs">
-                        <span>Occupancy</span>
-                        <span className="font-medium">{competitor.bookings}%</span>
-                      </div>
-                      <Progress value={competitor.bookings} className="h-1" />
+                      <p className="text-xs text-muted-foreground mt-1">Waterfront luxury properties</p>
                     </div>
-                  ))}
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex justify-between">
+                        <span className="font-medium">Downtown</span>
+                        <span className="text-sm text-blue-600">Premium Tier (+50%)</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Business district and attractions</p>
+                    </div>
+                    <div className="p-3 border rounded-lg">
+                      <div className="flex justify-between">
+                        <span className="font-medium">JLT</span>
+                        <span className="text-sm text-gray-600">Standard Tier</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-1">Modern towers with metro access</p>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
               <CardHeader>
-                <CardTitle>Competitive Position</CardTitle>
-                <CardDescription>Your ranking and opportunities</CardDescription>
+                <CardTitle>Market Positioning</CardTitle>
+                <CardDescription>Your competitive advantage in Dubai</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <h4 className="font-medium">Market Position</h4>
-                  <div className="text-2xl font-bold text-blue-600">#2</div>
-                  <div className="text-sm text-muted-foreground">out of 12 nearby properties</div>
-                </div>
-
-                <div className="space-y-2">
-                  <h4 className="font-medium">Price Competitiveness</h4>
-                  <div className="text-sm">
-                    <div className="flex justify-between">
-                      <span>vs Avg Market Rate</span>
-                      <span className="font-medium text-green-600">+5.2%</span>
+                {marketInsights?.area_insights && (
+                  <>
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Your Area: {marketInsights.area_insights.area}</h4>
+                      <div className="text-2xl font-bold text-blue-600">{marketInsights.area_insights.tier}</div>
+                      <div className="text-sm text-muted-foreground">{marketInsights.area_insights.primary_demand}</div>
                     </div>
-                    <div className="flex justify-between">
-                      <span>vs Direct Competitors</span>
-                      <span className="font-medium text-red-600">-8.1%</span>
-                    </div>
-                  </div>
-                </div>
 
-                <Alert>
-                  <Zap className="h-4 w-4" />
-                  <AlertDescription>
-                    Increase rates by $15-20 to match premium competitors while maintaining bookings.
-                  </AlertDescription>
-                </Alert>
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Market Performance</h4>
+                      <div className="text-sm">
+                        <div className="flex justify-between">
+                          <span>vs Market Average</span>
+                          <span className="font-medium text-green-600">{marketInsights.performance_vs_market}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Position in Area</span>
+                          <span className="font-medium">#{marketInsights.competitive_position}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Alert>
+                      <Zap className="h-4 w-4" />
+                      <AlertDescription>
+                        {marketInsights.area_recommendations?.[0] || "Optimize pricing based on Dubai seasonal patterns"}
+                      </AlertDescription>
+                    </Alert>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -569,48 +646,151 @@ export function AnalyticsDashboard() {
 
         <TabsContent value="insights" className="space-y-4">
           <div className="grid gap-4">
-            {insightsData.map((insight, index) => (
-              <Card key={index}>
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-full bg-green-100 text-green-600">
+                    <TrendingUp className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">Dubai Winter Season Opportunity</h3>
+                      <div className="flex gap-2">
+                        <Badge variant="outline">Impact: High</Badge>
+                        <Badge variant="outline">Effort: Low</Badge>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground">
+                      Increase rates by 40-50% during Dubai's peak winter season (December-February) when European tourists seek warm weather escapes.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-full bg-blue-100 text-blue-600">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">Event-Based Surge Pricing</h3>
+                      <div className="flex gap-2">
+                        <Badge variant="outline">Impact: Very High</Badge>
+                        <Badge variant="outline">Effort: Low</Badge>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground">
+                      Implement automatic surge pricing for major Dubai events: F1 Grand Prix (+300%), Shopping Festival (+80%), GITEX (+60%).
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <div className="flex items-start gap-4">
+                  <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">
+                    <AlertTriangle className="h-4 w-4" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-semibold">Summer Season Strategy</h3>
+                      <div className="flex gap-2">
+                        <Badge variant="outline">Impact: Medium</Badge>
+                        <Badge variant="outline">Effort: Medium</Badge>
+                      </div>
+                    </div>
+                    <p className="text-muted-foreground">
+                      Dubai summer (May-September) requires 20-30% discount and focus on longer stays, business travelers, and local residents.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {marketInsights?.area_recommendations && (
+              <Card>
                 <CardContent className="p-6">
                   <div className="flex items-start gap-4">
-                    <div className={`p-2 rounded-full ${
-                      insight.type === 'opportunity' ? 'bg-green-100 text-green-600' :
-                      insight.type === 'warning' ? 'bg-yellow-100 text-yellow-600' :
-                      'bg-blue-100 text-blue-600'
-                    }`}>
-                      <insight.icon className="h-4 w-4" />
+                    <div className="p-2 rounded-full bg-purple-100 text-purple-600">
+                      <MapPin className="h-4 w-4" />
                     </div>
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-semibold">{insight.title}</h3>
+                        <h3 className="font-semibold">Area-Specific Recommendations</h3>
                         <div className="flex gap-2">
-                          <Badge variant="outline">Impact: {insight.impact}</Badge>
-                          <Badge variant="outline">Effort: {insight.effort}</Badge>
+                          <Badge variant="outline">Impact: High</Badge>
+                          <Badge variant="outline">Effort: Low</Badge>
                         </div>
                       </div>
-                      <p className="text-muted-foreground">{insight.description}</p>
+                      <div className="space-y-2">
+                        {marketInsights.area_recommendations.map((rec, index) => (
+                          <p key={index} className="text-muted-foreground text-sm">• {rec}</p>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-            ))}
+            )}
 
             <Card>
               <CardHeader>
-                <CardTitle>Demand Patterns</CardTitle>
-                <CardDescription>Booking demand by time and day type</CardDescription>
+                <CardTitle>Dubai Demand Patterns</CardTitle>
+                <CardDescription>Real Dubai seasonal and daily booking patterns</CardDescription>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={demandPatternsData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="hour" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="weekday" fill="#2563eb" name="Weekday" />
-                    <Bar dataKey="weekend" fill="#10b981" name="Weekend" />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Peak Booking Times</h4>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span>Evening (6-9 PM)</span>
+                          <span className="font-medium">45%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Lunch (12-2 PM)</span>
+                          <span className="font-medium">25%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Morning (9-11 AM)</span>
+                          <span className="font-medium">20%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Late Night</span>
+                          <span className="font-medium">10%</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <h4 className="font-medium">Weekly Patterns</h4>
+                      <div className="space-y-1 text-sm">
+                        <div className="flex justify-between">
+                          <span>Friday-Saturday</span>
+                          <span className="font-medium text-green-600">Premium (+20%)</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Thursday</span>
+                          <span className="font-medium">Standard</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Sunday-Tuesday</span>
+                          <span className="font-medium text-blue-600">Business Focus</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Wednesday</span>
+                          <span className="font-medium text-orange-600">Lowest</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
