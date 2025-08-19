@@ -1,16 +1,23 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { supabase } from '../utils/supabase/client'
 
-// Environment configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://krib-host-dahsboard-backend.onrender.com/api'
+// Environment configuration - FORCE HTTPS in production
+const PRODUCTION_API_URL = 'https://krib-host-dahsboard-backend.onrender.com/api'
+const DEVELOPMENT_API_URL = import.meta.env.VITE_API_URL || PRODUCTION_API_URL
 
-// Ensure HTTPS is used in production
+// Always use HTTPS in production (Vercel), allow override only in development
+const API_BASE_URL = window.location.protocol === 'https:' ? PRODUCTION_API_URL : DEVELOPMENT_API_URL
+
+// Extra safety: ensure HTTPS is used regardless
 const SECURE_API_URL = API_BASE_URL.replace('http://', 'https://')
 
 // Debug logging for API URL
-console.log('API Configuration:', {
+console.log('🔒 API Configuration:', {
+  protocol: window.location.protocol,
+  hostname: window.location.hostname,
+  isDevelopment: window.location.hostname === 'localhost',
   original: API_BASE_URL,
-  secure: SECURE_API_URL,
+  final: SECURE_API_URL,
   environment: import.meta.env.VITE_API_URL
 })
 
