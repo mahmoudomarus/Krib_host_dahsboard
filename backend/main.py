@@ -54,29 +54,21 @@ app = FastAPI(
     title="Krib AI API",
     description="Krib AI - AI-Powered Property Rental Management Platform",
     version="1.0.0",
-    lifespan=lifespan,
-    # Ensure proper HTTPS handling
-    redirect_slashes=False
+    lifespan=lifespan
 )
 
 # Middleware Configuration
 
-# Force HTTPS scheme recognition for Render
+# Simple HTTPS redirect fix for Render
 @app.middleware("http")
-async def https_scheme_middleware(request, call_next):
-    """Fix HTTPS scheme detection behind Render proxy"""
-    # Render sends X-Forwarded-Proto header
-    forwarded_proto = request.headers.get("x-forwarded-proto")
-    if forwarded_proto == "https":
-        # Update request URL to use HTTPS scheme
-        request.scope["scheme"] = "https"
-    
+async def https_fix_middleware(request, call_next):
+    """Simple fix for HTTPS behind proxy"""
     response = await call_next(request)
     
-    # Ensure HTTPS URLs in response headers
+    # Fix any HTTP redirects to HTTPS
     if "location" in response.headers:
         location = response.headers["location"]
-        if location.startswith("http://") and "onrender.com" in location:
+        if "onrender.com" in location and location.startswith("http://"):
             response.headers["location"] = location.replace("http://", "https://")
     
     return response

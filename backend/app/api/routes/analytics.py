@@ -129,6 +129,7 @@ async def get_market_comparison(
         )
 
 
+@router.get("", response_model=AnalyticsResponse)
 @router.get("/", response_model=AnalyticsResponse)
 async def get_analytics(
     period: str = "12months",

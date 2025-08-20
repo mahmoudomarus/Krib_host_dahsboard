@@ -92,6 +92,7 @@ async def create_property(
         )
 
 
+@router.get("", response_model=List[PropertyResponse])
 @router.get("/", response_model=List[PropertyResponse])
 async def get_user_properties(
     status_filter: Optional[str] = None,
