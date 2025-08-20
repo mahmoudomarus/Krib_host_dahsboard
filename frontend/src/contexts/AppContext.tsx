@@ -12,14 +12,18 @@ const API_BASE_URL = window.location.protocol === 'https:' ? PRODUCTION_API_URL 
 const SECURE_API_URL = API_BASE_URL.replace('http://', 'https://')
 
 // Debug logging for API URL
-console.log('🔒 API Configuration:', {
+console.log('🔒 API Configuration [FORCE UPDATE v2]:', {
   protocol: window.location.protocol,
   hostname: window.location.hostname,
   isDevelopment: window.location.hostname === 'localhost',
   original: API_BASE_URL,
   final: SECURE_API_URL,
-  environment: import.meta.env.VITE_API_URL
+  environment: import.meta.env.VITE_API_URL,
+  timestamp: new Date().toISOString()
 })
+
+// EMERGENCY: Log every API call to debug
+console.log('🚨 SECURE_API_URL being used for all calls:', SECURE_API_URL)
 
 interface User {
   id: string
@@ -177,7 +181,9 @@ async function makeAPIRequest(endpoint: string, options: RequestInit = {}) {
     },
   }
 
-  const response = await fetch(`${SECURE_API_URL}${endpoint}`, config)
+  const fullUrl = `${SECURE_API_URL}${endpoint}`
+  console.log('🔥 MAKING API CALL TO:', fullUrl)
+  const response = await fetch(fullUrl, config)
   
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
