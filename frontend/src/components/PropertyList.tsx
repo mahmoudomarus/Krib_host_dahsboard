@@ -123,7 +123,7 @@ export function PropertyList() {
 
       <div className="space-y-4">
         {filteredProperties.map((property) => (
-          <Card key={property.id} className="p-6">
+          <Card key={property.id} className="p-6 krib-card krib-glow-hover">
             <div className="flex items-center gap-6">
               {/* Property Image */}
               <div className="w-32 h-24 relative flex-shrink-0">
@@ -215,7 +215,7 @@ export function PropertyList() {
       </div>
 
       {filteredProperties.length === 0 && (
-        <Card className="p-12">
+        <Card className="p-12 krib-card">
           <div className="text-center">
             <Building2 className="h-16 w-16 mx-auto text-muted-foreground mb-6" />
             <h3 className="text-xl font-semibold mb-3">No properties found</h3>
