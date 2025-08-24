@@ -415,19 +415,35 @@ html {
   transition: all 0.3s ease;
 }
 
-/* Krib Button System */
+/* Krib Button System - Clean Single Button Appearance */
 .krib-button-primary {
   background: linear-gradient(135deg, var(--krib-lime) 0%, var(--krib-lime-light) 100%) !important;
   color: var(--krib-black) !important;
   border: none !important;
+  border-radius: 12px !important;
   font-weight: 600 !important;
-  transition: all 0.3s ease !important;
+  transition: all 0.2s ease !important;
+  box-shadow: 0 2px 8px rgba(184, 255, 0, 0.15) !important;
+  outline: none !important;
+  /* Override any conflicting styles */
+  text-decoration: none !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .krib-button-primary:hover {
   background: linear-gradient(135deg, var(--krib-lime-light) 0%, var(--krib-lime) 100%) !important;
   box-shadow: 0 4px 15px rgba(184, 255, 0, 0.25) !important;
-  transform: translateY(-2px);
+  transform: translateY(-1px) !important;
+}
+
+.krib-button-primary:focus {
+  box-shadow: 0 2px 8px rgba(184, 255, 0, 0.15), 0 0 0 3px rgba(184, 255, 0, 0.2) !important;
+}
+
+.krib-button-primary:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 1px 4px rgba(184, 255, 0, 0.2) !important;
 }
 
 /* Krib Card System */

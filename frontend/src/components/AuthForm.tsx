@@ -144,7 +144,7 @@ export function AuthForm() {
                 onClick={handleGoogleSignIn}
                 disabled={isSubmitting}
                 variant="outline" 
-                className="w-full flex items-center justify-center gap-3 h-12 rounded-xl border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+                className="w-full h-12 border border-gray-200 hover:border-gray-300 hover:bg-gray-50 rounded-xl"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -208,7 +208,7 @@ export function AuthForm() {
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full h-12 rounded-xl krib-button-primary font-medium shadow-lg hover:shadow-xl transition-all duration-200" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-12 krib-button-primary" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-krib-black border-t-transparent rounded-full"></div>
@@ -296,7 +296,7 @@ export function AuthForm() {
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full h-12 rounded-xl krib-button-primary font-medium shadow-lg hover:shadow-xl transition-all duration-200" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-12 krib-button-primary" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-krib-black border-t-transparent rounded-full"></div>
