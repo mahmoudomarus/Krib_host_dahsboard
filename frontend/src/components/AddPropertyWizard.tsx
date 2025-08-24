@@ -414,7 +414,7 @@ export function AddPropertyWizard() {
               <Camera className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Photos</h3>
               <p className="text-gray-600 mb-4">Add up to 10 high-quality photos of your property</p>
-              <Button onClick={handleImageUpload} size="lg" disabled={isUploadingImages} className="btn-shadow">
+              <Button onClick={handleImageUpload} size="lg" disabled={isUploadingImages} className="krib-button-primary">
                 <Upload className="h-4 w-4 mr-2" />
                 {isUploadingImages ? 'Uploading...' : 'Choose Photos'}
               </Button>
@@ -507,6 +507,7 @@ export function AddPropertyWizard() {
                   size="sm"
                   onClick={generateDescription}
                   disabled={isGeneratingDescription}
+                  className="border-krib-lime text-krib-lime hover:bg-krib-lime-soft"
                 >
                   <Bot className="h-4 w-4 mr-2" />
                   {isGeneratingDescription ? 'Generating...' : 'AI Generate'}
@@ -679,12 +680,12 @@ export function AddPropertyWizard() {
               onClick={handlePublish}
               disabled={isPublishing}
               size="lg"
-              className="px-8"
+              className="px-8 krib-button-primary"
             >
               {isPublishing ? 'Publishing...' : 'Publish Property'}
             </Button>
           ) : (
-            <Button onClick={nextStep} size="lg" className="px-8 btn-shadow">
+            <Button onClick={nextStep} size="lg" className="px-8 krib-button-primary">
               Next
               <ArrowRight className="h-4 w-4 ml-2" />
             </Button>

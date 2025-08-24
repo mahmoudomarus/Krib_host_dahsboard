@@ -357,7 +357,42 @@ html {
 /* KRIB DESIGN SYSTEM - CLEAN & METHODICAL       */
 /* =============================================== */
 
-/* Clean Stripe Background Pattern - Crisp, Not Hazy */
+/* Krib Paint Splash Background - Artistic & Beautiful */
+.krib-paint-splash-background {
+  background: 
+    /* Main white background */
+    #ffffff,
+    /* Large lime splash - top right */
+    radial-gradient(ellipse 400px 300px at 85% 15%, rgba(184, 255, 0, 0.08) 0%, transparent 50%),
+    /* Medium black splash - bottom left */
+    radial-gradient(ellipse 350px 250px at 10% 80%, rgba(17, 17, 17, 0.04) 0%, transparent 60%),
+    /* Small lime splash - center right */
+    radial-gradient(ellipse 200px 180px at 90% 50%, rgba(203, 252, 80, 0.06) 0%, transparent 70%),
+    /* Tiny black accent - top left */
+    radial-gradient(ellipse 150px 120px at 5% 20%, rgba(17, 17, 17, 0.03) 0%, transparent 80%),
+    /* Medium lime splash - bottom center */
+    radial-gradient(ellipse 300px 200px at 60% 90%, rgba(184, 255, 0, 0.05) 0%, transparent 65%),
+    /* Subtle stripes overlay */
+    linear-gradient(
+      45deg,
+      transparent 0%,
+      transparent 95%,
+      rgba(184, 255, 0, 0.01) 95%,
+      rgba(184, 255, 0, 0.01) 100%
+    );
+  background-size: 
+    100% 100%,
+    600px 400px,
+    500px 350px,
+    300px 250px,
+    200px 150px,
+    400px 300px,
+    100px 100px;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
+  background-attachment: fixed, fixed, fixed, fixed, fixed, fixed, scroll;
+}
+
+/* Alternative cleaner stripe background for pages that need subtlety */
 .krib-stripe-background {
   background-image: 
     linear-gradient(
