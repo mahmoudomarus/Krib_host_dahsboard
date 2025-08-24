@@ -403,7 +403,7 @@ export function PropertyList() {
               <Button variant="outline" onClick={() => setIsEditModalOpen(false)} className="px-6">
                 Cancel
               </Button>
-              <Button onClick={handleUpdateProperty} className="px-6 bg-blue-600 hover:bg-blue-700">
+              <Button onClick={handleUpdateProperty} className="px-6 krib-button-primary">
                 Save Changes
               </Button>
             </div>

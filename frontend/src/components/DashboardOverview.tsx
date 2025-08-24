@@ -50,7 +50,7 @@ export function DashboardOverview() {
       value: properties.length.toString(),
       change: properties.length > 0 ? `${properties.length} active` : "No properties yet",
       icon: Building2,
-      color: "text-blue-600"
+      color: "text-krib-lime"
     },
     {
       title: "Total Revenue",

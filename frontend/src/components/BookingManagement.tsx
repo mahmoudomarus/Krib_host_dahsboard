@@ -145,7 +145,7 @@ export function BookingManagement() {
         <Card className="krib-card krib-glow-hover">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Upcoming Bookings</CardTitle>
-            <Calendar className="h-4 w-4 text-blue-600" />
+            <Calendar className="h-4 w-4 text-krib-lime" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{upcomingBookings.length}</div>

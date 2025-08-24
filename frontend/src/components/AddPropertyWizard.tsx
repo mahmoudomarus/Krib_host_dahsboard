@@ -458,7 +458,7 @@ export function AddPropertyWizard() {
                   onClick={() => toggleAmenity(amenity)}
                   className={`p-3 border rounded-lg cursor-pointer transition-all ${
                     propertyData.amenities.includes(amenity)
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
+                      ? 'border-krib-lime bg-krib-lime-soft text-krib-black'
                       : 'border-gray-300 hover:border-gray-400'
                   }`}
                 >
@@ -636,14 +636,14 @@ export function AddPropertyWizard() {
             <div key={step.id} className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
                 index <= currentStepIndex 
-                  ? 'bg-blue-600 text-white' 
+                  ? 'bg-krib-lime text-krib-black' 
                   : 'bg-gray-200 text-gray-500'
               }`}>
                 <step.icon className="h-5 w-5" />
               </div>
               {index < steps.length - 1 && (
                 <div className={`w-16 h-1 mx-2 ${
-                  index < currentStepIndex ? 'bg-blue-600' : 'bg-gray-200'
+                  index < currentStepIndex ? 'bg-krib-lime' : 'bg-gray-200'
                 }`} />
               )}
             </div>

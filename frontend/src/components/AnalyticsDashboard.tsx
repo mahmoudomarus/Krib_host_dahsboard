@@ -116,7 +116,7 @@ export function AnalyticsDashboard() {
       change: analyticsData?.booking_growth ? `${analyticsData.booking_growth > 0 ? '+' : ''}${analyticsData.booking_growth.toFixed(1)}%` : "0%",
       trend: "up",
       icon: Calendar,
-      color: "text-blue-600"
+      color: "text-krib-lime"
     },
     {
       title: "Average Rating",
