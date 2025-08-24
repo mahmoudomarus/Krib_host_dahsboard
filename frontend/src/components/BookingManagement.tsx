@@ -142,7 +142,7 @@ export function BookingManagement() {
 
       {/* Quick Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <Card>
+        <Card className="krib-card krib-glow-hover">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Upcoming Bookings</CardTitle>
             <Calendar className="h-4 w-4 text-blue-600" />
@@ -153,7 +153,7 @@ export function BookingManagement() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="krib-card krib-glow-hover">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Check-ins Today</CardTitle>
             <User className="h-4 w-4 text-green-600" />
@@ -164,7 +164,7 @@ export function BookingManagement() {
           </CardContent>
         </Card>
         
-        <Card>
+        <Card className="krib-card krib-glow-hover">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm">Check-outs Today</CardTitle>
             <User className="h-4 w-4 text-orange-600" />

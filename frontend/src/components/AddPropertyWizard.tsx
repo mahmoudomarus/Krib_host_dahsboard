@@ -540,7 +540,7 @@ export function AddPropertyWizard() {
               </Alert>
             )}
             
-            <Card>
+            <Card className="krib-card">
               <CardContent className="p-6">
                 <div className="space-y-4">
                   <div>
