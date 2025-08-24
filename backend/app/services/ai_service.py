@@ -246,32 +246,118 @@ class AIService:
             raise
     
     def _generate_fallback_description(self, property_data: Dict[str, Any]) -> Dict[str, str]:
-        """Generate basic description without AI"""
+        """Generate compelling, detailed description without AI"""
         property_type = property_data.get('property_type', 'property').title()
         bedrooms = property_data.get('bedrooms', 0)
         bathrooms = property_data.get('bathrooms', 0)
         max_guests = property_data.get('max_guests', 1)
-        city = property_data.get('city', 'a great location')
+        city = property_data.get('city', 'a prime location')
+        state = property_data.get('state', '')
+        price = property_data.get('price_per_night', 0)
+        amenities = property_data.get('amenities', [])
+        title = property_data.get('title', f'Beautiful {property_type}')
         
-        description = f"""Welcome to this beautiful {property_type.lower()} in {city}! 
+        # Create location string
+        location = f"{city}, {state}" if state else city
         
-        This comfortable space features {bedrooms} bedroom{'s' if bedrooms != 1 else ''} and {bathrooms} bathroom{'s' if bathrooms != 1 else ''}, 
-        perfect for up to {max_guests} guest{'s' if max_guests != 1 else ''}. 
+        # Generate property-specific details
+        space_details = self._get_space_details(property_type, bedrooms, bathrooms, max_guests)
+        amenity_highlights = self._get_amenity_highlights(amenities, property_type)
+        location_benefits = self._get_location_benefits(city, property_type)
         
-        Whether you're here for business or leisure, you'll find everything you need for a memorable stay. 
-        The space is thoughtfully designed to provide comfort and convenience throughout your visit."""
+        # Build compelling description
+        description = f"""Discover {title.lower()} - your perfect retreat in {location}!
+
+{space_details}
+
+🌟 **What makes this special:**
+{amenity_highlights}
+
+📍 **Prime Location Benefits:**
+{location_benefits}
+
+✨ **Perfect for:**
+• Business travelers seeking comfort and convenience
+• Couples looking for a romantic getaway
+• Families wanting space and amenities
+• Groups celebrating special occasions
+• Anyone who appreciates quality accommodations
+
+Whether you're here for work or play, this thoughtfully designed space offers everything you need for an exceptional stay. Book now and experience the perfect blend of comfort, style, and convenience!"""
+
+        # Generate dynamic highlights
+        highlights = [
+            f"{bedrooms} spacious bedroom{'s' if bedrooms != 1 else ''}",
+            f"{bathrooms} full bathroom{'s' if bathrooms != 1 else ''}",
+            f"Accommodates up to {max_guests} guest{'s' if max_guests != 1 else ''}",
+            f"Prime {city} location"
+        ]
+        
+        # Add amenity highlights
+        if amenities:
+            top_amenities = amenities[:3]  # Show top 3 amenities
+            highlights.extend(top_amenities)
+        else:
+            highlights.extend(["Modern amenities", "Comfortable furnishings"])
+            
+        if price > 0:
+            highlights.append(f"Starting at ${price}/night")
         
         return {
             "description": description,
-            "summary": f"Comfortable {property_type.lower()} for {max_guests} guests in {city}",
-            "highlights": [
-                f"{bedrooms} bedroom{'s' if bedrooms != 1 else ''}",
-                f"{bathrooms} bathroom{'s' if bathrooms != 1 else ''}",
-                f"Accommodates {max_guests} guest{'s' if max_guests != 1 else ''}",
-                "Great location",
-                "Comfortable amenities"
-            ]
+            "summary": f"Stunning {property_type.lower()} in {location} - {max_guests} guests, {bedrooms} bed{'s' if bedrooms != 1 else ''}, premium amenities",
+            "highlights": highlights[:6]  # Limit to 6 highlights
         }
+    
+    def _get_space_details(self, property_type: str, bedrooms: int, bathrooms: int, max_guests: int) -> str:
+        """Generate detailed space description"""
+        if property_type.lower() == 'studio':
+            return f"This stylish studio offers an open-plan living space that maximizes comfort for {max_guests} guest{'s' if max_guests != 1 else ''}. The thoughtfully designed layout includes a full bathroom and all the essentials for a perfect stay."
+        elif property_type.lower() == 'apartment':
+            return f"This modern {bedrooms}-bedroom apartment features {bathrooms} full bathroom{'s' if bathrooms != 1 else ''} and comfortably hosts {max_guests} guest{'s' if max_guests != 1 else ''}. Each room is carefully designed with your comfort in mind."
+        elif property_type.lower() == 'house':
+            return f"Enjoy the privacy and space of this beautiful {bedrooms}-bedroom house with {bathrooms} bathroom{'s' if bathrooms != 1 else ''}. Perfect for {max_guests} guest{'s' if max_guests != 1 else ''}, offering room to spread out and truly relax."
+        elif property_type.lower() == 'condo':
+            return f"Experience luxury living in this elegant {bedrooms}-bedroom condo featuring {bathrooms} bathroom{'s' if bathrooms != 1 else ''}. Designed for {max_guests} guest{'s' if max_guests != 1 else ''} with premium finishes throughout."
+        else:
+            return f"This exceptional {property_type.lower()} offers {bedrooms} bedroom{'s' if bedrooms != 1 else ''} and {bathrooms} bathroom{'s' if bathrooms != 1 else ''}, thoughtfully designed for {max_guests} guest{'s' if max_guests != 1 else ''}."
+    
+    def _get_amenity_highlights(self, amenities: list, property_type: str) -> str:
+        """Generate amenity highlights"""
+        if not amenities:
+            defaults = {
+                'apartment': "• Modern kitchen with full appliances\n• High-speed WiFi throughout\n• Climate control for year-round comfort\n• Smart TV for entertainment",
+                'house': "• Spacious kitchen with dining area\n• Private outdoor space\n• Dedicated parking\n• Washer/dryer for convenience",
+                'studio': "• Efficient kitchenette\n• High-speed internet\n• Modern bathroom\n• Smart storage solutions",
+                'condo': "• Gourmet kitchen with premium appliances\n• Building amenities access\n• Secure entry\n• Elevator access"
+            }
+            return defaults.get(property_type.lower(), "• Modern amenities throughout\n• Comfortable furnishings\n• All essentials provided\n• Clean and well-maintained")
+        
+        # Format actual amenities
+        formatted_amenities = []
+        for amenity in amenities[:5]:  # Top 5 amenities
+            formatted_amenities.append(f"• {amenity}")
+        
+        if len(amenities) > 5:
+            formatted_amenities.append(f"• Plus {len(amenities) - 5} more amenities!")
+            
+        return "\n".join(formatted_amenities)
+    
+    def _get_location_benefits(self, city: str, property_type: str) -> str:
+        """Generate location-specific benefits"""
+        city_lower = city.lower()
+        
+        # City-specific benefits
+        if 'dubai' in city_lower:
+            return "• World-class shopping and dining nearby\n• Easy access to iconic landmarks\n• Modern transportation links\n• Vibrant cultural scene"
+        elif 'san francisco' in city_lower:
+            return "• Walking distance to tech hubs\n• Diverse dining and entertainment\n• Easy public transportation\n• Iconic city attractions nearby"
+        elif 'new york' in city_lower:
+            return "• Heart of the city energy\n• World-class restaurants and shows\n• Excellent subway connections\n• Endless entertainment options"
+        elif 'los angeles' in city_lower:
+            return "• Year-round perfect weather\n• Close to beaches and mountains\n• Entertainment industry hub\n• Diverse neighborhoods to explore"
+        else:
+            return f"• Convenient {city} location\n• Local attractions within reach\n• Great restaurants and shopping\n• Easy access to city highlights"
     
     def _get_base_amenities(self, property_type: str) -> List[str]:
         """Get base amenities based on property type"""

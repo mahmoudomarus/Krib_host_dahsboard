@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { ArrowLeft, ArrowRight, Bot, Upload, Check, MapPin, Home, Camera, Sparkles, X, Plus, Star, AlertCircle, Building, FileText, DollarSign } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
@@ -50,6 +51,7 @@ const propertyTypes = [
 
 export function AddPropertyWizard() {
   const { createProperty, generateAIDescription } = useApp()
+  const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<WizardStep>('basic-info')
   const [isPublishing, setIsPublishing] = useState(false)
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
@@ -507,10 +509,19 @@ export function AddPropertyWizard() {
                   size="sm"
                   onClick={generateDescription}
                   disabled={isGeneratingDescription}
-                  className="border-krib-lime text-krib-lime hover:bg-krib-lime-soft"
+                  className="h-10 px-4 rounded-xl border-2 border-krib-lime text-krib-lime hover:bg-krib-lime hover:text-krib-black transition-all duration-200 font-medium shadow-sm hover:shadow-md group"
                 >
-                  <Bot className="h-4 w-4 mr-2" />
-                  {isGeneratingDescription ? 'Generating...' : 'AI Generate'}
+                  {isGeneratingDescription ? (
+                    <div className="flex items-center">
+                      <div className="animate-spin h-4 w-4 border-2 border-krib-lime border-t-transparent rounded-full mr-2"></div>
+                      Generating...
+                    </div>
+                  ) : (
+                    <div className="flex items-center">
+                      <Bot className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform duration-200" />
+                      ✨ AI Generate
+                    </div>
+                  )}
                 </Button>
               </div>
               <Textarea
@@ -598,10 +609,17 @@ export function AddPropertyWizard() {
               <p className="text-gray-600">Your property is now live and ready to receive bookings.</p>
             </div>
             <div className="space-y-3">
-              <Button onClick={() => setCurrentStep('basic-info')} variant="outline">
+              <Button 
+                onClick={() => setCurrentStep('basic-info')} 
+                variant="outline"
+                className="w-full h-12 rounded-xl border-2 hover:bg-gray-50"
+              >
                 Add Another Property
               </Button>
-              <Button onClick={() => window.location.reload()}>
+              <Button 
+                onClick={() => navigate('/properties')}
+                className="w-full h-12 rounded-xl krib-button-primary"
+              >
                 View My Properties
               </Button>
             </div>
