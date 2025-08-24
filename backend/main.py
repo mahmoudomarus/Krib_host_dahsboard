@@ -19,7 +19,7 @@ from app.core.database import init_db
 from app.core.redis_client import redis_client
 from app.core.monitoring import init_sentry, metrics_middleware, metrics_endpoint, health_check_with_metrics
 from app.core.rate_limiter import limiter, custom_rate_limit_handler
-from app.api.routes import auth, properties, bookings, analytics, upload, financials
+from app.api.routes import auth, properties, bookings, analytics, upload, financials, users
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
 
@@ -94,6 +94,7 @@ security = HTTPBearer()
 
 # Include routers
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
+app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(properties.router, prefix="/api/properties", tags=["properties"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])
 app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"])

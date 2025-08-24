@@ -508,14 +508,77 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  // Settings methods
-  async function updateUserSettings(settings: Partial<User>): Promise<void> {
-    const updatedUser = await makeAPIRequest('/auth/me', {
-      method: 'PUT',
-      body: JSON.stringify(settings)
-    })
-    
-    setUser(updatedUser)
+  // User/Settings methods
+  async function getUserProfile(): Promise<User> {
+    try {
+      return await makeAPIRequest('/users/profile')
+    } catch (error) {
+      console.error('Get user profile error:', error)
+      throw error
+    }
+  }
+
+  async function updateUserProfile(updates: Partial<User>): Promise<User> {
+    try {
+      const updatedUser = await makeAPIRequest('/users/profile', {
+        method: 'PUT',
+        body: JSON.stringify(updates)
+      })
+      setUser(updatedUser)
+      return updatedUser
+    } catch (error) {
+      console.error('Update user profile error:', error)
+      throw error
+    }
+  }
+
+  async function updateUserSettings(settings: any): Promise<void> {
+    try {
+      await makeAPIRequest('/users/settings', {
+        method: 'PUT',
+        body: JSON.stringify(settings)
+      })
+    } catch (error) {
+      console.error('Update user settings error:', error)
+      throw error
+    }
+  }
+
+  async function changePassword(currentPassword: string, newPassword: string, confirmPassword: string): Promise<void> {
+    try {
+      await makeAPIRequest('/users/change-password', {
+        method: 'POST',
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword,
+          confirm_password: confirmPassword
+        })
+      })
+    } catch (error) {
+      console.error('Change password error:', error)
+      throw error
+    }
+  }
+
+  async function getUserNotifications(): Promise<any> {
+    try {
+      return await makeAPIRequest('/users/notifications')
+    } catch (error) {
+      console.error('Get user notifications error:', error)
+      throw error
+    }
+  }
+
+  async function updateUserNotifications(notifications: any): Promise<void> {
+    try {
+      await makeAPIRequest('/users/notifications', {
+        method: 'PUT',
+        body: JSON.stringify(notifications)
+      })
+    } catch (error) {
+      console.error('Update user notifications error:', error)
+      throw error
+    }
   }
 
   const contextValue: AppContextType = {
@@ -554,8 +617,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getTransactions,
     updatePayoutSettings,
     
-    // Settings methods
+    // User/Settings methods
+    getUserProfile,
+    updateUserProfile,
     updateUserSettings,
+    changePassword,
+    getUserNotifications,
+    updateUserNotifications,
   }
 
   return (

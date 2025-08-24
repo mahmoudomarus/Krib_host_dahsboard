@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
 import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Switch } from './ui/switch'
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
 import { useApp } from '../contexts/AppContext'
 import { toast } from 'sonner'
 
@@ -25,12 +26,27 @@ interface UserSettings {
 }
 
 export function SettingsPage() {
-  const { user, signOut } = useApp()
+  const { 
+    user, 
+    signOut, 
+    updateUserProfile, 
+    updateUserSettings, 
+    changePassword, 
+    getUserNotifications, 
+    updateUserNotifications 
+  } = useApp()
+  
   const [isLoading, setIsLoading] = useState(false)
+  const [showPasswordDialog, setShowPasswordDialog] = useState(false)
+  const [passwordData, setPasswordData] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  })
   const [settings, setSettings] = useState<UserSettings>({
-    displayName: (user?.user_metadata as any)?.name || '',
+    displayName: user?.name || '',
     email: user?.email || '',
-    phoneNumber: (user?.user_metadata as any)?.phone || '',
+    phoneNumber: (user as any)?.phone || '',
     notifications: {
       bookings: true,
       marketing: false,
@@ -42,19 +58,83 @@ export function SettingsPage() {
       language: 'English'
     }
   })
+  
+  // Load user settings on component mount
+  useEffect(() => {
+    loadUserSettings()
+  }, [user])
+  
+  const loadUserSettings = async () => {
+    if (!user) return
+    
+    try {
+      const notifications = await getUserNotifications()
+      setSettings(prev => ({
+        ...prev,
+        displayName: user.name || '',
+        email: user.email || '',
+        phoneNumber: (user as any)?.phone || '',
+        notifications: notifications.notifications || prev.notifications
+      }))
+    } catch (error) {
+      console.error('Failed to load user settings:', error)
+    }
+  }
 
   const handleSaveSettings = async () => {
     setIsLoading(true)
     try {
-      // In a real app, this would save to your backend
-      await new Promise(resolve => setTimeout(resolve, 1000)) // Simulate API call
+      // Update profile information
+      await updateUserProfile({
+        name: settings.displayName,
+        phone: settings.phoneNumber
+      })
+      
+      // Update notifications
+      await updateUserNotifications(settings.notifications)
+      
+      // Update preferences (stored in user settings)
+      await updateUserSettings({
+        notifications: settings.notifications,
+        preferences: settings.preferences
+      })
+      
       toast.success('Settings saved successfully')
-    } catch (error) {
-      toast.error('Failed to save settings')
+    } catch (error: any) {
+      console.error('Settings save error:', error)
+      toast.error(error.message || 'Failed to save settings')
     } finally {
       setIsLoading(false)
     }
   }
+  
+  const handleChangePassword = async () => {
+    if (passwordData.new !== passwordData.confirm) {
+      toast.error('New passwords do not match')
+      return
+    }
+    
+    if (passwordData.new.length < 6) {
+      toast.error('Password must be at least 6 characters long')
+      return
+    }
+    
+    // Check if user is OAuth user (no current password required)
+    const isOAuthUser = user?.email && !passwordData.current
+    
+    try {
+      await changePassword(passwordData.current || '', passwordData.new, passwordData.confirm)
+      toast.success(isOAuthUser ? 'Password set successfully' : 'Password changed successfully')
+      setShowPasswordDialog(false)
+      setPasswordData({ current: '', new: '', confirm: '' })
+    } catch (error: any) {
+      console.error('Password change error:', error)
+      toast.error(error.message || 'Failed to change password')
+    }
+  }
+  
+  // Check if user is OAuth user (determine if current password is needed)
+  const isOAuthUser = user?.email && !user?.app_metadata?.provider === 'email'
 
   const handleSignOut = async () => {
     try {
@@ -76,7 +156,7 @@ export function SettingsPage() {
 
       <div className="grid gap-6">
         {/* Profile Information */}
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
             <CardTitle>Profile Information</CardTitle>
             <CardDescription>
@@ -125,7 +205,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Notifications */}
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
             <CardDescription>
@@ -184,7 +264,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Preferences */}
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
             <CardTitle>Preferences</CardTitle>
             <CardDescription>
@@ -251,7 +331,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Account Actions */}
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
             <CardTitle>Account Actions</CardTitle>
             <CardDescription>
@@ -260,12 +340,90 @@ export function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handleSaveSettings} disabled={isLoading}>
+              <Button 
+                onClick={handleSaveSettings} 
+                disabled={isLoading}
+                className="krib-button-primary"
+              >
                 {isLoading ? 'Saving...' : 'Save Changes'}
               </Button>
-              <Button variant="outline">
-                Change Password
-              </Button>
+              
+              <Dialog open={showPasswordDialog} onOpenChange={setShowPasswordDialog}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    Change Password
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="krib-card">
+                  <DialogHeader>
+                    <DialogTitle>{isOAuthUser ? 'Set Password' : 'Change Password'}</DialogTitle>
+                    <DialogDescription>
+                      {isOAuthUser 
+                        ? 'Set a password for your account to enable email/password sign-in.'
+                        : 'Enter your current password and choose a new one.'
+                      }
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    {!isOAuthUser && (
+                      <div className="space-y-2">
+                        <Label htmlFor="current-password" className="text-sm font-medium text-gray-700">Current Password</Label>
+                        <Input
+                          id="current-password"
+                          type="password"
+                          placeholder="Enter current password"
+                          className="h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20"
+                          value={passwordData.current}
+                          onChange={(e) => setPasswordData(prev => ({ ...prev, current: e.target.value }))}
+                        />
+                      </div>
+                    )}
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password" className="text-sm font-medium text-gray-700">New Password</Label>
+                      <Input
+                        id="new-password"
+                        type="password"
+                        placeholder="Enter new password"
+                        className="h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20"
+                        value={passwordData.new}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, new: e.target.value }))}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password" className="text-sm font-medium text-gray-700">Confirm New Password</Label>
+                      <Input
+                        id="confirm-password"
+                        type="password"
+                        placeholder="Confirm new password"
+                        className="h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20"
+                        value={passwordData.confirm}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirm: e.target.value }))}
+                      />
+                    </div>
+                    <div className="flex gap-3 pt-4">
+                      <Button 
+                        onClick={handleChangePassword}
+                        className="flex-1 krib-button-primary"
+                        disabled={
+                          (!isOAuthUser && !passwordData.current) || 
+                          !passwordData.new || 
+                          !passwordData.confirm
+                        }
+                      >
+                        {isOAuthUser ? 'Set Password' : 'Change Password'}
+                      </Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowPasswordDialog(false)}
+                        className="flex-1"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </DialogContent>
+              </Dialog>
+              
               <Button variant="destructive" onClick={handleSignOut}>
                 Sign Out
               </Button>

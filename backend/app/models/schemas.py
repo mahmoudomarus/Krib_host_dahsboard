@@ -94,6 +94,18 @@ class UserResponse(BaseModel):
     total_revenue: float = 0
 
 
+class PasswordChangeRequest(BaseModel):
+    current_password: Optional[str] = Field(None, min_length=6)  # Optional for OAuth users
+    new_password: str = Field(..., min_length=6)
+    confirm_password: str = Field(..., min_length=6)
+    
+    @validator('confirm_password')
+    def passwords_match(cls, v, values, **kwargs):
+        if 'new_password' in values and v != values['new_password']:
+            raise ValueError('passwords do not match')
+        return v
+
+
 # Property Models
 class PropertyCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=200)
