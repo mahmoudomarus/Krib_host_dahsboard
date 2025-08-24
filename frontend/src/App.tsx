@@ -64,7 +64,7 @@ function DashboardContent() {
           activeSection={activeSection} 
           onSectionChange={handleSectionChange} 
         />
-        <main className="flex-1 overflow-auto bg-background krib-paint-splash-background" style={{ marginLeft: '16rem' }}>
+        <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '16rem' }}>
           <Routes>
             <Route path="/" element={<DashboardOverview />} />
             <Route path="/overview" element={<DashboardOverview />} />
