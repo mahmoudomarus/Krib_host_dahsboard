@@ -556,6 +556,7 @@ html {
 .krib-sidebar-active {
   animation: krib-sidebar-active-pulse 3s ease-in-out infinite !important;
 }
+}
 
 /* Paint Splash Background */
 .krib-paint-splash-background {
