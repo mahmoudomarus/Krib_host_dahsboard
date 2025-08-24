@@ -25,15 +25,25 @@ class RedisClient:
             # Parse Redis URL
             redis_url = settings.redis_url
             
-            # Create connection pool
+            # Create connection pool with Upstash SSL support
+            pool_kwargs = {
+                "encoding": "utf-8",
+                "decode_responses": True,
+                "max_connections": 20,
+                "retry_on_timeout": True,
+                "socket_keepalive": True,
+                "socket_keepalive_options": {}
+            }
+            
+            # Add SSL support for Upstash
+            if "upstash.io" in redis_url:
+                pool_kwargs["ssl_cert_reqs"] = None
+                pool_kwargs["ssl_check_hostname"] = False
+                pool_kwargs["ssl_ca_certs"] = None
+            
             self.redis_pool = redis.ConnectionPool.from_url(
                 redis_url,
-                encoding="utf-8",
-                decode_responses=True,
-                max_connections=20,
-                retry_on_timeout=True,
-                socket_keepalive=True,
-                socket_keepalive_options={}
+                **pool_kwargs
             )
             
             # Test connection
