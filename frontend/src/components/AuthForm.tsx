@@ -1,5 +1,6 @@
 import { useState } from "react"
 import { Bot, User, Mail, Lock, Eye, EyeOff } from "lucide-react"
+import KribLogo from "../assets/krib-logo.svg"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Input } from "./ui/input"
@@ -100,12 +101,12 @@ export function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center krib-paint-splash-background p-4">
+      <Card className="w-full max-w-md krib-card krib-glow">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Bot className="h-7 w-7" />
+            <div className="flex h-16 w-16 items-center justify-center rounded-xl krib-logo-container">
+              <img src={KribLogo} alt="Krib" className="h-10 w-10" />
             </div>
           </div>
           <CardTitle className="text-2xl">Welcome to Krib AI</CardTitle>

@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Building2, TrendingUp, Calendar, DollarSign, Star } from "lucide-react"
+import { Building2, TrendingUp, Calendar, DollarSign, Star, Plus, BarChart3, BookOpen, CreditCard, Settings } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Progress } from "./ui/progress"
 import { Badge } from "./ui/badge"
@@ -194,45 +194,84 @@ export function DashboardOverview() {
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks to manage your properties</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             <Button 
-              className="w-full justify-start h-auto p-3 text-left krib-button-primary"
+              className="w-full justify-start h-auto p-4 text-left krib-button-primary group"
               onClick={() => navigate('/add-property')}
             >
-              <span className="mr-2">📝</span>
-              Add New Property
+              <div className="flex items-center w-full">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-black/10 mr-3 group-hover:bg-krib-black/20 transition-colors">
+                  <Plus className="h-5 w-5 text-krib-black" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Add New Property</div>
+                  <div className="text-sm opacity-80">List a new rental property</div>
+                </div>
+              </div>
             </Button>
+            
             <Button 
               variant="outline" 
-              className="w-full justify-start h-auto p-3 text-left hover:bg-krib-lime-soft"
+              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft border-krib-lime/20 group"
               onClick={() => navigate('/analytics')}
             >
-              <span className="mr-2">📊</span>
-              View Analytics
+              <div className="flex items-center w-full">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-lime/10 mr-3 group-hover:bg-krib-lime/20 transition-colors">
+                  <BarChart3 className="h-5 w-5 text-krib-lime" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">View Analytics</div>
+                  <div className="text-sm text-muted-foreground">Performance insights</div>
+                </div>
+              </div>
             </Button>
+            
             <Button 
               variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft group"
               onClick={() => navigate('/bookings')}
             >
-              <span className="mr-2">📅</span>
-              Manage Bookings
+              <div className="flex items-center w-full">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-lime/5 mr-3 group-hover:bg-krib-lime/10 transition-colors">
+                  <BookOpen className="h-5 w-5 text-krib-lime" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Manage Bookings</div>
+                  <div className="text-sm text-muted-foreground">Reservations & guests</div>
+                </div>
+              </div>
             </Button>
+            
             <Button 
               variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft group"
               onClick={() => navigate('/financials')}
             >
-              <span className="mr-2">💰</span>
-              Financial Dashboard
+              <div className="flex items-center w-full">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-lime-light/5 mr-3 group-hover:bg-krib-lime-light/10 transition-colors">
+                  <CreditCard className="h-5 w-5 text-krib-lime-light" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Financial Dashboard</div>
+                  <div className="text-sm text-muted-foreground">Earnings & payouts</div>
+                </div>
+              </div>
             </Button>
+            
             <Button 
               variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft group"
               onClick={() => navigate('/settings')}
             >
-              <span className="mr-2">⚙️</span>
-              Settings
+              <div className="flex items-center w-full">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-black/5 mr-3 group-hover:bg-krib-black/10 transition-colors">
+                  <Settings className="h-5 w-5 text-krib-black" />
+                </div>
+                <div className="text-left">
+                  <div className="font-semibold">Settings</div>
+                  <div className="text-sm text-muted-foreground">Account preferences</div>
+                </div>
+              </div>
             </Button>
           </CardContent>
         </Card>
