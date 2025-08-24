@@ -102,7 +102,7 @@ export function AuthForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center krib-paint-splash-background p-4">
-      <Card className="w-full max-w-md krib-card krib-glow">
+      <Card className="w-full max-w-md krib-card krib-glow backdrop-blur-sm border border-white/20 shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-xl krib-logo-container">
@@ -115,25 +115,25 @@ export function AuthForm() {
           </CardDescription>
         </CardHeader>
         
-        <CardContent>
+        <CardContent className="px-6 pb-6">
           <Tabs defaultValue="signin" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 h-12 bg-krib-lime-soft border border-krib-lime/20 shadow-lg">
+            <TabsList className="grid w-full grid-cols-2 h-12 bg-krib-lime-soft/30 rounded-xl border border-krib-lime/10 p-1">
               <TabsTrigger 
                 value="signin" 
-                className="h-10 font-semibold data-[state=active]:bg-krib-lime data-[state=active]:text-krib-black data-[state=active]:shadow-md transition-all duration-300"
+                className="h-10 rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:text-krib-black data-[state=active]:shadow-sm transition-all duration-200"
               >
                 Sign In
               </TabsTrigger>
               <TabsTrigger 
                 value="signup" 
-                className="h-10 font-semibold data-[state=active]:bg-krib-lime data-[state=active]:text-krib-black data-[state=active]:shadow-md transition-all duration-300"
+                className="h-10 rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:text-krib-black data-[state=active]:shadow-sm transition-all duration-200"
               >
                 Sign Up
               </TabsTrigger>
             </TabsList>
             
             {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg text-sm">
+              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
                 {error}
               </div>
             )}
@@ -144,7 +144,7 @@ export function AuthForm() {
                 onClick={handleGoogleSignIn}
                 disabled={isSubmitting}
                 variant="outline" 
-                className="w-full flex items-center gap-3 h-12 border-2 border-krib-lime/20 hover:border-krib-lime/40 hover:bg-krib-lime-soft transition-all duration-300 shadow-lg hover:shadow-xl"
+                className="w-full flex items-center justify-center gap-3 h-12 rounded-xl border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
               >
                 <svg className="h-4 w-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -157,10 +157,10 @@ export function AuthForm() {
 
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full" />
+                  <Separator className="w-full bg-gray-200" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-background px-2 text-muted-foreground">Or continue with email</span>
+                  <span className="bg-white px-3 py-1 text-gray-500 font-medium rounded-full">Or continue with email</span>
                 </div>
               </div>
             </div>
@@ -168,14 +168,14 @@ export function AuthForm() {
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signin-email" className="text-sm font-semibold text-krib-black">Email</Label>
+                  <Label htmlFor="signin-email" className="text-sm font-medium text-gray-700">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="signin-email"
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10 h-12 border-2 border-krib-lime/10 focus:border-krib-lime focus:ring-krib-lime focus:ring-2 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+                      className="pl-10 h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20 transition-all duration-200 bg-gray-50/50 focus:bg-white"
                       value={signInData.email}
                       onChange={(e) => setSignInData(prev => ({ ...prev, email: e.target.value }))}
                       required
@@ -184,14 +184,14 @@ export function AuthForm() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signin-password" className="text-sm font-semibold text-krib-black">Password</Label>
+                  <Label htmlFor="signin-password" className="text-sm font-medium text-gray-700">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="signin-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
-                      className="pl-10 pr-10 h-12 border-2 border-krib-lime/10 focus:border-krib-lime focus:ring-krib-lime focus:ring-2 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+                      className="pl-10 pr-10 h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20 transition-all duration-200 bg-gray-50/50 focus:bg-white"
                       value={signInData.password}
                       onChange={(e) => setSignInData(prev => ({ ...prev, password: e.target.value }))}
                       required
@@ -200,7 +200,7 @@ export function AuthForm() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 rounded-lg"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -208,7 +208,7 @@ export function AuthForm() {
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full h-12 krib-button-primary shadow-xl hover:shadow-2xl" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-12 rounded-xl krib-button-primary font-medium shadow-lg hover:shadow-xl transition-all duration-200" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-krib-black border-t-transparent rounded-full"></div>
@@ -224,14 +224,14 @@ export function AuthForm() {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="signup-name" className="text-sm font-semibold text-krib-black">Full Name</Label>
+                  <Label htmlFor="signup-name" className="text-sm font-medium text-gray-700">Full Name</Label>
                   <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="signup-name"
                       type="text"
                       placeholder="Enter your full name"
-                      className="pl-10 h-12 border-2 border-krib-lime/10 focus:border-krib-lime focus:ring-krib-lime focus:ring-2 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+                      className="pl-10 h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20 transition-all duration-200 bg-gray-50/50 focus:bg-white"
                       value={signUpData.name}
                       onChange={(e) => setSignUpData(prev => ({ ...prev, name: e.target.value }))}
                       required
@@ -240,14 +240,14 @@ export function AuthForm() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-email" className="text-sm font-semibold text-krib-black">Email</Label>
+                  <Label htmlFor="signup-email" className="text-sm font-medium text-gray-700">Email</Label>
                   <div className="relative">
-                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="signup-email"
                       type="email"
                       placeholder="Enter your email"
-                      className="pl-10 h-12 border-2 border-krib-lime/10 focus:border-krib-lime focus:ring-krib-lime focus:ring-2 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+                      className="pl-10 h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20 transition-all duration-200 bg-gray-50/50 focus:bg-white"
                       value={signUpData.email}
                       onChange={(e) => setSignUpData(prev => ({ ...prev, email: e.target.value }))}
                       required
@@ -256,14 +256,14 @@ export function AuthForm() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-password" className="text-sm font-semibold text-krib-black">Password</Label>
+                  <Label htmlFor="signup-password" className="text-sm font-medium text-gray-700">Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="signup-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Create a password"
-                      className="pl-10 pr-10 h-12 border-2 border-krib-lime/10 focus:border-krib-lime focus:ring-krib-lime focus:ring-2 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+                      className="pl-10 pr-10 h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20 transition-all duration-200 bg-gray-50/50 focus:bg-white"
                       value={signUpData.password}
                       onChange={(e) => setSignUpData(prev => ({ ...prev, password: e.target.value }))}
                       required
@@ -272,7 +272,7 @@ export function AuthForm() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0"
+                      className="absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 text-gray-400 hover:text-gray-600 rounded-lg"
                       onClick={() => setShowPassword(!showPassword)}
                     >
                       {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
@@ -281,14 +281,14 @@ export function AuthForm() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="signup-confirm-password" className="text-sm font-semibold text-krib-black">Confirm Password</Label>
+                  <Label htmlFor="signup-confirm-password" className="text-sm font-medium text-gray-700">Confirm Password</Label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
                     <Input
                       id="signup-confirm-password"
                       type={showPassword ? "text" : "password"}
                       placeholder="Confirm your password"
-                      className="pl-10 h-12 border-2 border-krib-lime/10 focus:border-krib-lime focus:ring-krib-lime focus:ring-2 transition-all duration-300 bg-white/90 backdrop-blur-sm shadow-lg"
+                      className="pl-10 h-12 rounded-xl border-gray-200 focus:border-krib-lime focus:ring-2 focus:ring-krib-lime/20 transition-all duration-200 bg-gray-50/50 focus:bg-white"
                       value={signUpData.confirmPassword}
                       onChange={(e) => setSignUpData(prev => ({ ...prev, confirmPassword: e.target.value }))}
                       required
@@ -296,7 +296,7 @@ export function AuthForm() {
                   </div>
                 </div>
                 
-                <Button type="submit" className="w-full h-12 krib-button-primary shadow-xl hover:shadow-2xl" disabled={isSubmitting}>
+                <Button type="submit" className="w-full h-12 rounded-xl krib-button-primary font-medium shadow-lg hover:shadow-xl transition-all duration-200" disabled={isSubmitting}>
                   {isSubmitting ? (
                     <div className="flex items-center gap-2">
                       <div className="animate-spin h-4 w-4 border-2 border-krib-black border-t-transparent rounded-full"></div>
