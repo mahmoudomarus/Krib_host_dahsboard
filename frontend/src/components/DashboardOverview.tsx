@@ -268,6 +268,7 @@ export function DashboardOverview() {
           </CardContent>
         </Card>
       </div>
+      </div>
     </div>
   )
 }
