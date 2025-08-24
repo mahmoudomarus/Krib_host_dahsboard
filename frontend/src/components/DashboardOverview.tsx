@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Building2, TrendingUp, Calendar, DollarSign, Star } from "lucide-react"
+import { Building2, TrendingUp, Calendar, DollarSign, Star, Plus, BarChart3, Settings } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Progress } from "./ui/progress"
 import { Badge } from "./ui/badge"
@@ -84,25 +84,26 @@ export function DashboardOverview() {
     .slice(0, 3)
 
   return (
-    <div className="p-6 space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Dashboard Overview</h1>
-        <p className="text-muted-foreground">
-          Welcome back! Here's what's happening with your rental properties.
-        </p>
-      </div>
+    <div className="krib-background min-h-screen">
+      <div className="p-6 space-y-6 krib-fade-in">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Dashboard Overview</h1>
+          <p className="text-muted-foreground">
+            Welcome back! Here's what's happening with your rental properties.
+          </p>
+        </div>
 
       {/* Stats Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className="analytics-card">
+          <Card key={stat.title} className="krib-card krib-stat-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm">{stat.title}</CardTitle>
-              <stat.icon className={`h-4 w-4 ${stat.color}`} />
+              <CardTitle className="text-sm font-medium text-gray-700">{stat.title}</CardTitle>
+              <stat.icon className={`stat-icon h-5 w-5 ${stat.color}`} />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground">{stat.change}</p>
+              <div className="stat-value text-3xl font-bold mb-2">{stat.value}</div>
+              <p className="text-xs text-gray-500 font-medium">{stat.change}</p>
             </CardContent>
           </Card>
         ))}
@@ -110,10 +111,10 @@ export function DashboardOverview() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Bookings */}
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
-            <CardTitle>Recent Bookings</CardTitle>
-            <CardDescription>Latest reservations for your properties</CardDescription>
+            <CardTitle className="text-gray-800">Recent Bookings</CardTitle>
+            <CardDescription className="text-gray-600">Latest reservations for your properties</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -144,10 +145,10 @@ export function DashboardOverview() {
         </Card>
 
         {/* Top Performing Properties */}
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
-            <CardTitle>Top Performing Properties</CardTitle>
-            <CardDescription>Your best properties by revenue</CardDescription>
+            <CardTitle className="text-gray-800">Top Performing Properties</CardTitle>
+            <CardDescription className="text-gray-600">Your best properties by revenue</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
@@ -189,59 +190,58 @@ export function DashboardOverview() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>Common tasks to manage your properties</CardDescription>
+            <CardTitle className="text-gray-800">Quick Actions</CardTitle>
+            <CardDescription className="text-gray-600">Common tasks to manage your properties</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-2">
+          <CardContent className="space-y-3">
             <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              className="krib-button w-full justify-start h-auto p-4 text-left"
               onClick={() => navigate('/add-property')}
             >
-              <span className="mr-2">📝</span>
+              <Plus className="mr-3 h-4 w-4" />
               Add New Property
             </Button>
             <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              variant="outline" 
+              className="w-full justify-start h-auto p-3 text-left border-lime-200 hover:bg-lime-50"
               onClick={() => navigate('/analytics')}
             >
-              <span className="mr-2">📊</span>
+              <BarChart3 className="mr-3 h-4 w-4 text-lime-600" />
               View Analytics
             </Button>
             <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              variant="outline" 
+              className="w-full justify-start h-auto p-3 text-left border-lime-200 hover:bg-lime-50"
               onClick={() => navigate('/bookings')}
             >
-              <span className="mr-2">📅</span>
+              <Calendar className="mr-3 h-4 w-4 text-lime-600" />
               Manage Bookings
             </Button>
             <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              variant="outline" 
+              className="w-full justify-start h-auto p-3 text-left border-lime-200 hover:bg-lime-50"
               onClick={() => navigate('/financials')}
             >
-              <span className="mr-2">💰</span>
+              <DollarSign className="mr-3 h-4 w-4 text-lime-600" />
               Financial Dashboard
             </Button>
             <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-3 text-left"
+              variant="outline" 
+              className="w-full justify-start h-auto p-3 text-left border-lime-200 hover:bg-lime-50"
               onClick={() => navigate('/settings')}
             >
-              <span className="mr-2">⚙️</span>
+              <Settings className="mr-3 h-4 w-4 text-lime-600" />
               Settings
             </Button>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="krib-card">
           <CardHeader>
-            <CardTitle>Property Performance</CardTitle>
-            <CardDescription>Overall portfolio metrics</CardDescription>
+            <CardTitle className="text-gray-800">Property Performance</CardTitle>
+            <CardDescription className="text-gray-600">Overall portfolio metrics</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">

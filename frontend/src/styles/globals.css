@@ -6,20 +6,33 @@
 
 :root {
   --font-size: 14px;
+  
+  /* Krib Brand Colors */
+  --krib-lime: #B8FF00;
+  --krib-lime-variant: #CBFC50;
+  --krib-lime-soft: rgba(184, 255, 0, 0.1);
+  --krib-lime-medium: rgba(184, 255, 0, 0.2);
+  --krib-lime-glow: rgba(184, 255, 0, 0.3);
+  --krib-black: #111111;
+  --krib-gray-light: #F8F9FA;
+  --krib-gray-medium: #E2E8F0;
+  --krib-gray-dark: #2D3748;
+  
+  /* Updated System Colors */
   --background: #ffffff;
-  --foreground: oklch(0.145 0 0);
+  --foreground: var(--krib-gray-dark);
   --card: #ffffff;
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: #030213;
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.95 0.0058 264.53);
-  --secondary-foreground: #030213;
-  --muted: #ececf0;
+  --card-foreground: var(--krib-gray-dark);
+  --popover: #ffffff;
+  --popover-foreground: var(--krib-gray-dark);
+  --primary: var(--krib-lime);
+  --primary-foreground: var(--krib-black);
+  --secondary: var(--krib-gray-light);
+  --secondary-foreground: var(--krib-gray-dark);
+  --muted: var(--krib-gray-medium);
   --muted-foreground: #717182;
-  --accent: #e9ebef;
-  --accent-foreground: #030213;
+  --accent: var(--krib-lime-soft);
+  --accent-foreground: var(--krib-gray-dark);
   --destructive: #d4183d;
   --destructive-foreground: #ffffff;
   --border: rgba(0, 0, 0, 0.1);
@@ -28,21 +41,26 @@
   --switch-background: #cbced4;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
+  --ring: var(--krib-lime);
+  
+  /* Chart Colors with Krib Theme */
+  --chart-1: var(--krib-lime);
+  --chart-2: var(--krib-lime-variant);
+  --chart-3: #64B5F6;
+  --chart-4: #81C784;
+  --chart-5: #FFB74D;
+  
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: #030213;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #e9ebef;
-  --sidebar-accent-foreground: oklch(0.145 0 0);
-  --sidebar-border: rgba(0, 0, 0, 0.1);
-  --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Krib Sidebar Colors */
+  --sidebar: var(--krib-gray-light);
+  --sidebar-foreground: var(--krib-gray-dark);
+  --sidebar-primary: var(--krib-lime);
+  --sidebar-primary-foreground: var(--krib-black);
+  --sidebar-accent: var(--krib-lime-soft);
+  --sidebar-accent-foreground: var(--krib-gray-dark);
+  --sidebar-border: var(--krib-lime-medium);
+  --sidebar-ring: var(--krib-lime);
 }
 
 .dark {
@@ -331,4 +349,236 @@ html {
   .analytics-card:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   }
+}
+
+/* ========================================
+   🎨 KRIB DESIGN SYSTEM
+   ======================================== */
+
+/* Background Patterns */
+.krib-background {
+  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.krib-background::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    linear-gradient(45deg, var(--krib-lime-soft) 1px, transparent 1px),
+    linear-gradient(-45deg, var(--krib-lime-soft) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.krib-background::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(
+    circle at 20% 80%,
+    var(--krib-lime-soft) 0%,
+    transparent 50%
+  ),
+  radial-gradient(
+    circle at 80% 20%,
+    var(--krib-lime-medium) 0%,
+    transparent 50%
+  );
+  animation: krib-float 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes krib-float {
+  0%, 100% { transform: translate(0px, 0px) rotate(0deg); }
+  33% { transform: translate(30px, -30px) rotate(2deg); }
+  66% { transform: translate(-20px, 20px) rotate(-2deg); }
+}
+
+/* Krib Cards */
+.krib-card {
+  background: #ffffff;
+  border: 1px solid var(--krib-gray-medium);
+  border-bottom: 3px solid var(--krib-lime);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.krib-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--krib-lime), var(--krib-lime-variant));
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.krib-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(184, 255, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  border-bottom-color: var(--krib-lime-variant);
+}
+
+.krib-card:hover::before {
+  transform: scaleX(1);
+}
+
+/* Krib Buttons */
+.krib-button {
+  background: linear-gradient(135deg, var(--krib-lime), var(--krib-lime-variant));
+  color: var(--krib-black);
+  border: none;
+  border-radius: var(--radius);
+  font-weight: 600;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 4px 14px 0 rgba(184, 255, 0, 0.3);
+}
+
+.krib-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.krib-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px 0 rgba(184, 255, 0, 0.4);
+}
+
+.krib-button:hover::before {
+  left: 100%;
+}
+
+/* Krib Sidebar */
+.krib-sidebar {
+  background: var(--sidebar);
+  border-right: 2px solid var(--krib-lime-medium);
+  position: relative;
+}
+
+.krib-sidebar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 3px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--krib-lime), var(--krib-lime-variant));
+  opacity: 0.6;
+}
+
+/* Krib Menu Items */
+.krib-menu-item {
+  transition: all 0.3s ease;
+  border-radius: var(--radius);
+  margin: 0.25rem 0.5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.krib-menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--krib-lime-soft);
+  transition: left 0.3s ease;
+  z-index: 0;
+}
+
+.krib-menu-item:hover::before {
+  left: 0;
+}
+
+.krib-menu-item.active {
+  background: var(--krib-lime-soft);
+  color: var(--krib-black);
+  font-weight: 600;
+}
+
+.krib-menu-item.active::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 4px;
+  height: 60%;
+  background: var(--krib-lime);
+  transform: translateY(-50%);
+  border-radius: 0 2px 2px 0;
+}
+
+/* Krib Animations */
+.krib-fade-in {
+  animation: kribFadeIn 0.6s ease-out;
+}
+
+@keyframes kribFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.krib-glow {
+  box-shadow: 0 0 20px var(--krib-lime-glow);
+}
+
+/* Progress Bars */
+.krib-progress {
+  background: var(--krib-gray-medium);
+}
+
+.krib-progress .progress-fill {
+  background: linear-gradient(90deg, var(--krib-lime), var(--krib-lime-variant));
+  box-shadow: 0 2px 8px rgba(184, 255, 0, 0.3);
+}
+
+/* Stats Cards */
+.krib-stat-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fafffe 100%);
+  border: 1px solid var(--krib-gray-medium);
+  border-left: 4px solid var(--krib-lime);
+}
+
+.krib-stat-card .stat-icon {
+  color: var(--krib-lime);
+  filter: drop-shadow(0 2px 4px rgba(184, 255, 0, 0.3));
+}
+
+.krib-stat-card .stat-value {
+  background: linear-gradient(135deg, var(--krib-lime), var(--krib-lime-variant));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
 }
