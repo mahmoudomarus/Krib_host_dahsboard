@@ -23,6 +23,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=PropertyResponse)
+@router.post("", response_model=PropertyResponse)
 async def create_property(
     property_data: PropertyCreate,
     background_tasks: BackgroundTasks,

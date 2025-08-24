@@ -16,6 +16,17 @@ module.exports = {
     },
     extend: {
       colors: {
+        // Krib Brand Colors
+        'krib-lime': 'var(--krib-lime)',
+        'krib-lime-light': 'var(--krib-lime-light)',
+        'krib-lime-soft': 'var(--krib-lime-soft)',
+        'krib-lime-medium': 'var(--krib-lime-medium)',
+        'krib-black': 'var(--krib-black)',
+        'krib-gray-light': 'var(--krib-gray-light)',
+        'krib-gray-medium': 'var(--krib-gray-medium)',
+        'krib-gray-dark': 'var(--krib-gray-dark)',
+        
+        // Base Tailwind Colors
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
