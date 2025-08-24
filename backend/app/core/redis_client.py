@@ -25,26 +25,21 @@ class RedisClient:
             # Parse Redis URL
             redis_url = settings.redis_url
             
-            # Create connection pool with Upstash SSL support
-            pool_kwargs = {
-                "encoding": "utf-8",
-                "decode_responses": True,
-                "max_connections": 20,
-                "retry_on_timeout": True,
-                "socket_keepalive": True,
-                "socket_keepalive_options": {}
-            }
+            # Convert redis:// to rediss:// for Upstash SSL
+            if "upstash.io" in redis_url and redis_url.startswith("redis://"):
+                redis_url = redis_url.replace("redis://", "rediss://")
+                logger.info(f"Using SSL Redis URL for Upstash: {redis_url.split('@')[0]}@***")
             
-            # Add SSL support for Upstash (proper way for redis-py 5.x)
-            if "upstash.io" in redis_url:
-                import ssl
-                pool_kwargs["ssl"] = True
-                pool_kwargs["ssl_cert_reqs"] = ssl.CERT_NONE
-                pool_kwargs["ssl_check_hostname"] = False
-            
+            # Create connection pool - simple approach for Upstash
+            # Let redis-py handle SSL automatically from the URL
             self.redis_pool = redis.ConnectionPool.from_url(
                 redis_url,
-                **pool_kwargs
+                encoding="utf-8",
+                decode_responses=True,
+                max_connections=20,
+                retry_on_timeout=True,
+                socket_keepalive=True,
+                socket_keepalive_options={}
             )
             
             # Test connection

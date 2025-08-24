@@ -44,7 +44,7 @@ sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.0
 
 # Redis for caching and sessions
-redis>=4.5.0
+redis>=4.5.0,<5.0.0
 hiredis>=2.0.0
 
 # Background jobs and task queue
