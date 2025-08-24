@@ -7,17 +7,26 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, date
 from decimal import Decimal
 from enum import Enum
+from app.constants.uae_locations import UAE_EMIRATES, validate_uae_location, UAE_PROPERTY_TYPES
 
 
 # Enums
 class PropertyType(str, Enum):
     apartment = "apartment"
-    house = "house"
-    condo = "condo"
     villa = "villa"
+    townhouse = "townhouse"
+    penthouse = "penthouse"
     studio = "studio"
-    cabin = "cabin"
-    other = "other"
+    duplex = "duplex"
+    loft = "loft"
+    compound = "compound"
+    chalet = "chalet"
+    hotel_apartment = "hotel_apartment"
+    whole_building = "whole_building"
+    office = "office"
+    retail = "retail"
+    warehouse = "warehouse"
+    land = "land"
 
 
 class PropertyStatus(str, Enum):
@@ -111,16 +120,16 @@ class PropertyCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=200)
     description: Optional[str] = Field(None, max_length=2000)
     address: str = Field(..., min_length=5, max_length=500)
-    city: str = Field(..., min_length=1, max_length=100)
-    state: str = Field(..., min_length=1, max_length=100)
-    country: str = Field(..., min_length=1, max_length=100)
+    city: str = Field(..., min_length=1, max_length=100, description="Area/City within the emirate")
+    state: str = Field(..., min_length=1, max_length=100, description="UAE Emirate (Dubai, Abu Dhabi, etc.)")
+    country: str = Field(default="UAE", description="Country code - defaults to UAE")
     latitude: Optional[float] = Field(None, ge=-90, le=90)
     longitude: Optional[float] = Field(None, ge=-180, le=180)
     property_type: PropertyType
     bedrooms: int = Field(..., ge=0, le=20)
     bathrooms: float = Field(..., ge=0, le=20)
     max_guests: int = Field(..., ge=1, le=50)
-    price_per_night: float = Field(..., gt=0, le=10000)
+    price_per_night: float = Field(..., gt=0, le=50000)  # Increased for Dubai luxury market
     amenities: List[str] = []
     images: List[str] = []
     
@@ -129,6 +138,32 @@ class PropertyCreate(BaseModel):
         # Allow half bathrooms (0.5, 1.5, etc.)
         if v * 2 != int(v * 2):
             raise ValueError('Bathrooms must be whole or half numbers (e.g., 1, 1.5, 2)')
+        return v
+    
+    @validator('country')
+    def validate_country(cls, v):
+        # Ensure country is UAE for this system
+        if v.upper() not in ['UAE', 'UNITED ARAB EMIRATES']:
+            return 'UAE'
+        return 'UAE'
+    
+    @validator('state')
+    def validate_emirate(cls, v):
+        # Validate that the emirate exists
+        if v not in UAE_EMIRATES:
+            raise ValueError(f'Invalid emirate. Must be one of: {", ".join(UAE_EMIRATES.keys())}')
+        return v
+    
+    @validator('city')
+    def validate_city_area(cls, v, values):
+        # Validate city/area exists in the specified emirate
+        if 'state' in values and values['state']:
+            emirate = values['state']
+            if emirate in UAE_EMIRATES:
+                valid_areas = UAE_EMIRATES[emirate]['major_areas']
+                if v not in valid_areas:
+                    # Allow custom areas but warn in logs
+                    pass  # Could log this for monitoring
         return v
 
 

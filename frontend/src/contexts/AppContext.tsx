@@ -154,7 +154,21 @@ interface AppContextType {
   updatePayoutSettings: (settings: any) => Promise<any>
   
   // Settings methods
-  updateUserSettings: (settings: Partial<User>) => Promise<void>
+  getUserProfile: () => Promise<User>
+  updateUserProfile: (updates: Partial<User>) => Promise<User>
+  updateUserSettings: (settings: any) => Promise<void>
+  changePassword: (currentPassword: string, newPassword: string, confirmPassword: string) => Promise<void>
+  getUserNotifications: () => Promise<any>
+  updateUserNotifications: (notifications: any) => Promise<void>
+  
+  // UAE Location methods
+  getUAEEmirates: () => Promise<any>
+  getEmirateAreas: (emirate: string) => Promise<string[]>
+  getPopularLocations: () => Promise<string[]>
+  searchLocations: (query: string) => Promise<any>
+  validateLocation: (emirate: string, area?: string) => Promise<any>
+  getUAEAmenities: () => Promise<string[]>
+  getUAEPropertyTypes: () => Promise<any>
 }
 
 const AppContext = createContext<AppContextType | null>(null)
@@ -244,8 +258,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           id: session.user.id,
           email: session.user.email || '',
           name: session.user.user_metadata?.full_name || session.user.email || 'User',
-          created_at: session.user.created_at,
-          updated_at: session.user.updated_at || session.user.created_at
+          created_at: session.user.created_at
         })
         
         // Load user data from Supabase directly instead of backend
@@ -581,6 +594,73 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // UAE Location Services
+  async function getUAEEmirates(): Promise<any> {
+    try {
+      return await makeAPIRequest('/locations/emirates')
+    } catch (error) {
+      console.error('Get UAE emirates error:', error)
+      throw error
+    }
+  }
+
+  async function getEmirateAreas(emirate: string): Promise<string[]> {
+    try {
+      return await makeAPIRequest(`/locations/emirates/${emirate}/areas`)
+    } catch (error) {
+      console.error('Get emirate areas error:', error)
+      throw error
+    }
+  }
+
+  async function getPopularLocations(): Promise<string[]> {
+    try {
+      return await makeAPIRequest('/locations/popular')
+    } catch (error) {
+      console.error('Get popular locations error:', error)
+      throw error
+    }
+  }
+
+  async function searchLocations(query: string): Promise<any> {
+    try {
+      return await makeAPIRequest(`/locations/search?q=${encodeURIComponent(query)}`)
+    } catch (error) {
+      console.error('Search locations error:', error)
+      throw error
+    }
+  }
+
+  async function validateLocation(emirate: string, area?: string): Promise<any> {
+    try {
+      const params = new URLSearchParams({ emirate })
+      if (area) params.append('area', area)
+      
+      return await makeAPIRequest(`/locations/validate?${params.toString()}`)
+    } catch (error) {
+      console.error('Validate location error:', error)
+      throw error
+    }
+  }
+
+  async function getUAEAmenities(): Promise<string[]> {
+    try {
+      return await makeAPIRequest('/locations/amenities')
+    } catch (error) {
+      console.error('Get UAE amenities error:', error)
+      throw error
+    }
+  }
+
+  async function getUAEPropertyTypes(): Promise<any> {
+    try {
+      return await makeAPIRequest('/locations/property-types')
+    } catch (error) {
+      console.error('Get UAE property types error:', error)
+      throw error
+    }
+  }
+
   const contextValue: AppContextType = {
     // State
     user,
@@ -624,6 +704,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
     changePassword,
     getUserNotifications,
     updateUserNotifications,
+    
+    // UAE Location methods
+    getUAEEmirates,
+    getEmirateAreas,
+    getPopularLocations,
+    searchLocations,
+    validateLocation,
+    getUAEAmenities,
+    getUAEPropertyTypes,
   }
 
   return (

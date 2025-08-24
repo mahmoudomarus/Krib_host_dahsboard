@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { ArrowLeft, ArrowRight, Bot, Upload, Check, MapPin, Home, Camera, Sparkles, X, Plus, Star, AlertCircle, Building, FileText, DollarSign } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
@@ -32,42 +32,40 @@ interface PropertyData {
   amenities: string[]
 }
 
-const amenitiesList = [
-  "WiFi", "Kitchen", "Washing Machine", "Air Conditioning", "Heating", "TV", "Parking",
-  "Pool", "Hot Tub", "Gym", "Balcony", "Garden", "Pet Friendly", "Fireplace", 
-  "Elevator", "Wheelchair Accessible", "Beach Access", "Mountain View", "Ocean View",
-  "City View", "Workspace", "Coffee Maker", "Dishwasher", "Microwave", "Oven"
-]
-
-const propertyTypes = [
-  { value: "apartment", label: "Apartment" },
-  { value: "house", label: "House" }, 
-  { value: "condo", label: "Condominium" },
-  { value: "villa", label: "Villa" },
-  { value: "studio", label: "Studio" },
-  { value: "cabin", label: "Cabin" },
-  { value: "other", label: "Other" }
-]
+// UAE-specific amenities and property types are loaded from the backend via useEffect
 
 export function AddPropertyWizard() {
-  const { createProperty, generateAIDescription } = useApp()
+  const { 
+    createProperty, 
+    generateAIDescription, 
+    getUAEEmirates, 
+    getEmirateAreas, 
+    getUAEPropertyTypes, 
+    getUAEAmenities 
+  } = useApp()
   const navigate = useNavigate()
   const [currentStep, setCurrentStep] = useState<WizardStep>('basic-info')
   const [isPublishing, setIsPublishing] = useState(false)
   const [isGeneratingDescription, setIsGeneratingDescription] = useState(false)
   const [isUploadingImages, setIsUploadingImages] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
+  const [uaeEmirates, setUAEEmirates] = useState<any[]>([])
+  const [availableAreas, setAvailableAreas] = useState<string[]>([])
+  const [uaePropertyTypes, setUAEPropertyTypes] = useState<any>({})
+  const [uaeAmenities, setUAEAmenities] = useState<string[]>([])
+  const [isLoadingAreas, setIsLoadingAreas] = useState(false)
+  
   const [propertyData, setPropertyData] = useState<PropertyData>({
     title: '',
     address: '',
     city: '',
     state: '',
-    country: 'USA',
+    country: 'UAE',
     property_type: '',
     bedrooms: 1,
     bathrooms: 1,
     max_guests: 2,
-    price_per_night: 100,
+    price_per_night: 500, // Higher default for UAE market
     description: '',
     images: [],
     amenities: []
@@ -81,6 +79,56 @@ export function AddPropertyWizard() {
     { id: 'pricing', title: 'Pricing', icon: DollarSign, description: 'Set your rate' },
     { id: 'preview', title: 'Preview', icon: Check, description: 'Review & publish' },
   ]
+
+  // Load UAE data on component mount
+  useEffect(() => {
+    loadUAEData()
+  }, [])
+
+  // Load areas when emirate changes
+  useEffect(() => {
+    if (propertyData.state) {
+      loadEmirateAreas(propertyData.state)
+    }
+  }, [propertyData.state])
+
+  const loadUAEData = async () => {
+    try {
+      const [emirates, propertyTypes, amenities] = await Promise.all([
+        getUAEEmirates(),
+        getUAEPropertyTypes(),
+        getUAEAmenities()
+      ])
+      
+      setUAEEmirates(emirates)
+      setUAEPropertyTypes(propertyTypes)
+      setUAEAmenities(amenities)
+    } catch (error) {
+      console.error('Failed to load UAE data:', error)
+    }
+  }
+
+  const loadEmirateAreas = async (emirate: string) => {
+    setIsLoadingAreas(true)
+    try {
+      const areas = await getEmirateAreas(emirate)
+      setAvailableAreas(areas)
+    } catch (error) {
+      console.error('Failed to load emirate areas:', error)
+      setAvailableAreas([])
+    } finally {
+      setIsLoadingAreas(false)
+    }
+  }
+
+  const handleEmirateChange = (value: string) => {
+    setPropertyData(prev => ({ 
+      ...prev, 
+      state: value,
+      city: '' // Reset city when emirate changes
+    }))
+    setErrors(prev => ({ ...prev, state: '', city: '' }))
+  }
 
   const currentStepIndex = steps.findIndex(step => step.id === currentStep)
   const progress = ((currentStepIndex + 1) / steps.length) * 100
@@ -239,7 +287,7 @@ export function AddPropertyWizard() {
         description: propertyData.description,
         images: propertyData.images,
         amenities: propertyData.amenities,
-        status: 'active'
+        status: 'active' as const
       }
 
       console.log('Sending payload to backend:', propertyPayload)
@@ -274,19 +322,19 @@ export function AddPropertyWizard() {
             <div className="grid gap-6 md:grid-cols-2">
               <div className="md:col-span-2">
                 <Label htmlFor="title">Property Title *</Label>
-                <Input
-                  id="title"
-                  placeholder="e.g., Cozy Downtown Apartment"
-                  value={propertyData.title}
-                  onChange={(e) => setPropertyData(prev => ({ ...prev, title: e.target.value }))}
+                  <Input 
+                    id="title"
+                    placeholder="e.g., Cozy Downtown Apartment"
+                    value={propertyData.title}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, title: e.target.value }))}
                   className={`input-enhanced ${errors.title ? 'border-red-500' : ''}`}
-                />
+                  />
                 {errors.title && <p className="text-red-500 text-sm mt-1">{errors.title}</p>}
-              </div>
+                </div>
               
               <div className="md:col-span-2">
                 <Label htmlFor="address">Address *</Label>
-                <Input
+                  <Input 
                   id="address"
                   placeholder="123 Main Street"
                   value={propertyData.address}
@@ -297,55 +345,73 @@ export function AddPropertyWizard() {
               </div>
               
               <div>
-                <Label htmlFor="city">City *</Label>
-                <Input
-                  id="city"
-                  placeholder="San Francisco"
-                  value={propertyData.city}
-                  onChange={(e) => setPropertyData(prev => ({ ...prev, city: e.target.value }))}
-                  className={errors.city ? 'border-red-500' : ''}
-                />
-                {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
-              </div>
+                <Label htmlFor="state">Emirate *</Label>
+                <Select value={propertyData.state} onValueChange={handleEmirateChange}>
+                  <SelectTrigger className={errors.state ? 'border-red-500' : ''}>
+                    <SelectValue placeholder="Select Emirate" />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {uaeEmirates.map((emirate) => (
+                      <SelectItem key={emirate.value} value={emirate.value}>
+                        {emirate.label}
+                      </SelectItem>
+                    ))}
+                    </SelectContent>
+                  </Select>
+                {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
+                </div>
               
               <div>
-                <Label htmlFor="state">State *</Label>
-                <Input
-                  id="state"
-                  placeholder="CA"
-                  value={propertyData.state}
-                  onChange={(e) => setPropertyData(prev => ({ ...prev, state: e.target.value }))}
-                  className={errors.state ? 'border-red-500' : ''}
-                />
-                {errors.state && <p className="text-red-500 text-sm mt-1">{errors.state}</p>}
-              </div>
+                <Label htmlFor="city">Area/City *</Label>
+                <Select 
+                  value={propertyData.city} 
+                  onValueChange={(value) => setPropertyData(prev => ({ ...prev, city: value }))}
+                  disabled={!propertyData.state || isLoadingAreas}
+                >
+                  <SelectTrigger className={errors.city ? 'border-red-500' : ''}>
+                    <SelectValue placeholder={
+                      !propertyData.state ? "Select Emirate first" : 
+                      isLoadingAreas ? "Loading areas..." : 
+                      "Select Area/City"
+                    } />
+                    </SelectTrigger>
+                    <SelectContent>
+                    {availableAreas.map((area) => (
+                      <SelectItem key={area} value={area}>
+                        {area}
+                      </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                {errors.city && <p className="text-red-500 text-sm mt-1">{errors.city}</p>}
+                </div>
               
               <div>
                 <Label htmlFor="country">Country</Label>
                 <Select value={propertyData.country} onValueChange={(value) => setPropertyData(prev => ({ ...prev, country: value }))}>
-                  <SelectTrigger>
+                    <SelectTrigger>
                     <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="USA">United States</SelectItem>
-                    <SelectItem value="Canada">Canada</SelectItem>
-                    <SelectItem value="UK">United Kingdom</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                    </SelectTrigger>
+                    <SelectContent>
+                    <SelectItem value="UAE">United Arab Emirates 🇦🇪</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               
               <div>
                 <Label htmlFor="property_type">Property Type *</Label>
                 <Select value={propertyData.property_type} onValueChange={(value) => setPropertyData(prev => ({ ...prev, property_type: value }))}>
                   <SelectTrigger className={errors.property_type ? 'border-red-500' : ''}>
                     <SelectValue placeholder="Select type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {propertyTypes.map(type => (
-                      <SelectItem key={type.value} value={type.value}>{type.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                    </SelectTrigger>
+                    <SelectContent>
+                    {Object.entries(uaePropertyTypes).map(([key, label]) => (
+                      <SelectItem key={key} value={key}>
+                        {label as string}
+                      </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 {errors.property_type && <p className="text-red-500 text-sm mt-1">{errors.property_type}</p>}
               </div>
             </div>
@@ -358,12 +424,12 @@ export function AddPropertyWizard() {
             <div className="text-center mb-6">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Property Details</h2>
               <p className="text-gray-600">Help guests understand your space</p>
-            </div>
-            
+              </div>
+              
             <div className="grid gap-6 md:grid-cols-3">
               <div>
                 <Label htmlFor="bedrooms">Bedrooms</Label>
-                <Input
+                <Input 
                   id="bedrooms"
                   type="number"
                   min="0"
@@ -399,9 +465,9 @@ export function AddPropertyWizard() {
                   className={errors.max_guests ? 'border-red-500' : ''}
                 />
                 {errors.max_guests && <p className="text-red-500 text-sm mt-1">{errors.max_guests}</p>}
-              </div>
-            </div>
-          </div>
+                  </div>
+                  </div>
+                </div>
         )
 
       case 'images':
@@ -417,32 +483,32 @@ export function AddPropertyWizard() {
               <h3 className="text-lg font-medium text-gray-900 mb-2">Upload Photos</h3>
               <p className="text-gray-600 mb-4">Add up to 10 high-quality photos of your property</p>
               <Button onClick={handleImageUpload} size="lg" disabled={isUploadingImages} className="krib-button-primary">
-                <Upload className="h-4 w-4 mr-2" />
+                    <Upload className="h-4 w-4 mr-2" />
                 {isUploadingImages ? 'Uploading...' : 'Choose Photos'}
-              </Button>
+                  </Button>
               {errors.images && <p className="text-red-500 text-sm mt-2">{errors.images}</p>}
-            </div>
+                </div>
             
             {propertyData.images.length > 0 && (
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {propertyData.images.map((image, index) => (
+                    {propertyData.images.map((image, index) => (
                   <div key={index} className="relative group">
-                    <img 
-                      src={image} 
-                      alt={`Property ${index + 1}`}
-                      className="w-full h-32 object-cover rounded-lg"
-                    />
+                        <img 
+                          src={image} 
+                          alt={`Property ${index + 1}`}
+                          className="w-full h-32 object-cover rounded-lg"
+                        />
                     <button
                       onClick={() => removeImage(index)}
                       className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <X className="h-4 w-4" />
                     </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
             )}
-          </div>
+                </div>
         )
 
       case 'amenities':
@@ -454,7 +520,7 @@ export function AddPropertyWizard() {
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-              {amenitiesList.map((amenity) => (
+              {uaeAmenities.map((amenity) => (
                 <div
                   key={amenity}
                   onClick={() => toggleAmenity(amenity)}
@@ -471,9 +537,9 @@ export function AddPropertyWizard() {
                     />
                     <span className="text-sm font-medium">{amenity}</span>
                   </div>
-                </div>
-              ))}
-            </div>
+                  </div>
+                ))}
+              </div>
           </div>
         )
 
@@ -486,16 +552,16 @@ export function AddPropertyWizard() {
             </div>
             
             <div className="max-w-md mx-auto">
-              <Label htmlFor="price_per_night">Price per Night (USD)</Label>
+              <Label htmlFor="price_per_night">Price per Night (AED)</Label>
               <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">AED</span>
                 <Input
                   id="price_per_night"
                   type="number"
                   min="1"
                   value={propertyData.price_per_night}
                   onChange={(e) => setPropertyData(prev => ({ ...prev, price_per_night: parseInt(e.target.value) || 1 }))}
-                  className={`pl-8 text-lg ${errors.price_per_night ? 'border-red-500' : ''}`}
+                  className={`pl-14 text-lg ${errors.price_per_night ? 'border-red-500' : ''}`}
                 />
               </div>
               {errors.price_per_night && <p className="text-red-500 text-sm mt-1">{errors.price_per_night}</p>}
@@ -564,7 +630,7 @@ export function AddPropertyWizard() {
                     <span>{propertyData.bedrooms} bed</span>
                     <span>{propertyData.bathrooms} bath</span>
                     <span>{propertyData.max_guests} guests</span>
-                    <span className="font-bold text-gray-900">${propertyData.price_per_night}/night</span>
+                    <span className="font-bold text-gray-900">AED {propertyData.price_per_night}/night</span>
                   </div>
                   
                   {propertyData.images.length > 0 && (
@@ -583,12 +649,12 @@ export function AddPropertyWizard() {
                   <p className="text-gray-700">{propertyData.description}</p>
                   
                   {propertyData.amenities.length > 0 && (
-                    <div>
-                      <h4 className="font-medium mb-2">Amenities</h4>
-                      <div className="flex flex-wrap gap-2">
+                  <div>
+                    <h4 className="font-medium mb-2">Amenities</h4>
+                    <div className="flex flex-wrap gap-2">
                         {propertyData.amenities.map((amenity) => (
-                          <Badge key={amenity} variant="secondary">{amenity}</Badge>
-                        ))}
+                        <Badge key={amenity} variant="secondary">{amenity}</Badge>
+                      ))}
                       </div>
                     </div>
                   )}
@@ -607,22 +673,22 @@ export function AddPropertyWizard() {
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">🎉 Property Published!</h2>
               <p className="text-gray-600">Your property is now live and ready to receive bookings.</p>
-            </div>
+              </div>
             <div className="space-y-3">
               <Button 
                 onClick={() => setCurrentStep('basic-info')} 
                 variant="outline"
                 className="w-full h-12 rounded-xl border-2 hover:bg-gray-50"
               >
-                Add Another Property
-              </Button>
+                  Add Another Property
+                </Button>
               <Button 
                 onClick={() => navigate('/properties')}
                 className="w-full h-12 rounded-xl krib-button-primary"
               >
                 View My Properties
-              </Button>
-            </div>
+                </Button>
+              </div>
           </div>
         )
 

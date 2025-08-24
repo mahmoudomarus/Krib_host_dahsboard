@@ -101,7 +101,7 @@ export function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center krib-paint-splash-background p-4">
+    <div className="min-h-screen flex items-center justify-center krib-auth-real-estate-background p-4">
       <Card className="w-full max-w-md krib-card krib-glow backdrop-blur-sm border border-white/20 shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
