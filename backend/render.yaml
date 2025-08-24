@@ -34,11 +34,11 @@ services:
       - key: JWT_SECRET_KEY
         generateValue: true
       - key: REDIS_URL
-        value: "redis://default:AaaPAAIncDFiODQ4YzM0NDE5MDg0ODg1ODRlNTVmNzA4ZTcxMzY0ZHAxNDI2Mzk@brief-macaque-42639.upstash.io:6379"
+        fromSecret: true
       - key: UPSTASH_REDIS_REST_URL
-        value: "https://brief-macaque-42639.upstash.io"
+        fromSecret: true
       - key: UPSTASH_REDIS_REST_TOKEN
-        value: "AaaPAAIncDFiODQ4YzM0NDE5MDg0ODg1ODRlNTVmNzA4ZTcxMzY0ZHAxNDI2Mzk"
+        fromSecret: true
       - key: SENTRY_DSN
         fromSecret: true
       - key: ENABLE_METRICS
