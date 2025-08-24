@@ -35,11 +35,12 @@ class RedisClient:
                 "socket_keepalive_options": {}
             }
             
-            # Add SSL support for Upstash
+            # Add SSL support for Upstash (proper way for redis-py 5.x)
             if "upstash.io" in redis_url:
-                pool_kwargs["ssl_cert_reqs"] = None
+                import ssl
+                pool_kwargs["ssl"] = True
+                pool_kwargs["ssl_cert_reqs"] = ssl.CERT_NONE
                 pool_kwargs["ssl_check_hostname"] = False
-                pool_kwargs["ssl_ca_certs"] = None
             
             self.redis_pool = redis.ConnectionPool.from_url(
                 redis_url,
