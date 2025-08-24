@@ -102,7 +102,18 @@ export function AuthForm() {
 
   return (
     <div className="min-h-screen flex items-center justify-center krib-auth-real-estate-background p-4">
-      <Card className="w-full max-w-md krib-card krib-glow backdrop-blur-sm border border-white/20 shadow-2xl">
+      {/* Realistic Ink Splashes */}
+      <div className="ink-splash-1"></div>
+      <div className="ink-splash-2"></div>
+      <div className="ink-droplet-1"></div>
+      <div className="ink-droplet-2"></div>
+      <div className="ink-droplet-3"></div>
+      <div className="ink-brush-1"></div>
+      <div className="ink-fine-1"></div>
+      <div className="ink-fine-2"></div>
+      <div className="ink-fine-3"></div>
+      
+      <Card className="w-full max-w-md krib-card krib-glow backdrop-blur-sm border border-white/20 shadow-2xl relative z-10">
         <CardHeader className="text-center">
           <div className="flex justify-center mb-4">
             <div className="flex h-16 w-16 items-center justify-center rounded-xl krib-logo-container">

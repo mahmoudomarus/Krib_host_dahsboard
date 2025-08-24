@@ -590,49 +590,19 @@ html {
   background-attachment: scroll;
 }
 
-/* Enhanced Auth Background with Real Estate Elements */
+/* Enhanced Auth Background with Realistic Ink Splashes */
 .krib-auth-real-estate-background {
   background: 
-    /* Real estate themed ink splashes */
-    radial-gradient(circle at 20% 30%, rgba(184, 255, 0, 0.15) 0%, transparent 60%),
-    radial-gradient(circle at 80% 70%, rgba(17, 17, 17, 0.12) 0%, transparent 65%),
-    radial-gradient(circle at 60% 20%, rgba(203, 252, 80, 0.18) 0%, transparent 55%),
-    radial-gradient(circle at 30% 85%, rgba(184, 255, 0, 0.20) 0%, transparent 70%),
-    
-    /* Property silhouette shadows */
-    radial-gradient(ellipse 400px 200px at 90% 10%, rgba(17, 17, 17, 0.08) 0%, transparent 80%),
-    radial-gradient(ellipse 300px 150px at 10% 90%, rgba(17, 17, 17, 0.06) 0%, transparent 75%),
-    
-    /* Floating real estate elements */
-    radial-gradient(circle at 70% 40%, rgba(184, 255, 0, 0.10) 0%, transparent 30%),
-    radial-gradient(circle at 40% 60%, rgba(203, 252, 80, 0.12) 0%, transparent 35%),
-    
-    /* Base paint splash pattern */
-    radial-gradient(circle at 15% 25%, rgba(184, 255, 0, 0.06) 0%, transparent 45%),
-    radial-gradient(circle at 85% 75%, rgba(17, 17, 17, 0.08) 0%, transparent 50%),
-    
-    /* Subtle property grid pattern */
-    repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 120px,
-      rgba(184, 255, 0, 0.015) 120px,
-      rgba(184, 255, 0, 0.015) 122px
-    ),
-    repeating-linear-gradient(
-      90deg,
-      transparent,
-      transparent 120px,
-      rgba(17, 17, 17, 0.010) 120px,
-      rgba(17, 17, 17, 0.010) 122px
-    );
+    /* Subtle base gradients */
+    radial-gradient(circle at 15% 25%, rgba(184, 255, 0, 0.03) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(17, 17, 17, 0.04) 0%, transparent 50%);
   
   background-repeat: no-repeat;
   background-attachment: scroll;
   position: relative;
 }
 
-/* Floating real estate icons */
+/* Realistic Ink Splashes using CSS clip-path */
 .krib-auth-real-estate-background::before {
   content: '';
   position: absolute;
@@ -640,12 +610,177 @@ html {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    /* Subtle building silhouettes */
-    linear-gradient(transparent 70%, rgba(17, 17, 17, 0.03) 70%, rgba(17, 17, 17, 0.03) 75%, transparent 75%),
-    linear-gradient(90deg, transparent 85%, rgba(184, 255, 0, 0.04) 85%, rgba(184, 255, 0, 0.04) 90%, transparent 90%);
-  background-size: 100% 200px, 150px 100%;
-  background-position: bottom, right;
-  background-repeat: no-repeat;
   pointer-events: none;
+  z-index: 0;
+}
+
+/* Large organic ink splash - top right */
+.krib-auth-real-estate-background::after {
+  content: '';
+  position: absolute;
+  top: 15%;
+  right: 10%;
+  width: 120px;
+  height: 80px;
+  background-color: var(--krib-lime);
+  opacity: 0.06;
+  transform: rotate(-25deg);
+  clip-path: polygon(20% 5%, 75% 0%, 90% 25%, 95% 60%, 85% 85%, 60% 95%, 25% 90%, 10% 70%, 5% 40%, 15% 15%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ink Splash Collection - Layered approach */
+.krib-auth-real-estate-background .ink-splash-1 {
+  position: absolute;
+  top: 25%;
+  left: 8%;
+  width: 160px;
+  height: 100px;
+  background-color: var(--krib-black);
+  opacity: 0.08;
+  transform: rotate(12deg);
+  clip-path: polygon(15% 5%, 75% 0%, 90% 30%, 85% 70%, 70% 90%, 30% 95%, 10% 65%, 5% 25%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Brush stroke extending from main splash */
+.krib-auth-real-estate-background .ink-splash-1::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 15px;
+  width: 40px;
+  height: 8px;
+  background-color: var(--krib-black);
+  opacity: 0.7;
+  transform: rotate(30deg);
+  clip-path: polygon(0% 20%, 80% 0%, 100% 80%, 20% 100%);
+}
+
+/* Secondary brush stroke */
+.krib-auth-real-estate-background .ink-splash-1::after {
+  content: '';
+  position: absolute;
+  top: 25px;
+  right: -20px;
+  width: 56px;
+  height: 12px;
+  background-color: var(--krib-black);
+  opacity: 0.6;
+  transform: rotate(-20deg);
+  clip-path: polygon(0% 50%, 85% 0%, 100% 30%, 90% 100%, 15% 80%);
+}
+
+/* Medium lime splash - bottom right */
+.krib-auth-real-estate-background .ink-splash-2 {
+  position: absolute;
+  bottom: 30%;
+  right: 20%;
+  width: 80px;
+  height: 60px;
+  background-color: var(--krib-lime);
+  opacity: 0.1;
+  transform: rotate(45deg);
+  clip-path: polygon(25% 0%, 70% 15%, 95% 45%, 80% 75%, 50% 90%, 20% 85%, 5% 50%, 10% 20%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Small droplets scattered */
+.krib-auth-real-estate-background .ink-droplet-1 {
+  position: absolute;
+  top: 60%;
+  left: 15%;
+  width: 12px;
+  height: 8px;
+  background-color: var(--krib-lime);
+  opacity: 0.08;
+  transform: rotate(60deg);
+  clip-path: polygon(0% 30%, 80% 0%, 100% 70%, 20% 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.krib-auth-real-estate-background .ink-droplet-2 {
+  position: absolute;
+  bottom: 20%;
+  left: 30%;
+  width: 8px;
+  height: 8px;
+  background-color: var(--krib-black);
+  opacity: 0.06;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.krib-auth-real-estate-background .ink-droplet-3 {
+  position: absolute;
+  top: 40%;
+  right: 35%;
+  width: 16px;
+  height: 10px;
+  background-color: var(--krib-lime);
+  opacity: 0.07;
+  transform: rotate(-15deg);
+  clip-path: polygon(30% 0%, 70% 30%, 100% 70%, 70% 100%, 30% 70%, 0% 30%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Brush stroke - bottom left */
+.krib-auth-real-estate-background .ink-brush-1 {
+  position: absolute;
+  bottom: 25%;
+  left: 12%;
+  width: 96px;
+  height: 4px;
+  background-color: var(--krib-black);
+  opacity: 0.05;
+  transform: rotate(-12deg);
+  clip-path: polygon(0% 20%, 85% 0%, 100% 40%, 95% 80%, 15% 100%, 0% 60%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Fine splatter dots */
+.krib-auth-real-estate-background .ink-fine-1 {
+  position: absolute;
+  top: 35%;
+  left: 45%;
+  width: 2px;
+  height: 2px;
+  background-color: var(--krib-lime);
+  opacity: 0.04;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.krib-auth-real-estate-background .ink-fine-2 {
+  position: absolute;
+  top: 70%;
+  right: 40%;
+  width: 3px;
+  height: 3px;
+  background-color: var(--krib-black);
+  opacity: 0.05;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.krib-auth-real-estate-background .ink-fine-3 {
+  position: absolute;
+  bottom: 45%;
+  left: 55%;
+  width: 1px;
+  height: 1px;
+  background-color: var(--krib-lime);
+  opacity: 0.06;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
 }

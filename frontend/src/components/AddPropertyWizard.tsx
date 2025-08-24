@@ -104,7 +104,38 @@ export function AddPropertyWizard() {
       setUAEPropertyTypes(propertyTypes)
       setUAEAmenities(amenities)
     } catch (error) {
-      console.error('Failed to load UAE data:', error)
+      console.error('Failed to load UAE data from API, using fallback data:', error)
+      
+      // Fallback UAE data while API is being deployed
+      setUAEEmirates([
+        { value: "Dubai", label: "Dubai" },
+        { value: "Abu Dhabi", label: "Abu Dhabi" },
+        { value: "Sharjah", label: "Sharjah" },
+        { value: "Ajman", label: "Ajman" },
+        { value: "Ras Al Khaimah", label: "Ras Al Khaimah" },
+        { value: "Fujairah", label: "Fujairah" },
+        { value: "Umm Al Quwain", label: "Umm Al Quwain" }
+      ])
+      
+      setUAEPropertyTypes({
+        "apartment": "Apartment",
+        "villa": "Villa", 
+        "townhouse": "Townhouse",
+        "penthouse": "Penthouse",
+        "studio": "Studio",
+        "duplex": "Duplex",
+        "loft": "Loft",
+        "compound": "Compound",
+        "hotel_apartment": "Hotel Apartment",
+        "office": "Office",
+        "retail": "Retail Space"
+      })
+      
+      setUAEAmenities([
+        "Central Air Conditioning", "Maid's Room", "Driver's Room", "Built-in Wardrobes",
+        "Covered Parking", "24/7 Security", "Swimming Pool", "Gym", "Children's Play Area",
+        "WiFi", "Kitchen", "Washing Machine", "TV", "Balcony", "Sea View", "City View"
+      ])
     }
   }
 
@@ -114,8 +145,37 @@ export function AddPropertyWizard() {
       const areas = await getEmirateAreas(emirate)
       setAvailableAreas(areas)
     } catch (error) {
-      console.error('Failed to load emirate areas:', error)
-      setAvailableAreas([])
+      console.error('Failed to load emirate areas from API, using fallback data:', error)
+      
+      // Fallback areas data while API is being deployed
+      const fallbackAreas: Record<string, string[]> = {
+        "Dubai": [
+          "Downtown Dubai", "Dubai Marina", "Jumeirah Beach Residence (JBR)",
+          "Business Bay", "Palm Jumeirah", "Jumeirah", "Arabian Ranches",
+          "Dubai Hills Estate", "City Walk", "DIFC", "Al Barsha", "The Greens"
+        ],
+        "Abu Dhabi": [
+          "Abu Dhabi City", "Yas Island", "Saadiyat Island", "Al Reem Island",
+          "Khalifa City", "Al Raha", "Masdar City", "Corniche", "Al Maryah Island"
+        ],
+        "Sharjah": [
+          "Sharjah City", "Al Majaz", "Al Nahda", "Al Khan", "Al Qasba"
+        ],
+        "Ajman": [
+          "Ajman City", "Al Nuaimiya", "Al Rashidiya", "Corniche Road"
+        ],
+        "Ras Al Khaimah": [
+          "Ras Al Khaimah City", "Al Hamra", "Al Marjan Island", "Al Rams"
+        ],
+        "Fujairah": [
+          "Fujairah City", "Dibba", "Kalba", "Khor Fakkan"
+        ],
+        "Umm Al Quwain": [
+          "Umm Al Quwain City", "Al Salam City", "Falaj Al Mualla"
+        ]
+      }
+      
+      setAvailableAreas(fallbackAreas[emirate] || [])
     } finally {
       setIsLoadingAreas(false)
     }
@@ -415,7 +475,7 @@ export function AddPropertyWizard() {
                 {errors.property_type && <p className="text-red-500 text-sm mt-1">{errors.property_type}</p>}
               </div>
             </div>
-          </div>
+                </div>
         )
 
       case 'details':
@@ -565,8 +625,8 @@ export function AddPropertyWizard() {
                 />
               </div>
               {errors.price_per_night && <p className="text-red-500 text-sm mt-1">{errors.price_per_night}</p>}
-            </div>
-            
+              </div>
+              
             <div>
               <div className="flex items-center justify-between mb-2">
                 <Label htmlFor="description">Description</Label>
