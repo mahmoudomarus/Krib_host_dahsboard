@@ -70,24 +70,26 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
   const { user, signOut } = useApp()
   
   return (
-    <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border p-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg krib-glow">
+    <Sidebar className="krib-sidebar">
+      <SidebarHeader className="krib-sidebar-header border-b border-sidebar-border p-6">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl krib-logo-container">
             <img src={KribLogo} alt="Krib" className="h-8 w-8" />
           </div>
           <div>
-            <h2 className="text-xl font-bold text-sidebar-foreground">Krib</h2>
-            <p className="text-sm text-sidebar-foreground/70">Property Dashboard</p>
+            <h2 className="text-xl font-bold text-sidebar-foreground bg-gradient-to-r from-krib-gray-dark to-krib-black bg-clip-text">
+              Krib
+            </h2>
+            <p className="text-sm text-sidebar-foreground/70 font-medium">Property Dashboard</p>
           </div>
         </div>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="krib-sidebar-group-label">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="krib-sidebar-menu">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
@@ -108,20 +110,22 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-sidebar-border p-4">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2 px-2">
-            <User className="h-4 w-4 text-sidebar-foreground/60" />
+      <SidebarFooter className="border-t border-sidebar-border p-4 krib-sidebar-header">
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10">
+              <User className="h-4 w-4 text-krib-gray-dark" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm text-sidebar-foreground truncate">{user?.name || 'User'}</p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">{user?.email}</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
             </div>
           </div>
           <Button
             variant="ghost"
             size="sm"
             onClick={signOut}
-            className="w-full justify-start text-sidebar-foreground/60 hover:text-sidebar-foreground"
+            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-red-50 transition-all duration-200"
           >
             <LogOut className="h-4 w-4 mr-2" />
             Sign Out
