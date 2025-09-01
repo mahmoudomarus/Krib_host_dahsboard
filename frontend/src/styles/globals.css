@@ -817,31 +817,9 @@ html {
   position: relative;
 }
 
-/* Dubai Skyline Background Enhancement */
-.dubai-skyline-bg {
-  position: relative;
-  background-attachment: scroll; /* Better mobile performance */
-  background-blend-mode: normal;
-}
-
-.dubai-skyline-bg::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    rgba(248, 249, 250, 0.1) 50%,
-    rgba(248, 249, 250, 0.2) 100%
-  );
-  pointer-events: none;
-  z-index: 1;
-}
-
-/* Enhance text readability over Dubai image */
-@media (max-width: 768px) {
-  .dubai-skyline-bg {
-    background-attachment: scroll;
-    background-size: cover;
-  }
+/* Enhanced text readability over Dubai background */
+.hero-text-shadow {
+  text-shadow: 
+    0 1px 3px rgba(0, 0, 0, 0.3),
+    0 1px 2px rgba(0, 0, 0, 0.2);
 }

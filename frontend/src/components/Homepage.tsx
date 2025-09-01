@@ -12,17 +12,18 @@ export function Homepage() {
       <div className="relative min-h-screen flex items-center justify-center">
         {/* Dubai Skyline Background */}
         <div 
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat dubai-skyline-bg"
+          className="absolute inset-0"
           style={{
-            backgroundImage: `
-              url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80'),
-              url('https://images.unsplash.com/photo-1580674684081-7617fbf3d745?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80'),
-              linear-gradient(135deg, #f8f9fa 0%, rgba(184, 255, 0, 0.05) 100%)
-            `,
+            backgroundImage: `url('https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
+            backgroundColor: '#f8f9fa', // Fallback color
+            minHeight: '100vh'
           }}
         >
-          {/* Gradient Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/20 to-white/40 z-10"></div>
+          {/* Very light overlay for text readability */}
+          <div className="absolute inset-0 bg-white bg-opacity-20"></div>
           
           {/* Subtle Dubai-inspired accent elements */}
           <div className="absolute top-20 right-20 w-32 h-32 bg-krib-lime-muted opacity-10 transform rotate-45 rounded-lg z-15"></div>
@@ -38,17 +39,17 @@ export function Homepage() {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-krib-lime-muted rounded-2xl mb-4">
                 <Home className="w-10 h-10 text-krib-black" />
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold text-krib-black mb-4 drop-shadow-md">
-                Krib <span className="text-krib-lime-dark drop-shadow-md">AI</span>
+              <h1 className="text-5xl md:text-6xl font-bold text-krib-black mb-4 hero-text-shadow">
+                Krib <span className="text-krib-lime-dark hero-text-shadow">AI</span>
               </h1>
             </div>
 
             {/* Main Headline */}
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight drop-shadow-sm">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight hero-text-shadow">
               Your AI-Powered Real Estate Partner in the UAE
             </h2>
             
-            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-sm">
+            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed hero-text-shadow">
               Experience the future of property management with our intelligent platform. 
               From finding your dream home to maximizing rental income, Krib AI makes real estate effortless.
             </p>
