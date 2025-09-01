@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { Button } from './ui/button'
 import { Card } from './ui/card'
 import { Bot, Home, Users, TrendingUp, MapPin, Zap, Shield, Clock } from 'lucide-react'
+import KribLogo from '../assets/krib-logo.svg'
 
 export function Homepage() {
   const navigate = useNavigate()
@@ -9,21 +10,23 @@ export function Homepage() {
   return (
     <div className="min-h-screen krib-homepage-background">
       {/* Hero Section */}
-      <div className="relative min-h-screen flex items-center justify-center">
+      <div className="relative w-full min-h-screen flex items-center justify-center overflow-hidden">
         {/* Dubai Skyline Background */}
         <div 
-          className="absolute inset-0"
+          className="absolute inset-0 w-full h-full"
           style={{
             backgroundImage: `url('https://images.unsplash.com/photo-1518684079-3c830dcef090?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80')`,
             backgroundSize: 'cover',
-            backgroundPosition: 'center',
+            backgroundPosition: 'center bottom',
             backgroundRepeat: 'no-repeat',
             backgroundColor: '#f8f9fa', // Fallback color
-            minHeight: '100vh'
+            minHeight: '100vh',
+            width: '100%',
+            height: '100%'
           }}
         >
-          {/* Very light overlay for text readability */}
-          <div className="absolute inset-0 bg-white bg-opacity-20"></div>
+          {/* Enhanced overlay for better text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/50 to-white/30"></div>
           
           {/* Subtle Dubai-inspired accent elements */}
           <div className="absolute top-20 right-20 w-32 h-32 bg-krib-lime-muted opacity-10 transform rotate-45 rounded-lg z-15"></div>
@@ -33,11 +36,15 @@ export function Homepage() {
 
         {/* Main Content */}
         <div className="relative z-20 container mx-auto px-6 text-center">
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-4xl mx-auto bg-white/10 backdrop-blur-sm rounded-3xl p-8 border border-white/20">
             {/* Logo Area */}
             <div className="mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-krib-lime-muted rounded-2xl mb-4">
-                <Home className="w-10 h-10 text-krib-black" />
+              <div className="inline-flex items-center justify-center mb-6">
+                <img 
+                  src={KribLogo} 
+                  alt="Krib AI Logo" 
+                  className="h-16 w-auto filter drop-shadow-lg"
+                />
               </div>
               <h1 className="text-5xl md:text-6xl font-bold text-krib-black mb-4 hero-text-shadow">
                 Krib <span className="text-krib-lime-dark hero-text-shadow">AI</span>
