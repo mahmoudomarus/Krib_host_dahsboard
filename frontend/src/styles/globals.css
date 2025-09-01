@@ -10,6 +10,8 @@
   /* Krib Brand Colors */
   --krib-lime: #B8FF00;
   --krib-lime-light: #CBFC50;
+  --krib-lime-dark: #8FCC00;
+  --krib-lime-muted: rgba(184, 255, 0, 0.08);
   --krib-lime-soft: rgba(184, 255, 0, 0.1);
   --krib-lime-medium: rgba(184, 255, 0, 0.15);
   --krib-black: #111111;
@@ -803,4 +805,14 @@ html {
   border-radius: 50%;
   pointer-events: none;
   z-index: 0;
+}
+
+/* Homepage Background */
+.krib-homepage-background {
+  background: linear-gradient(135deg, 
+    #fafbfc 0%, 
+    rgba(248, 249, 250, 0.95) 50%, 
+    rgba(184, 255, 0, 0.02) 100%
+  );
+  position: relative;
 }

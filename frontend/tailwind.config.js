@@ -19,6 +19,8 @@ module.exports = {
         // Krib Brand Colors
         'krib-lime': 'var(--krib-lime)',
         'krib-lime-light': 'var(--krib-lime-light)',
+        'krib-lime-dark': 'var(--krib-lime-dark)',
+        'krib-lime-muted': 'var(--krib-lime-muted)',
         'krib-lime-soft': 'var(--krib-lime-soft)',
         'krib-lime-medium': 'var(--krib-lime-medium)',
         'krib-black': 'var(--krib-black)',
