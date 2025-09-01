@@ -22,7 +22,7 @@ export function Homepage() {
           }}
         >
           {/* Gradient Overlay for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/75 to-white/80 z-10"></div>
+          <div className="absolute inset-0 bg-gradient-to-br from-white/30 via-white/20 to-white/40 z-10"></div>
           
           {/* Subtle Dubai-inspired accent elements */}
           <div className="absolute top-20 right-20 w-32 h-32 bg-krib-lime-muted opacity-10 transform rotate-45 rounded-lg z-15"></div>
@@ -38,17 +38,17 @@ export function Homepage() {
               <div className="inline-flex items-center justify-center w-20 h-20 bg-krib-lime-muted rounded-2xl mb-4">
                 <Home className="w-10 h-10 text-krib-black" />
               </div>
-              <h1 className="text-5xl md:text-6xl font-bold text-krib-black mb-4">
-                Krib <span className="text-krib-lime-dark">AI</span>
+              <h1 className="text-5xl md:text-6xl font-bold text-krib-black mb-4 drop-shadow-md">
+                Krib <span className="text-krib-lime-dark drop-shadow-md">AI</span>
               </h1>
             </div>
 
             {/* Main Headline */}
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 leading-tight drop-shadow-sm">
               Your AI-Powered Real Estate Partner in the UAE
             </h2>
             
-            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto leading-relaxed drop-shadow-sm">
               Experience the future of property management with our intelligent platform. 
               From finding your dream home to maximizing rental income, Krib AI makes real estate effortless.
             </p>

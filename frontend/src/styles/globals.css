@@ -831,8 +831,8 @@ html {
   background: linear-gradient(
     180deg,
     transparent 0%,
-    rgba(248, 249, 250, 0.3) 50%,
-    rgba(248, 249, 250, 0.6) 100%
+    rgba(248, 249, 250, 0.1) 50%,
+    rgba(248, 249, 250, 0.2) 100%
   );
   pointer-events: none;
   z-index: 1;
