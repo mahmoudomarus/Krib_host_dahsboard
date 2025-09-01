@@ -10,18 +10,24 @@ export function Homepage() {
     <div className="min-h-screen krib-homepage-background">
       {/* Hero Section */}
       <div className="relative min-h-screen flex items-center justify-center">
-        {/* Background Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-black/20 via-transparent to-black/10 z-10"></div>
-        
         {/* Dubai Skyline Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-krib-gray-light via-white to-gray-50">
-          {/* Dubai silhouette using CSS shapes */}
-          <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-gray-800 to-transparent opacity-10"></div>
+        <div 
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat dubai-skyline-bg"
+          style={{
+            backgroundImage: `
+              url('https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2340&q=80'),
+              url('https://images.unsplash.com/photo-1580674684081-7617fbf3d745?ixlib=rb-4.0.3&auto=format&fit=crop&w=2340&q=80'),
+              linear-gradient(135deg, #f8f9fa 0%, rgba(184, 255, 0, 0.05) 100%)
+            `,
+          }}
+        >
+          {/* Gradient Overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-br from-white/85 via-white/75 to-white/80 z-10"></div>
           
-          {/* Geometric Dubai-inspired patterns */}
-          <div className="absolute top-20 right-20 w-32 h-32 bg-krib-lime-muted opacity-5 transform rotate-45"></div>
-          <div className="absolute bottom-40 left-16 w-24 h-24 bg-krib-lime-muted opacity-5 transform rotate-12"></div>
-          <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-krib-lime-muted opacity-5 rounded-full"></div>
+          {/* Subtle Dubai-inspired accent elements */}
+          <div className="absolute top-20 right-20 w-32 h-32 bg-krib-lime-muted opacity-10 transform rotate-45 rounded-lg z-15"></div>
+          <div className="absolute bottom-40 left-16 w-24 h-24 bg-krib-lime-muted opacity-10 transform rotate-12 rounded-lg z-15"></div>
+          <div className="absolute top-1/3 left-1/4 w-16 h-16 bg-krib-lime-muted opacity-10 rounded-full z-15"></div>
         </div>
 
         {/* Main Content */}
