@@ -122,21 +122,21 @@ class PropertySearchResponse(BaseModel):
 
 # Availability Check Models
 class AvailabilityRequest(BaseModel):
-    start_date: date = Field(..., description="Check-in date")
-    end_date: date = Field(..., description="Check-out date")
+    check_in: date = Field(..., description="Check-in date")
+    check_out: date = Field(..., description="Check-out date")
     guests: Optional[int] = Field(1, ge=1, le=50, description="Number of guests")
     
-    @validator('end_date')
+    @validator('check_out')
     def validate_dates(cls, v, values):
-        if 'start_date' in values and v <= values['start_date']:
-            raise ValueError('End date must be after start date')
+        if 'check_in' in values and v <= values['check_in']:
+            raise ValueError('Check-out date must be after check-in date')
         return v
 
 
 class AvailabilityResponse(BaseModel):
     property_id: str = Field(..., description="Property ID")
-    start_date: str = Field(..., description="Check-in date")
-    end_date: str = Field(..., description="Check-out date")
+    check_in: str = Field(..., description="Check-in date")
+    check_out: str = Field(..., description="Check-out date")
     guests: int = Field(..., description="Number of guests")
     is_available: bool = Field(..., description="Whether property is available")
     reasons: List[Optional[str]] = Field([], description="Reasons if not available")

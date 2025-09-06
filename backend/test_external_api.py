@@ -8,9 +8,9 @@ import requests
 import json
 from datetime import datetime, date, timedelta
 
-# Configuration
-BASE_URL = "https://krib-host-dahsboard-backend.onrender.com/api/external"
-# BASE_URL = "http://localhost:8000/api/external"  # For local testing
+# Configuration  
+BASE_URL = "https://krib-host-dahsboard-backend.onrender.com/api/v1"
+# BASE_URL = "http://localhost:8000/api/v1"  # For local testing
 
 # Test API key (safe test key, not a real secret)
 API_KEY = "krib_ai_test_key_12345"
@@ -26,7 +26,7 @@ def test_health_check():
     print("🏥 Testing Health Check...")
     
     try:
-        response = requests.get(f"{BASE_URL}/health", headers=HEADERS)
+        response = requests.get("https://krib-host-dahsboard-backend.onrender.com/api/external/health", headers=HEADERS)
         print(f"Status: {response.status_code}")
         
         if response.status_code == 200:
@@ -127,8 +127,8 @@ def test_availability_check(property_id):
         end_date = (date.today() + timedelta(days=9)).isoformat()
         
         params = {
-            "start_date": start_date,
-            "end_date": end_date,
+            "check_in": start_date,
+            "check_out": end_date,
             "guests": 2
         }
         
@@ -141,7 +141,7 @@ def test_availability_check(property_id):
             availability = data['data']
             
             print(f"✅ Availability check completed")
-            print(f"Dates: {availability['start_date']} to {availability['end_date']}")
+            print(f"Dates: {availability['check_in']} to {availability['check_out']}")
             print(f"Available: {availability['is_available']}")
             if availability['reasons']:
                 print(f"Reasons: {', '.join(availability['reasons'])}")

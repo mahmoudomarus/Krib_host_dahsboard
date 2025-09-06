@@ -32,7 +32,7 @@ router = APIRouter()
 limiter = Limiter(key_func=get_remote_address)
 
 
-@router.get("/properties/search", response_model=ExternalAPIResponse)
+@router.get("/v1/properties/search", response_model=ExternalAPIResponse)
 @limiter.limit("100/minute")
 async def search_properties(
     request: Request,
@@ -228,7 +228,7 @@ async def search_properties(
         )
 
 
-@router.get("/properties/{property_id}", response_model=ExternalAPIResponse)
+@router.get("/v1/properties/{property_id}", response_model=ExternalAPIResponse)
 @limiter.limit("200/minute")
 async def get_property_details(
     request: Request,
@@ -328,13 +328,13 @@ async def get_property_details(
         )
 
 
-@router.get("/properties/{property_id}/availability", response_model=ExternalAPIResponse)
+@router.get("/v1/properties/{property_id}/availability", response_model=ExternalAPIResponse)
 @limiter.limit("150/minute")
 async def check_availability(
     request: Request,
     property_id: str,
-    start_date: date = Query(..., description="Check-in date"),
-    end_date: date = Query(..., description="Check-out date"),
+    check_in: date = Query(..., description="Check-in date"),
+    check_out: date = Query(..., description="Check-out date"),
     guests: Optional[int] = Query(1, description="Number of guests"),
     service_context: dict = Depends(get_external_service_context)
 ):
@@ -348,10 +348,10 @@ async def check_availability(
         property_data = await verify_property_access_external(property_id, service_context)
         
         # Validate dates
-        if end_date <= start_date:
+        if check_out <= check_in:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="End date must be after start date"
+                detail="Check-out date must be after check-in date"
             )
         
         # Check guest capacity
@@ -378,8 +378,8 @@ async def check_availability(
             success=True,
             data=AvailabilityResponse(
                 property_id=property_id,
-                start_date=start_date.isoformat(),
-                end_date=end_date.isoformat(),
+                check_in=check_in.isoformat(),
+                check_out=check_out.isoformat(),
                 guests=guests,
                 is_available=is_available,
                 reasons=reasons,
@@ -397,7 +397,7 @@ async def check_availability(
         )
 
 
-@router.post("/properties/{property_id}/calculate-pricing", response_model=ExternalAPIResponse)
+@router.post("/v1/properties/{property_id}/calculate-pricing", response_model=ExternalAPIResponse)
 @limiter.limit("150/minute")
 async def calculate_pricing(
     request: Request,
@@ -513,7 +513,7 @@ async def calculate_pricing(
         )
 
 
-@router.post("/bookings", response_model=ExternalAPIResponse)
+@router.post("/v1/bookings", response_model=ExternalAPIResponse)
 @limiter.limit("50/minute")
 async def create_external_booking(
     request: Request,

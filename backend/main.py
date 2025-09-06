@@ -103,7 +103,7 @@ app.include_router(upload.router, prefix="/api/upload", tags=["upload"])
 app.include_router(financials.router, prefix="/api/financials", tags=["financials"])
 
 # External API for third-party integrations (AI platforms)
-app.include_router(external.router, prefix="/api/external", tags=["external-api"])
+app.include_router(external.router, prefix="/api", tags=["external-api"])
 
 @app.get("/")
 async def root():
