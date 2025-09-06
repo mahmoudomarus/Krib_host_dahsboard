@@ -12,7 +12,7 @@ from datetime import datetime, date, timedelta
 BASE_URL = "https://krib-host-dahsboard-backend.onrender.com/api/external"
 # BASE_URL = "http://localhost:8000/api/external"  # For local testing
 
-# Test API key
+# Test API key (safe test key, not a real secret)
 API_KEY = "krib_ai_test_key_12345"
 
 # Headers

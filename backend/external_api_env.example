@@ -1,0 +1,18 @@
+# External API Environment Variables
+# Add these to your Render backend deployment
+
+# Production API Key for your Krib AI platform
+KRIB_AI_AGENT_API_KEY=your_secure_random_key_here_replace_this
+
+# Rate Limiting (optional - defaults are set in code)
+EXTERNAL_API_RATE_LIMIT_SEARCH=100/minute
+EXTERNAL_API_RATE_LIMIT_DETAILS=200/minute
+EXTERNAL_API_RATE_LIMIT_AVAILABILITY=150/minute
+EXTERNAL_API_RATE_LIMIT_PRICING=150/minute
+EXTERNAL_API_RATE_LIMIT_BOOKING=50/minute
+
+# Logging Level for External API
+EXTERNAL_API_LOG_LEVEL=INFO
+
+# Enable/Disable External API (optional)
+EXTERNAL_API_ENABLED=true

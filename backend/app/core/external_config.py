@@ -13,17 +13,11 @@ class ExternalAPIConfig:
     # Production API Keys (load from environment)
     PRODUCTION_API_KEYS = {
         "krib_ai_agent": os.getenv("KRIB_AI_AGENT_API_KEY"),
-        "chatgpt_agent": os.getenv("CHATGPT_AGENT_API_KEY"),
-        "claude_agent": os.getenv("CLAUDE_AGENT_API_KEY"),
-        "booking_service": os.getenv("BOOKING_SERVICE_API_KEY"),
     }
     
     # Development/Test API Keys
     TEST_API_KEYS = {
         "krib_ai_agent": "krib_ai_test_key_12345",
-        "chatgpt_agent": "chatgpt_test_key_67890", 
-        "claude_agent": "claude_test_key_abcde",
-        "booking_service": "booking_test_key_fghij",
     }
     
     # API Key Permissions
@@ -34,31 +28,12 @@ class ExternalAPIConfig:
             "read_availability",
             "calculate_pricing",
             "read_property_details"
-        ],
-        "chatgpt_agent": [
-            "read_properties",
-            "read_availability", 
-            "calculate_pricing"
-        ],
-        "claude_agent": [
-            "read_properties",
-            "read_availability",
-            "calculate_pricing"
-        ],
-        "booking_service": [
-            "read_properties",
-            "create_bookings",
-            "read_availability",
-            "calculate_pricing"
         ]
     }
     
     # Rate Limits per service (requests per minute)
     RATE_LIMITS = {
         "krib_ai_agent": 200,
-        "chatgpt_agent": 100,
-        "claude_agent": 100, 
-        "booking_service": 150,
         "default": 60
     }
     
