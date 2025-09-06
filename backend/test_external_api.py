@@ -26,7 +26,7 @@ def test_health_check():
     print("🏥 Testing Health Check...")
     
     try:
-        response = requests.get("https://krib-host-dahsboard-backend.onrender.com/api/external/health", headers=HEADERS)
+        response = requests.get("https://krib-host-dahsboard-backend.onrender.com/api/health", headers=HEADERS)
         print(f"Status: {response.status_code}")
         
         if response.status_code == 200:

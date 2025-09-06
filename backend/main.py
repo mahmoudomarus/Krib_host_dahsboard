@@ -76,7 +76,14 @@ async def https_fix_middleware(request, call_next):
 # CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5173", "https://krib-host-dahsboard.vercel.app", "*"],
+    allow_origins=[
+        "http://localhost:3000", 
+        "http://localhost:5173", 
+        "https://krib-host-dahsboard.vercel.app",
+        "https://krib.ai",
+        "https://*.krib.ai",
+        "*"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

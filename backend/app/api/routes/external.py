@@ -3,7 +3,7 @@ External API routes for third-party AI platform integrations
 Provides property search, availability, pricing, and booking endpoints
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status, Query, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, Response
 from typing import List, Optional, Dict, Any
 from datetime import datetime, date
 import uuid
@@ -31,11 +31,24 @@ router = APIRouter()
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
+def add_rate_limit_headers(response: Response, limit: str, service_name: str = "krib_ai_agent"):
+    """Add rate limit headers to API responses"""
+    # Extract numbers from limit string (e.g., "100/minute" -> 100)
+    limit_number = int(limit.split("/")[0])
+    remaining = max(0, limit_number - 1)  # Simplified calculation
+    
+    response.headers["X-RateLimit-Limit"] = str(limit_number)
+    response.headers["X-RateLimit-Remaining"] = str(remaining)
+    response.headers["X-RateLimit-Reset"] = str(60)  # Reset in 60 seconds
+    response.headers["X-RateLimit-Service"] = service_name
+    return response
+
 
 @router.get("/v1/properties/search", response_model=ExternalAPIResponse)
 @limiter.limit("100/minute")
 async def search_properties(
     request: Request,
+    response: Response,
     # Location parameters
     city: Optional[str] = Query(None, description="City or area name"),
     state: Optional[str] = Query(None, description="UAE Emirate"),
@@ -198,6 +211,9 @@ async def search_properties(
                 updated_at=prop.get("updated_at", "")
             )
             properties.append(property_result.dict())
+        
+        # Add rate limit headers
+        add_rate_limit_headers(response, "100/minute", service_context.get("service_name", "krib_ai_agent"))
         
         return ExternalAPIResponse(
             success=True,
