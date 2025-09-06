@@ -4,6 +4,7 @@ import { SidebarProvider } from "./components/ui/sidebar"
 import { AppProvider, useApp } from "./contexts/AppContext"
 import { Homepage } from "./components/Homepage"
 import { AuthForm } from "./components/AuthForm"
+import { AuthCallback } from "./components/AuthCallback"
 import { DashboardSidebar } from "./components/DashboardSidebar"
 import { DashboardOverview } from "./components/DashboardOverview"
 import { PropertyList } from "./components/PropertyList"
@@ -58,19 +59,25 @@ function AppContent() {
     )
   }
 
+  // Handle auth callback
+  if (location.pathname === '/auth/callback') {
+    return <AuthCallback />
+  }
+
   // Show homepage for non-authenticated users or when on homepage route
   if (!user && !location.pathname.startsWith('/auth')) {
     return (
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/auth" element={<AuthForm />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="*" element={<Homepage />} />
       </Routes>
     )
   }
 
-  // Show auth form when on auth route
-  if (location.pathname.startsWith('/auth')) {
+  // Show auth form when on auth route (but not callback)
+  if (location.pathname.startsWith('/auth') && location.pathname !== '/auth/callback') {
     return <AuthForm />
   }
 
