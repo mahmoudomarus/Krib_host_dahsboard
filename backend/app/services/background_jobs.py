@@ -418,6 +418,134 @@ def _calculate_user_daily_analytics(user_id: str, date: datetime.date) -> Dict[s
         logger.error(f"Failed to calculate daily analytics for user {user_id}: {e}")
         return {"revenue": 0, "bookings": 0, "views": 0}
 
+# Webhook notification tasks
+@monitored_task(bind=True, max_retries=3)
+def send_booking_webhook(self, event_type: str, booking_id: str, booking_data: Dict[str, Any]):
+    """Send booking webhook to external AI agents"""
+    try:
+        import asyncio
+        from app.services.webhook_service import webhook_service
+        
+        # Run async webhook sending
+        result = asyncio.run(webhook_service.send_webhook(
+            event_type=event_type,
+            booking_id=booking_id,
+            property_id=booking_data.get("property_id"),
+            host_id=booking_data.get("host_id"),
+            data={
+                "booking_details": booking_data,
+                "guest_info": booking_data.get("guest_info", {}),
+                "property_info": booking_data.get("property_info", {}),
+                "payment_info": booking_data.get("payment_info", {})
+            }
+        ))
+        
+        logger.info(f"Webhook sent for {event_type}: {result}")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Failed to send booking webhook: {e}")
+        
+        if self.request.retries < self.max_retries:
+            raise self.retry(countdown=60 * (2 ** self.request.retries))
+        
+        raise
+
+@monitored_task(bind=True, max_retries=3)
+def send_host_response_webhook(self, booking_id: str, host_id: str, response_data: Dict[str, Any]):
+    """Send host response needed webhook"""
+    try:
+        import asyncio
+        from app.services.webhook_service import webhook_service
+        
+        result = asyncio.run(webhook_service.send_webhook(
+            event_type="host.response_needed",
+            booking_id=booking_id,
+            property_id=response_data.get("property_id"),
+            host_id=host_id,
+            data=response_data
+        ))
+        
+        logger.info(f"Host response webhook sent: {result}")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Failed to send host response webhook: {e}")
+        
+        if self.request.retries < self.max_retries:
+            raise self.retry(countdown=60 * (2 ** self.request.retries))
+        
+        raise
+
+@monitored_task(bind=True, max_retries=3)
+def send_host_notification_task(self, host_id: str, notification_data: Dict[str, Any]):
+    """Send host notification as background task"""
+    try:
+        import asyncio
+        from app.services.notification_service import NotificationService, NotificationRequest
+        
+        notification = NotificationRequest(**notification_data)
+        result = asyncio.run(NotificationService.send_host_notification(host_id, notification))
+        
+        logger.info(f"Host notification sent: {result}")
+        return result
+        
+    except Exception as e:
+        logger.error(f"Failed to send host notification: {e}")
+        
+        if self.request.retries < self.max_retries:
+            raise self.retry(countdown=60 * (2 ** self.request.retries))
+        
+        raise
+
+@monitored_task()
+def cleanup_webhook_and_notifications():
+    """Clean up expired notifications and failed webhook subscriptions"""
+    try:
+        import asyncio
+        from app.services.notification_service import NotificationService
+        
+        # Cleanup expired notifications
+        notification_cleanup = asyncio.run(NotificationService.cleanup_expired_notifications())
+        
+        # Disable failed webhook subscriptions
+        webhook_cleanup_result = supabase_client.rpc("disable_failed_webhook_subscriptions").execute()
+        disabled_webhooks = webhook_cleanup_result.data or 0
+        
+        logger.info(f"Cleanup completed: {notification_cleanup['deleted_count']} expired notifications, {disabled_webhooks} failed webhooks disabled")
+        
+        return {
+            "status": "completed",
+            "expired_notifications_cleaned": notification_cleanup["deleted_count"],
+            "failed_webhooks_disabled": disabled_webhooks,
+            "cleanup_time": datetime.utcnow().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to cleanup webhooks and notifications: {e}")
+        raise
+
+# Enhanced daily maintenance with webhook cleanup
+@celery_app.task()
+def run_daily_maintenance():
+    """Run daily maintenance tasks"""
+    today = datetime.utcnow().date()
+    
+    tasks = [
+        generate_daily_analytics_report.delay(today.isoformat()),
+        update_market_intelligence_data.delay(),
+        cleanup_webhook_and_notifications.delay(),
+    ]
+    
+    # Process automatic payouts for eligible users
+    from app.core.supabase_client import supabase_client
+    users_result = supabase_client.table("payout_settings").select("user_id").eq("auto_payout_enabled", True).execute()
+    
+    for user_setting in users_result.data:
+        process_automatic_payout.delay(user_setting["user_id"])
+    
+    return {"status": "maintenance_tasks_scheduled", "date": today.isoformat()}
+
 # Celery beat schedule for periodic tasks
 celery_app.conf.beat_schedule = {
     "daily-maintenance": {
@@ -427,5 +555,9 @@ celery_app.conf.beat_schedule = {
     "update-market-data": {
         "task": "app.services.background_jobs.update_market_intelligence_data",
         "schedule": 60.0 * 60.0 * 6.0,  # Every 6 hours
+    },
+    "cleanup-webhooks-notifications": {
+        "task": "app.services.background_jobs.cleanup_webhook_and_notifications",
+        "schedule": 60.0 * 60.0 * 2.0,  # Every 2 hours
     },
 }

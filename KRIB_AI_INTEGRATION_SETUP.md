@@ -28,8 +28,8 @@ Krib AI Agent: krib_ai_test_key_12345
 
 ### **Base URL**
 ```
-Production: https://krib-host-dahsboard-backend.onrender.com/api/external
-Testing: http://localhost:8000/api/external (if running locally)
+Production: https://krib-host-dahsboard-backend.onrender.com/api/v1
+Testing: http://localhost:8000/api/v1 (if running locally)
 ```
 
 ### **Required Headers**
@@ -44,49 +44,53 @@ Content-Type: application/json
 
 ### **1. Health Check**
 ```http
-GET /api/external/health
+GET /api/v1/health
 ```
 
 ### **2. Property Search** 
 ```http
-GET /api/external/properties/search?city=Dubai&min_price_per_night=100&max_price_per_night=500&bedrooms=2
+GET /api/v1/properties/search?city=Dubai&min_price_per_night=100&max_price_per_night=500&bedrooms=2
 ```
 
 ### **3. Property Details**
 ```http
-GET /api/external/properties/{property_id}
+GET /api/v1/properties/{property_id}
 ```
 
 ### **4. Check Availability**
 ```http
-GET /api/external/properties/{property_id}/availability?start_date=2025-03-01&end_date=2025-03-05&guests=2
+GET /api/v1/properties/{property_id}/availability?check_in=2025-03-01&check_out=2025-03-05&guests=2
 ```
 
 ### **5. Calculate Pricing**
 ```http
-POST /api/external/properties/{property_id}/calculate-pricing
+POST /api/v1/properties/{property_id}/calculate-pricing
 {
-  "start_date": "2025-03-01",
-  "end_date": "2025-03-05", 
+  "check_in": "2025-03-01",
+  "check_out": "2025-03-05", 
   "guests": 2,
-  "discount_code": "WELCOME10"
+  "promo_code": "KRIB10"
 }
 ```
 
 ### **6. Create Booking**
 ```http
-POST /api/external/bookings
+POST /api/v1/bookings
 {
   "property_id": "123",
   "guest_info": {
-    "name": "John Doe",
+    "first_name": "John",
+    "last_name": "Doe",
     "email": "john@example.com",
-    "phone": "+971501234567"
+    "phone": "501234567",
+    "country_code": "+971"
   },
-  "start_date": "2025-03-01",
-  "end_date": "2025-03-05",
+  "check_in": "2025-03-01",
+  "check_out": "2025-03-05",
   "guests": 2,
-  "total_amount": 1200.00
+  "total_amount": 1200.00,
+  "payment_method": "pending",
+  "special_requests": "Booking from AI agent"
 }
 ```
 
@@ -102,7 +106,7 @@ from datetime import date
 
 # Configuration
 API_KEY = "krib_ai_test_key_12345"  # Use your assigned key
-BASE_URL = "https://krib-host-dahsboard-backend.onrender.com/api/external"
+BASE_URL = "https://krib-host-dahsboard-backend.onrender.com/api/v1"
 
 headers = {
     "Authorization": f"Bearer {API_KEY}",
@@ -130,10 +134,10 @@ def search_properties(city="Dubai", max_price=500):
         return None
 
 # Check availability
-def check_availability(property_id, start_date, end_date, guests=2):
+def check_availability(property_id, check_in, check_out, guests=2):
     params = {
-        "start_date": start_date,
-        "end_date": end_date,
+        "check_in": check_in,
+        "check_out": check_out,
         "guests": guests
     }
     
@@ -146,14 +150,16 @@ def check_availability(property_id, start_date, end_date, guests=2):
     return response.json()
 
 # Create booking
-def create_booking(property_id, guest_info, start_date, end_date, guests, total_amount):
+def create_booking(property_id, guest_info, check_in, check_out, guests, total_amount):
     booking_data = {
         "property_id": property_id,
         "guest_info": guest_info,
-        "start_date": start_date,
-        "end_date": end_date,
+        "check_in": check_in,
+        "check_out": check_out,
         "guests": guests,
-        "total_amount": total_amount
+        "total_amount": total_amount,
+        "payment_method": "pending",
+        "special_requests": "Booking from AI agent"
     }
     
     response = requests.post(
@@ -190,7 +196,7 @@ const axios = require('axios');
 class KribAIIntegration {
     constructor(apiKey = 'krib_ai_test_key_12345') {
         this.apiKey = apiKey;
-        this.baseURL = 'https://krib-host-dahsboard-backend.onrender.com/api/external';
+        this.baseURL = 'https://krib-host-dahsboard-backend.onrender.com/api/v1';
         this.headers = {
             'Authorization': `Bearer ${apiKey}`,
             'Content-Type': 'application/json'
@@ -213,15 +219,15 @@ class KribAIIntegration {
         }
     }
 
-    async checkAvailability(propertyId, startDate, endDate, guests = 2) {
+    async checkAvailability(propertyId, checkIn, checkOut, guests = 2) {
         try {
             const response = await axios.get(
                 `${this.baseURL}/properties/${propertyId}/availability`,
                 {
                     headers: this.headers,
                     params: {
-                        start_date: startDate,
-                        end_date: endDate,
+                        check_in: checkIn,
+                        check_out: checkOut,
                         guests: guests
                     }
                 }
@@ -277,14 +283,18 @@ async function findAndBook() {
             const booking = await krib.createBooking({
                 property_id: property.id,
                 guest_info: {
-                    name: 'Jane Smith',
+                    first_name: 'Jane',
+                    last_name: 'Smith',
                     email: 'jane@example.com',
-                    phone: '+971501234567'
+                    phone: '501234567',
+                    country_code: '+971'
                 },
-                start_date: '2025-03-01',
-                end_date: '2025-03-05',
+                check_in: '2025-03-01',
+                check_out: '2025-03-05',
                 guests: 2,
-                total_amount: availability.total_price
+                total_amount: availability.total_price,
+                payment_method: 'pending',
+                special_requests: 'Booking from AI agent'
             });
 
             console.log('Booking created:', booking);
@@ -314,7 +324,7 @@ Once you've deployed to Vercel and Render, test the health endpoint:
 
 ```bash
 curl -H "Authorization: Bearer krib_ai_test_key_12345" \
-     https://krib-host-dahsboard-backend.onrender.com/api/external/health
+     https://krib-host-dahsboard-backend.onrender.com/api/v1/health
 ```
 
 Expected response:
@@ -342,7 +352,7 @@ python test_external_api.py
 ### **3. Test Property Search**
 ```bash
 curl -H "Authorization: Bearer krib_ai_test_key_12345" \
-     "https://krib-host-dahsboard-backend.onrender.com/api/external/properties/search?city=Dubai&limit=5"
+     "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/search?city=Dubai&limit=5"
 ```
 
 ---

@@ -19,7 +19,7 @@ from app.core.database import init_db
 from app.core.redis_client import redis_client
 from app.core.monitoring import init_sentry, metrics_middleware, metrics_endpoint, health_check_with_metrics
 from app.core.rate_limiter import limiter, custom_rate_limit_handler
-from app.api.routes import auth, properties, bookings, analytics, upload, financials, users, locations, external
+from app.api.routes import auth, properties, bookings, analytics, upload, financials, users, locations, external, webhooks, notifications, sse
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
 
@@ -111,6 +111,15 @@ app.include_router(financials.router, prefix="/api/financials", tags=["financial
 
 # External API for third-party integrations (AI platforms)
 app.include_router(external.router, prefix="/api", tags=["external-api"])
+
+# Webhook management endpoints
+app.include_router(webhooks.router, prefix="/api", tags=["webhooks"])
+
+# Host notification endpoints
+app.include_router(notifications.router, prefix="/api", tags=["notifications"])
+
+# Server-Sent Events for real-time updates
+app.include_router(sse.router, prefix="/api", tags=["sse"])
 
 @app.get("/")
 async def root():

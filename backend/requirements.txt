@@ -29,6 +29,7 @@ email-validator>=2.1.0
 # HTTP clients and utilities - compatible with supabase 1.2.0 and anthropic
 httpx>=0.24.0
 aiofiles>=23.2.1
+aiohttp>=3.9.0
 
 # Data validation and serialization
 typing-extensions>=4.8.0

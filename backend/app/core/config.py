@@ -46,6 +46,15 @@ class Settings(BaseSettings):
     enable_rate_limiting: bool = True
     default_rate_limit: str = "1000/hour"
     
+    # Webhook Configuration
+    webhook_secret_key: str = "webhook-secret-key-change-in-production"
+    webhook_timeout: int = 30
+    webhook_max_retries: int = 3
+    
+    # SSE Configuration
+    sse_heartbeat_interval: int = 5
+    sse_max_connections: int = 1000
+    
     # API
     api_host: str = "0.0.0.0"
     api_port: int = 8000
