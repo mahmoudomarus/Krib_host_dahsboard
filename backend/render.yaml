@@ -45,3 +45,13 @@ services:
         value: "True"
       - key: ENABLE_RATE_LIMITING
         value: "True"
+      - key: WEBHOOK_SECRET_KEY
+        generateValue: true
+      - key: WEBHOOK_TIMEOUT
+        value: "30"
+      - key: WEBHOOK_MAX_RETRIES
+        value: "3"
+      - key: SSE_HEARTBEAT_INTERVAL
+        value: "5"
+      - key: SSE_MAX_CONNECTIONS
+        value: "1000"
