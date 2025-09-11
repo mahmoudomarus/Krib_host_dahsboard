@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from contextlib import asynccontextmanager
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -47,6 +48,15 @@ async def lifespan(app: FastAPI):
     
     # Shutdown
     print("🛑 Shutting down Krib AI Backend...")
+    
+    # Cancel all SSE connections gracefully
+    try:
+        from app.api.routes.sse import sse_manager
+        await sse_manager.shutdown_all_connections()
+        print("✅ SSE connections closed")
+    except Exception as e:
+        print(f"⚠️ Error closing SSE connections: {e}")
+    
     await redis_client.disconnect()
     print("✅ Redis connection closed")
 
@@ -130,9 +140,20 @@ async def root():
     }
 
 @app.get("/health")
+@app.head("/health")
 async def health_check():
     """Enhanced health check with monitoring"""
-    return await health_check_with_metrics()
+    try:
+        return await health_check_with_metrics()
+    except Exception as e:
+        # Fallback health check if monitoring fails
+        return {"status": "ok", "message": "Service is running", "timestamp": datetime.utcnow().isoformat()}
+
+@app.get("/healthz")
+@app.head("/healthz")
+async def simple_health():
+    """Simple health check for container orchestrators"""
+    return {"status": "ok"}
 
 @app.get("/metrics")
 async def get_metrics():

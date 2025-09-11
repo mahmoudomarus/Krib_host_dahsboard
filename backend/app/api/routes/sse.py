@@ -82,6 +82,27 @@ class SSEConnectionManager:
     def get_host_connection_count(self, host_id: str) -> int:
         """Get number of connections for a specific host"""
         return len(self._connections.get(host_id, set()))
+    
+    async def shutdown_all_connections(self):
+        """Gracefully shutdown all SSE connections"""
+        logger.info(f"Shutting down {self._connection_count} SSE connections")
+        
+        for host_id, connection_queues in self._connections.items():
+            for queue in connection_queues.copy():
+                try:
+                    # Send shutdown event
+                    await queue.put({
+                        'type': 'shutdown',
+                        'message': 'Server shutting down',
+                        'timestamp': datetime.utcnow().isoformat()
+                    })
+                except Exception as e:
+                    logger.error(f"Error sending shutdown event to host {host_id}: {e}")
+        
+        # Clear all connections
+        self._connections.clear()
+        self._connection_count = 0
+        logger.info("All SSE connections closed")
 
 # Global connection manager
 sse_manager = SSEConnectionManager()

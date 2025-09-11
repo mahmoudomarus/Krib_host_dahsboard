@@ -427,7 +427,10 @@ def send_booking_webhook(self, event_type: str, booking_id: str, booking_data: D
         from app.services.webhook_service import webhook_service
         
         # Run async webhook sending
-        result = asyncio.run(webhook_service.send_webhook(
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(webhook_service.send_webhook(
             event_type=event_type,
             booking_id=booking_id,
             property_id=booking_data.get("property_id"),
@@ -439,6 +442,8 @@ def send_booking_webhook(self, event_type: str, booking_id: str, booking_data: D
                 "payment_info": booking_data.get("payment_info", {})
             }
         ))
+        finally:
+            loop.close()
         
         logger.info(f"Webhook sent for {event_type}: {result}")
         return result
@@ -458,13 +463,18 @@ def send_host_response_webhook(self, booking_id: str, host_id: str, response_dat
         import asyncio
         from app.services.webhook_service import webhook_service
         
-        result = asyncio.run(webhook_service.send_webhook(
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(webhook_service.send_webhook(
             event_type="host.response_needed",
             booking_id=booking_id,
             property_id=response_data.get("property_id"),
             host_id=host_id,
             data=response_data
         ))
+        finally:
+            loop.close()
         
         logger.info(f"Host response webhook sent: {result}")
         return result
@@ -485,7 +495,12 @@ def send_host_notification_task(self, host_id: str, notification_data: Dict[str,
         from app.services.notification_service import NotificationService, NotificationRequest
         
         notification = NotificationRequest(**notification_data)
-        result = asyncio.run(NotificationService.send_host_notification(host_id, notification))
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            result = loop.run_until_complete(NotificationService.send_host_notification(host_id, notification))
+        finally:
+            loop.close()
         
         logger.info(f"Host notification sent: {result}")
         return result
@@ -506,7 +521,12 @@ def cleanup_webhook_and_notifications():
         from app.services.notification_service import NotificationService
         
         # Cleanup expired notifications
-        notification_cleanup = asyncio.run(NotificationService.cleanup_expired_notifications())
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        try:
+            notification_cleanup = loop.run_until_complete(NotificationService.cleanup_expired_notifications())
+        finally:
+            loop.close()
         
         # Disable failed webhook subscriptions
         webhook_cleanup_result = supabase_client.rpc("disable_failed_webhook_subscriptions").execute()
