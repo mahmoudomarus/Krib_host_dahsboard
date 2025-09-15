@@ -101,83 +101,91 @@ export function AuthForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center krib-auth-real-estate-background p-4">
-      {/* Realistic Ink Splashes */}
-      <div className="ink-splash-1"></div>
-      <div className="ink-splash-2"></div>
-      <div className="ink-droplet-1"></div>
-      <div className="ink-droplet-2"></div>
-      <div className="ink-droplet-3"></div>
-      <div className="ink-brush-1"></div>
-      <div className="ink-fine-1"></div>
-      <div className="ink-fine-2"></div>
-      <div className="ink-fine-3"></div>
+    <div className="min-h-screen swiss-bauhaus-auth-container">
+      {/* Swiss Bauhaus Grid System */}
+      <div className="bauhaus-grid-overlay"></div>
       
-      <Card className="w-full max-w-md krib-card krib-glow backdrop-blur-sm border border-white/20 shadow-2xl relative z-10">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="flex h-16 w-16 items-center justify-center rounded-xl krib-logo-container">
-              <img src={KribLogo} alt="Krib" className="h-10 w-10" />
+      {/* Geometric Elements */}
+      <div className="bauhaus-rectangle-primary"></div>
+      <div className="bauhaus-rectangle-secondary"></div>
+      <div className="bauhaus-square-accent"></div>
+      <div className="bauhaus-line-vertical"></div>
+      <div className="bauhaus-line-horizontal"></div>
+      
+      {/* Main Content Container */}
+      <div className="bauhaus-content-grid">
+        {/* Left Side - Typography & Branding */}
+        <div className="bauhaus-brand-section">
+          <div className="bauhaus-logo-container">
+            <img src={KribLogo} alt="Krib" className="bauhaus-logo" />
+          </div>
+          <div className="bauhaus-brand-text">
+            <h1 className="bauhaus-title">KRIB</h1>
+            <div className="bauhaus-subtitle">
+              <span className="bauhaus-subtitle-line-1">RENTAL</span>
+              <span className="bauhaus-subtitle-line-2">MANAGEMENT</span>
+              <span className="bauhaus-subtitle-line-3">SYSTEM</span>
             </div>
           </div>
-          <CardTitle className="text-2xl">Welcome to Krib AI</CardTitle>
-          <CardDescription>
-            Manage your rental properties with AI assistance
-          </CardDescription>
-        </CardHeader>
+        </div>
         
-        <CardContent className="px-6 pb-6">
-          <Tabs defaultValue="signin" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 h-12 bg-krib-lime-soft/30 rounded-xl border border-krib-lime/10 p-1">
-              <TabsTrigger 
-                value="signin" 
-                className="h-10 rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:text-krib-black data-[state=active]:shadow-sm transition-all duration-200"
-              >
-                Sign In
-              </TabsTrigger>
-              <TabsTrigger 
-                value="signup" 
-                className="h-10 rounded-lg font-medium data-[state=active]:bg-white data-[state=active]:text-krib-black data-[state=active]:shadow-sm transition-all duration-200"
-              >
-                Sign Up
-              </TabsTrigger>
-            </TabsList>
-            
-            {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm font-medium">
-                {error}
-              </div>
-            )}
+        {/* Right Side - Authentication Form */}
+        <Card className="bauhaus-auth-card">
+          <CardHeader className="bauhaus-card-header">
+            <CardTitle className="bauhaus-form-title">ACCESS</CardTitle>
+            <CardDescription className="bauhaus-form-subtitle">
+              Enter your credentials to continue
+            </CardDescription>
+          </CardHeader>
+        
+          <CardContent className="bauhaus-card-content">
+            <Tabs defaultValue="signin" className="bauhaus-tabs">
+              <TabsList className="bauhaus-tabs-list">
+                <TabsTrigger 
+                  value="signin" 
+                  className="bauhaus-tab-trigger"
+                >
+                  SIGN IN
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="signup" 
+                  className="bauhaus-tab-trigger"
+                >
+                  SIGN UP
+                </TabsTrigger>
+              </TabsList>
+              
+              {error && (
+                <div className="bauhaus-error-message">
+                  {error}
+                </div>
+              )}
 
-            {/* Google Sign In Button - Available on both tabs */}
-            <div className="space-y-4">
+            {/* Swiss Bauhaus Social Sign In */}
+            <div className="bauhaus-social-section">
               <Button 
                 onClick={handleGoogleSignIn}
                 disabled={isSubmitting}
-                variant="outline" 
-                className="w-full flex items-center justify-center gap-3 h-12 rounded-xl border-gray-200 hover:border-gray-300 hover:bg-gray-50 transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+                className="bauhaus-google-button"
               >
-                <svg className="h-4 w-4" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                <svg className="bauhaus-google-icon" viewBox="0 0 24 24">
+                  <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                  <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                 </svg>
-                {isSubmitting ? "Signing in..." : "Continue with Google"}
+                {isSubmitting ? "AUTHENTICATING..." : "GOOGLE"}
               </Button>
 
-              <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                  <Separator className="w-full bg-gray-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white px-3 py-1 text-gray-500 font-medium rounded-full">Or continue with email</span>
-                </div>
+              <div className="bauhaus-divider">
+                <div className="bauhaus-divider-line"></div>
+                <span className="bauhaus-divider-text">CREDENTIALS</span>
+                <div className="bauhaus-divider-line"></div>
               </div>
             </div>
             
-            <TabsContent value="signin">
-              <form onSubmit={handleSignIn} className="space-y-4">
+            <TabsContent value="signin" className="bauhaus-tab-content">
+              <form onSubmit={handleSignIn} className="bauhaus-form">
                 <div className="space-y-2">
                   <Label htmlFor="signin-email" className="text-sm font-medium text-gray-700">Email</Label>
                   <div className="relative">
@@ -385,7 +393,8 @@ export function AuthForm() {
             </div>
           )}
         </CardContent>
-      </Card>
+        </Card>
+      </div>
     </div>
   )
 }
