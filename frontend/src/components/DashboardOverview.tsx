@@ -8,11 +8,20 @@ import { Button } from "./ui/button"
 import { useApp } from "../contexts/AppContext"
 
 export function DashboardOverview() {
-  const { properties, bookings, analytics, getAnalytics } = useApp()
+  const { properties, bookings, analytics, getAnalytics, loadProperties, loadBookings } = useApp()
   const navigate = useNavigate()
 
   useEffect(() => {
-    getAnalytics()
+    // Load all necessary data for the dashboard
+    const loadDashboardData = async () => {
+      await Promise.all([
+        loadProperties(),
+        loadBookings(),
+        getAnalytics()
+      ])
+    }
+    
+    loadDashboardData()
   }, [])
 
   const totalRevenue = properties.reduce((sum, property) => sum + (property.total_revenue || 0), 0)

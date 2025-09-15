@@ -261,9 +261,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
           created_at: session.user.created_at
         })
         
-        // Load user data from Supabase directly instead of backend
-        // TODO: Replace these with direct Supabase queries
+        // Automatically load user's properties and bookings when authenticated
         console.log('User authenticated with Supabase:', session.user)
+        try {
+          await Promise.all([
+            loadProperties(),
+            loadBookings()
+          ])
+          console.log('User data loaded successfully')
+        } catch (dataError) {
+          console.error('Error loading user data:', dataError)
+        }
       } else {
         console.log('No Supabase session found')
       }
