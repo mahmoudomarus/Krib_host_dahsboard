@@ -55,3 +55,7 @@ services:
         value: "5"
       - key: SSE_MAX_CONNECTIONS
         value: "1000"
+      - key: ENVIRONMENT
+        value: "production"
+      - key: KRIB_AI_AGENT_API_KEY
+        value: "krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8"

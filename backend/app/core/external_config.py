@@ -10,14 +10,15 @@ from typing import Dict, List
 class ExternalAPIConfig:
     """Configuration for external API integrations"""
     
-    # Production API Keys (load from environment)
-    PRODUCTION_API_KEYS = {
-        "krib_ai_agent": os.getenv("KRIB_AI_AGENT_API_KEY"),
-    }
+    # Production API Key (solid, always works)
+    PRODUCTION_API_KEY = os.getenv(
+        "KRIB_AI_AGENT_API_KEY", 
+        "krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8"
+    )
     
-    # Development/Test API Keys
-    TEST_API_KEYS = {
-        "krib_ai_agent": "krib_ai_test_key_12345",
+    # Valid API Keys
+    VALID_API_KEYS = {
+        "krib_ai_agent": PRODUCTION_API_KEY,
     }
     
     # API Key Permissions
@@ -39,14 +40,8 @@ class ExternalAPIConfig:
     
     @classmethod
     def get_api_keys(cls) -> Dict[str, str]:
-        """Get API keys based on environment"""
-        is_production = os.getenv("ENVIRONMENT", "development").lower() == "production"
-        
-        if is_production:
-            # Filter out None values from production keys
-            return {k: v for k, v in cls.PRODUCTION_API_KEYS.items() if v is not None}
-        else:
-            return cls.TEST_API_KEYS
+        """Get all valid API keys"""
+        return cls.VALID_API_KEYS
     
     @classmethod
     def get_service_permissions(cls, service_name: str) -> List[str]:
@@ -76,38 +71,23 @@ class ExternalAPIConfig:
         return permission in service_permissions
 
 
-# Example usage and deployment instructions
+# Deployment instructions
 DEPLOYMENT_INSTRUCTIONS = """
-🔐 EXTERNAL API KEYS SETUP
+🔐 EXTERNAL API KEY SETUP
 
-1. For Production Deployment:
-   Add these environment variables to your deployment platform (Render, Heroku, etc.):
+Production Deployment (Render/Heroku/etc):
    
-   KRIB_AI_AGENT_API_KEY=your_secure_production_key_here
-   CHATGPT_AGENT_API_KEY=your_chatgpt_integration_key
-   CLAUDE_AGENT_API_KEY=your_claude_integration_key
-   BOOKING_SERVICE_API_KEY=your_booking_service_key
    ENVIRONMENT=production
+   KRIB_AI_AGENT_API_KEY=krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8
 
-2. For Development:
-   Add to your .env file:
-   
-   ENVIRONMENT=development
-   # Test keys will be used automatically
+Current Production Key: krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8
+Rate Limit: 200 requests/minute
+Permissions: read_properties, create_bookings, read_availability, calculate_pricing, read_property_details
 
-3. Generate Secure API Keys:
-   Use tools like: openssl rand -hex 32
-   Or online generators with sufficient entropy
-
-4. API Key Format Recommendation:
-   service_environment_purpose_random
-   Example: krib_prod_api_a1b2c3d4e5f6...
-
-5. Security Best Practices:
-   - Rotate keys quarterly
-   - Use different keys per environment
-   - Monitor usage and set alerts
-   - Implement key expiration if needed
+Security:
+- Rotate keys quarterly
+- Monitor usage via logs
+- Current key expires: Never (update as needed)
 """
 
 print(DEPLOYMENT_INSTRUCTIONS)
