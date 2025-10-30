@@ -51,27 +51,33 @@ class StripeConnectService:
                 return await StripeConnectService.get_account_status(user_id)
             
             # Create Stripe Connect Express account
-            account = stripe.Account.create(
-                type="express",
-                country=country,
-                email=email,
-                business_type=business_type,
-                capabilities={
-                    "card_payments": {"requested": True},
-                    "transfers": {"requested": True},
-                },
-                settings={
-                    "payouts": {
-                        "schedule": {
-                            "interval": "manual"  # We control payouts via API
+            logger.info(f"Creating Stripe Express account for user {user_id}, email {email}, country {country}")
+            
+            try:
+                account = stripe.Account.create(
+                    type="express",
+                    country=country,
+                    email=email,
+                    business_type=business_type,
+                    capabilities={
+                        "card_payments": {"requested": True},
+                        "transfers": {"requested": True},
+                    },
+                    settings={
+                        "payouts": {
+                            "schedule": {
+                                "interval": "manual"  # We control payouts via API
+                            }
                         }
+                    },
+                    metadata={
+                        "user_id": user_id,
+                        "platform": "krib_host_dashboard"
                     }
-                },
-                metadata={
-                    "user_id": user_id,
-                    "platform": "krib_host_dashboard"
-                }
-            )
+                )
+            except stripe.error.StripeError as e:
+                logger.error(f"Stripe API error creating account: {str(e)}")
+                raise ValueError(f"Stripe error: {str(e)}")
             
             logger.info(f"Created Stripe Connect account {account.id} for user {user_id}")
             

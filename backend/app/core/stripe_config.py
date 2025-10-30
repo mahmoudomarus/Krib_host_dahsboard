@@ -12,12 +12,9 @@ class StripeConfig:
     """Stripe configuration and initialization"""
     
     # Stripe API Keys (load from environment variables)
-    STRIPE_PUBLISHABLE_KEY: str = os.getenv("STRIPE_PUBLISHABLE_KEY")
-    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY")
+    STRIPE_PUBLISHABLE_KEY: str = os.getenv("STRIPE_PUBLISHABLE_KEY", "")
+    STRIPE_SECRET_KEY: str = os.getenv("STRIPE_SECRET_KEY", "")
     STRIPE_WEBHOOK_SECRET: Optional[str] = os.getenv("STRIPE_WEBHOOK_SECRET")
-    
-    if not STRIPE_SECRET_KEY:
-        raise ValueError("STRIPE_SECRET_KEY environment variable is required")
     
     # Platform settings
     PLATFORM_FEE_PERCENTAGE: float = float(os.getenv("PLATFORM_FEE_PERCENTAGE", "15.0"))
@@ -42,8 +39,20 @@ class StripeConfig:
     @classmethod
     def initialize(cls):
         """Initialize Stripe with API key"""
+        if not cls.STRIPE_SECRET_KEY:
+            print("⚠️  WARNING: STRIPE_SECRET_KEY not set - Stripe features disabled")
+            return
+        
+        if cls.STRIPE_SECRET_KEY.startswith("sk_test"):
+            print(f"✅ Stripe initialized in TEST mode")
+        elif cls.STRIPE_SECRET_KEY.startswith("sk_live"):
+            print(f"✅ Stripe initialized in LIVE mode")
+        else:
+            print(f"⚠️  WARNING: Invalid Stripe key format")
+            
         stripe.api_key = cls.STRIPE_SECRET_KEY
         stripe.api_version = cls.STRIPE_API_VERSION
+        print(f"✅ Stripe API initialized with key: {cls.STRIPE_SECRET_KEY[:12]}...")
     
     @classmethod
     def is_test_mode(cls) -> bool:

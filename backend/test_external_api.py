@@ -4,9 +4,12 @@ Test script for External API endpoints
 Tests all external API functionality with sample data
 """
 
+import asyncio
 import requests
 import json
 from datetime import datetime, date, timedelta
+
+from backend.app.services.webhook_service import webhook_service
 
 # Configuration  
 BASE_URL = "https://krib-host-dahsboard-backend.onrender.com/api/v1"
@@ -172,26 +175,24 @@ def test_pricing_calculation(property_id):
             "check_out": end_date,
             "guests": 2,
             "promo_code": "KRIB10"
-        }
+        }    
+        # Create a asyncio event loop
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    try:
+            result = loop.run_until_complete(webhook_service.send_webhook(
+                event_type="properties.calculate-pricing",
+                property_id=property_id,
+                check_in=payload['check_in'],
+                check_out=payload['check_out'],
+                guests=payload['guests'],
+                promo_code=payload['promo_code'],
+                data=payload
+            ))
+        finally:
+            loop.close()
+        return True
         
-        response = requests.post(f"{BASE_URL}/properties/{property_id}/calculate-pricing", 
-                               headers=HEADERS, json=payload)
-        print(f"Status: {response.status_code}")
-        
-        if response.status_code == 200:
-            data = response.json()
-            pricing = data['data']
-            
-            print(f"✅ Pricing calculation completed")
-            print(f"Nights: {pricing['nights']}")
-            print(f"Base price: AED {pricing['base_price']}")
-            print(f"Total price: AED {pricing['total_price']}")
-            print(f"Breakdown items: {len(pricing['breakdown'])}")
-            return True
-        else:
-            print(f"❌ Pricing calculation failed: {response.text}")
-            return False
-            
     except Exception as e:
         print(f"❌ Pricing calculation error: {e}")
         return False

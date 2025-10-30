@@ -472,6 +472,7 @@ def send_host_response_webhook(self, booking_id: str, host_id: str, response_dat
             property_id=response_data.get("property_id"),
             host_id=host_id,
             data=response_data
+            
         ))
         finally:
             loop.close()
