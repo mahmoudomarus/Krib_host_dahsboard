@@ -59,3 +59,19 @@ services:
         value: "production"
       - key: KRIB_AI_AGENT_API_KEY
         value: "krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8"
+      - key: STRIPE_PUBLISHABLE_KEY
+        fromSecret: true
+      - key: STRIPE_SECRET_KEY
+        fromSecret: true
+      - key: STRIPE_WEBHOOK_SECRET
+        fromSecret: true
+      - key: PLATFORM_FEE_PERCENTAGE
+        value: "15.0"
+      - key: PAYOUT_DELAY_DAYS
+        value: "1"
+      - key: CURRENCY
+        value: "AED"
+      - key: CONNECT_REFRESH_URL
+        value: "https://krib-platform.vercel.app/settings/payouts"
+      - key: CONNECT_RETURN_URL
+        value: "https://krib-platform.vercel.app/settings/payouts/complete"
