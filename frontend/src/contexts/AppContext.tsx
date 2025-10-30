@@ -153,6 +153,13 @@ interface AppContextType {
   getTransactions: (limit?: number) => Promise<any>
   updatePayoutSettings: (settings: any) => Promise<any>
   
+  // Stripe Connect methods
+  createStripeAccount: () => Promise<any>
+  getStripeOnboardingLink: () => Promise<any>
+  getStripeAccountStatus: () => Promise<any>
+  getStripeDashboardLink: () => Promise<any>
+  getHostPayouts: () => Promise<any>
+  
   // Settings methods
   getUserProfile: () => Promise<User>
   updateUserProfile: (updates: Partial<User>) => Promise<User>
@@ -529,6 +536,68 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Stripe Connect methods
+  async function createStripeAccount() {
+    try {
+      const result = await makeAPIRequest('/v1/stripe/host/create-account', {
+        method: 'POST',
+        body: JSON.stringify({
+          country: 'AE',
+          email: user?.email || '',
+          business_type: 'individual'
+        })
+      })
+      return result.data
+    } catch (error) {
+      console.error('Create Stripe account error:', error)
+      throw error
+    }
+  }
+
+  async function getStripeOnboardingLink() {
+    try {
+      const result = await makeAPIRequest('/v1/stripe/host/onboarding-link', {
+        method: 'POST'
+      })
+      return result.data
+    } catch (error) {
+      console.error('Get Stripe onboarding link error:', error)
+      throw error
+    }
+  }
+
+  async function getStripeAccountStatus() {
+    try {
+      const result = await makeAPIRequest('/v1/stripe/host/account-status')
+      return result.data
+    } catch (error) {
+      console.error('Get Stripe account status error:', error)
+      throw error
+    }
+  }
+
+  async function getStripeDashboardLink() {
+    try {
+      const result = await makeAPIRequest('/v1/stripe/host/dashboard-link', {
+        method: 'POST'
+      })
+      return result.data
+    } catch (error) {
+      console.error('Get Stripe dashboard link error:', error)
+      throw error
+    }
+  }
+
+  async function getHostPayouts() {
+    try {
+      const result = await makeAPIRequest('/v1/payouts/host-payouts')
+      return result.data
+    } catch (error) {
+      console.error('Get host payouts error:', error)
+      throw error
+    }
+  }
+
   // User/Settings methods
   async function getUserProfile(): Promise<User> {
     try {
@@ -721,6 +790,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     validateLocation,
     getUAEAmenities,
     getUAEPropertyTypes,
+    
+    // Stripe Connect methods
+    createStripeAccount,
+    getStripeOnboardingLink,
+    getStripeAccountStatus,
+    getStripeDashboardLink,
+    getHostPayouts,
   }
 
   return (
