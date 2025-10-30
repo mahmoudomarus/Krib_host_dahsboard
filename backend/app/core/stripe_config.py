@@ -26,11 +26,11 @@ class StripeConfig:
     # Connect settings
     CONNECT_REFRESH_URL: str = os.getenv(
         "CONNECT_REFRESH_URL",
-        "https://krib-platform.vercel.app/settings/payouts"
+        "https://krib-host-dashboard.vercel.app/dashboard/financials"
     )
     CONNECT_RETURN_URL: str = os.getenv(
         "CONNECT_RETURN_URL",
-        "https://krib-platform.vercel.app/settings/payouts/complete"
+        "https://krib-host-dashboard.vercel.app/dashboard/financials"
     )
     
     # API version
