@@ -10,7 +10,8 @@ import {
   Banknote,
   AlertCircle,
   CheckCircle,
-  Clock
+  Clock,
+  CreditCard
 } from "lucide-react"
 import { useApp } from "../contexts/AppContext"
 import { StripeConnectSetup } from "./StripeConnectSetup"
