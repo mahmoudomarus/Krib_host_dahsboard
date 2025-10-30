@@ -22,7 +22,7 @@ class StripeConnectService:
         user_id: str,
         email: str,
         country: str = "AE",
-        business_type: str = "individual"
+        business_type: str = "company"  # UAE requires 'company'
     ) -> Dict[str, Any]:
         """
         Create a Stripe Connect Express account for a host

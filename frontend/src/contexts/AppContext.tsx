@@ -544,7 +544,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({
           country: 'AE',
           email: user?.email || '',
-          business_type: 'individual'
+          business_type: 'company'  // UAE requires 'company' business type
         })
       })
       return result.data

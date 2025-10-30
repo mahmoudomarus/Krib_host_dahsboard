@@ -221,16 +221,28 @@ def generate_realistic_property(user_id, company_name, property_number):
     
     address = f"{random.choice(street_numbers)} {random.choice(street_names)}, {area}, Dubai, UAE"
     
-    # High-quality property images
+    # High-quality property images (Working Unsplash URLs with quality parameter)
     property_images = [
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600607687644-aac4c119fe23?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600566752734-f6b8e4fa8a88?w=1200&h=800&fit=crop"
+        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1502672260066-6bc35f0a1de8?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600607687644-aac4c119fe23?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600607688969-a5bfcd646154?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1518684079-3c830dcef090?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1582672060674-bc2bd808a8b5?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1546412414-e1885259563a?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1613977257363-707ba9348227?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600563438938-a650a5f1d97e?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1493809842364-78817add7ffb?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1556912172-45b7abe8b7e1?w=1200&h=800&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1600566752355-35792bedcfea?w=1200&h=800&fit=crop&q=80"
     ]
     
     return {
@@ -253,14 +265,8 @@ def generate_realistic_property(user_id, company_name, property_number):
         "status": "active",
         "created_at": datetime.utcnow().isoformat(),
         "updated_at": datetime.utcnow().isoformat(),
-        "images": [
-            {
-                "url": random.choice(property_images),
-                "alt_text": f"{area} {property_type} interior view",
-                "is_primary": True,
-                "order": 0
-            }
-        ]
+        # Images stored as TEXT[] array (just URL strings, not objects)
+        "images": random.sample(property_images, min(random.randint(3, 5), len(property_images)))
     }
 
 def create_properties_for_user(user_id, company_name):
@@ -277,8 +283,8 @@ def create_properties_for_user(user_id, company_name):
         try:
             property_data = generate_realistic_property(user_id, company_name, i+1)
             
-            # Extract images before creating property
-            images_data = property_data.pop("images")
+            # Images are now stored as TEXT[] array directly in property_data
+            # No need to extract or create separately
             
             # Create property
             response = requests.post(
@@ -292,29 +298,6 @@ def create_properties_for_user(user_id, company_name):
                 print(f"    ✅ Property {i+1}: {property_data['title'][:50]}...")
                 created_properties.append(property_id)
                 CREATED_PROPERTIES.append(property_id)
-                
-                # Create property images
-                for img in images_data:
-                    image_id = str(uuid.uuid4())
-                    image_record = {
-                        "id": image_id,
-                        "property_id": property_id,
-                        "url": img["url"],
-                        "alt_text": img["alt_text"],
-                        "is_primary": img["is_primary"],
-                        "order": img["order"],
-                        "created_at": datetime.utcnow().isoformat()
-                    }
-                    
-                    img_response = requests.post(
-                        f"{SUPABASE_URL}/rest/v1/property_images",
-                        headers=headers,
-                        json=image_record
-                    )
-                    
-                    if img_response.status_code in [200, 201]:
-                        CREATED_IMAGES.append(image_id)
-                    
                 time.sleep(0.1)  # Rate limiting
                 
             else:
@@ -335,17 +318,8 @@ def cleanup_test_data():
     
     print("\n🧹 Cleaning up test data...")
     
-    # Delete property images
-    for image_id in CREATED_IMAGES:
-        try:
-            response = requests.delete(
-                f"{SUPABASE_URL}/rest/v1/property_images?id=eq.{image_id}",
-                headers=headers
-            )
-            if response.status_code in [200, 204]:
-                print(f"  🗑️ Deleted image: {image_id}")
-        except Exception as e:
-            print(f"  ❌ Failed to delete image {image_id}: {e}")
+    # Images are now stored in properties table as TEXT[] array
+    # No separate property_images table to clean up
     
     # Delete properties
     for property_id in CREATED_PROPERTIES:
@@ -372,7 +346,7 @@ def cleanup_test_data():
             print(f"  ❌ Failed to delete user {user_id}: {e}")
     
     print(f"✅ Cleanup complete!")
-    print(f"   Deleted: {len(CREATED_IMAGES)} images, {len(CREATED_PROPERTIES)} properties, {len(CREATED_USERS)} users")
+    print(f"   Deleted: {len(CREATED_PROPERTIES)} properties, {len(CREATED_USERS)} users")
 
 def test_render_api_endpoints():
     """Test the Render API endpoints with created data"""
