@@ -20,7 +20,7 @@ from app.core.database import init_db
 from app.core.redis_client import redis_client
 from app.core.monitoring import init_sentry, metrics_middleware, metrics_endpoint, health_check_with_metrics
 from app.core.rate_limiter import limiter, custom_rate_limit_handler
-from app.api.routes import auth, properties, bookings, analytics, upload, financials, users, locations, external, webhooks, notifications, sse, stripe_connect, payments, payouts, stripe_webhooks
+from app.api.routes import auth, properties, bookings, analytics, upload, financials, users, locations, external, webhooks, notifications, sse, stripe_connect, payments, payouts, stripe_webhooks, external_payments
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
 
@@ -136,6 +136,7 @@ app.include_router(stripe_connect.router, prefix="/api/v1/stripe", tags=["stripe
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["payments"])
 app.include_router(payouts.router, prefix="/api/v1/payouts", tags=["payouts"])
 app.include_router(stripe_webhooks.router, prefix="/api/v1/stripe", tags=["stripe-webhooks"])
+app.include_router(external_payments.router, prefix="/api/external", tags=["external-payments"])
 
 @app.get("/")
 async def root():
