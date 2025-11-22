@@ -179,7 +179,14 @@ Apply SQL migrations in order from `supabase/migrations/` directory via Supabase
 - `backend/main.py` - FastAPI application entry point
 - `backend/app/api/routes/` - API route handlers
 - `backend/app/services/` - Business logic services
+  - `query_service.py` - Centralized database query logic
+  - `ai_service.py` - AI/LLM integration
+  - `stripe_connect_service.py` - Stripe payment processing
+  - `notification_service.py` - Notification system
 - `backend/app/core/` - Configuration and database
+  - `config.py` - Application settings (secure defaults)
+  - `stripe_config.py` - Stripe configuration
+  - `external_config.py` - External API keys
 - `backend/app/models/` - Pydantic schemas
 - `backend/requirements.txt` - Python dependencies
 - `backend/render.yaml` - Render deployment configuration
@@ -308,6 +315,23 @@ Configure in Supabase Dashboard → Authentication:
 ### Database Upgrade
 
 Schedule Postgres upgrade in Supabase Dashboard → Settings → Infrastructure when security patches are available.
+
+---
+
+## Code Quality Notes
+
+**Recent Refactoring (Nov 2024):**
+- Eliminated weak config defaults (auto-generated secure secrets)
+- Created `query_service.py` to centralize database logic
+- Refactored `bookings.py` and `properties.py` (reduced ~80 lines of duplicate code)
+- Added professional logging throughout (no emojis, proper error tracking)
+- Production config validation to prevent misconfiguration
+
+**Architecture:**
+- Service layer pattern: routes → services → database
+- Centralized error handling with HTTPException
+- Consistent response models (Pydantic)
+- Background tasks for async operations
 
 ---
 
