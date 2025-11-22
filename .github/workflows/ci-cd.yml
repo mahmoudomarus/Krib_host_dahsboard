@@ -72,8 +72,8 @@ jobs:
           SUPABASE_ANON_KEY: ${{ secrets.TEST_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.TEST_SUPABASE_SERVICE_ROLE_KEY }}
           REDIS_URL: redis://localhost:6379
-          SECRET_KEY: test-secret-key-for-ci
-          JWT_SECRET_KEY: test-jwt-secret-key-for-ci
+          SECRET_KEY: test-secret-key-for-ci-with-at-least-32-characters-long
+          JWT_SECRET_KEY: test-jwt-secret-key-for-ci-with-at-least-32-chars
         run: |
           cd backend
           pytest tests/ -v --cov=app --cov-report=xml --cov-report=term
