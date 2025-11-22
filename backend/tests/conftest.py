@@ -4,6 +4,13 @@ Pytest configuration and fixtures
 
 import pytest
 import os
+
+# Set test environment before importing app
+os.environ["DEBUG"] = "true"
+os.environ["SUPABASE_URL"] = os.getenv("TEST_SUPABASE_URL", "https://test.supabase.co")
+os.environ["SUPABASE_ANON_KEY"] = os.getenv("TEST_SUPABASE_ANON_KEY", "test_anon_key")
+os.environ["SUPABASE_SERVICE_ROLE_KEY"] = os.getenv("TEST_SUPABASE_SERVICE_ROLE_KEY", "test_service_key")
+
 from fastapi.testclient import TestClient
 from app.core.config import Settings
 

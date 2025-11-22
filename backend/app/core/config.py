@@ -84,6 +84,6 @@ class Settings(BaseSettings):
 # Global settings instance
 settings = Settings()
 
-# Validate config on startup in production
-if not settings.debug:
+# Validate config on startup in production (skip in test environment)
+if not settings.debug and not os.getenv("PYTEST_CURRENT_TEST"):
     settings.validate_production_config()
