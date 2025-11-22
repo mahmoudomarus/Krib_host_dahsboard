@@ -17,8 +17,11 @@ from app.models.schemas import (
 )
 from app.core.supabase_client import supabase_client
 from app.services.ai_service import ai_service
+from app.services.query_service import query_service
 from app.api.dependencies import get_current_user
+import logging
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
@@ -31,13 +34,8 @@ async def create_property(
 ):
     """Create a new property listing"""
     try:
-        # Generate unique property ID
         property_id = str(uuid.uuid4())
         
-        # Calculate nights for validation
-        # (This will be used for booking calculations later)
-        
-        # Prepare property data for database
         property_record = {
             "id": property_id,
             "user_id": current_user["id"],
@@ -56,7 +54,7 @@ async def create_property(
             "price_per_night": property_data.price_per_night,
             "amenities": property_data.amenities,
             "images": property_data.images,
-            "status": "draft",  # New properties start as draft
+            "status": "draft",
             "rating": 0,
             "review_count": 0,
             "booking_count": 0,
@@ -65,10 +63,10 @@ async def create_property(
             "updated_at": datetime.utcnow().isoformat()
         }
         
-        # Insert into database
         result = supabase_client.table("properties").insert(property_record).execute()
         
         if not result.data:
+            logger.error(f"Failed to insert property for user {current_user['id']}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to create property"
@@ -76,7 +74,6 @@ async def create_property(
         
         created_property = result.data[0]
         
-        # Schedule background AI enhancement if description is not provided
         if not property_data.description:
             background_tasks.add_task(
                 enhance_property_with_ai,
@@ -86,7 +83,10 @@ async def create_property(
         
         return PropertyResponse(**created_property)
         
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"Error creating property: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create property: {str(e)}"
@@ -102,19 +102,17 @@ async def get_user_properties(
 ):
     """Get all properties for the current user"""
     try:
-        query = supabase_client.table("properties").select("*").eq("user_id", current_user["id"])
+        properties = query_service.get_user_properties(
+            user_id=current_user["id"],
+            status_filter=status_filter,
+            property_type=property_type
+        )
+        return [PropertyResponse(**prop) for prop in properties]
         
-        # Apply filters
-        if status_filter:
-            query = query.eq("status", status_filter)
-        if property_type:
-            query = query.eq("property_type", property_type)
-        
-        result = query.order("created_at", desc=True).execute()
-        
-        return [PropertyResponse(**property_data) for property_data in result.data]
-        
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.error(f"Error fetching user properties: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch properties: {str(e)}"
@@ -128,19 +126,13 @@ async def get_property(
 ):
     """Get a specific property"""
     try:
-        result = supabase_client.table("properties").select("*").eq("id", property_id).eq("user_id", current_user["id"]).execute()
-        
-        if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Property not found"
-            )
-        
-        return PropertyResponse(**result.data[0])
+        property_data = query_service.get_property_by_id(property_id, current_user["id"])
+        return PropertyResponse(**property_data)
         
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Error fetching property {property_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch property: {str(e)}"
@@ -155,23 +147,17 @@ async def update_property(
 ):
     """Update a property"""
     try:
-        # Verify property ownership
-        existing = supabase_client.table("properties").select("*").eq("id", property_id).eq("user_id", current_user["id"]).execute()
-        
-        if not existing.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Property not found"
-            )
+        # Verify ownership
+        query_service.get_property_by_id(property_id, current_user["id"])
         
         # Prepare update data (only include non-None values)
         update_data = {k: v for k, v in property_updates.dict().items() if v is not None}
         update_data["updated_at"] = datetime.utcnow().isoformat()
         
-        # Update in database
         result = supabase_client.table("properties").update(update_data).eq("id", property_id).execute()
         
         if not result.data:
+            logger.error(f"Failed to update property {property_id}")
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to update property"
@@ -182,6 +168,7 @@ async def update_property(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Error updating property {property_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to update property: {str(e)}"
@@ -195,17 +182,11 @@ async def delete_property(
 ):
     """Delete a property"""
     try:
-        # Verify property ownership
-        existing = supabase_client.table("properties").select("*").eq("id", property_id).eq("user_id", current_user["id"]).execute()
-        
-        if not existing.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Property not found"
-            )
+        # Verify ownership
+        query_service.get_property_by_id(property_id, current_user["id"])
         
         # Check if property has active bookings
-        bookings = supabase_client.table("bookings").select("*").eq("property_id", property_id).in_("status", ["pending", "confirmed"]).execute()
+        bookings = supabase_client.table("bookings").select("id").eq("property_id", property_id).in_("status", ["pending", "confirmed"]).execute()
         
         if bookings.data:
             raise HTTPException(
@@ -213,7 +194,6 @@ async def delete_property(
                 detail="Cannot delete property with active bookings"
             )
         
-        # Delete property
         supabase_client.table("properties").delete().eq("id", property_id).execute()
         
         return SuccessResponse(message="Property deleted successfully")
@@ -221,6 +201,7 @@ async def delete_property(
     except HTTPException:
         raise
     except Exception as e:
+        logger.error(f"Error deleting property {property_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to delete property: {str(e)}"
