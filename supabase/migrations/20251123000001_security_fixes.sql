@@ -32,10 +32,21 @@ USING (true);
 -- SECURITY: Fix Function Search Path Vulnerabilities
 -- ============================================================================
 
--- Add SECURITY DEFINER and set search_path to prevent search_path injection attacks
--- This ensures functions execute with a fixed schema search path
+-- Drop existing functions to allow parameter name changes and security updates
+DROP FUNCTION IF EXISTS public.update_payouts_updated_at() CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_platform_fee(NUMERIC) CASCADE;
+DROP FUNCTION IF EXISTS public.cleanup_expired_notifications() CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_host_payout(NUMERIC) CASCADE;
+DROP FUNCTION IF EXISTS public.get_unread_notification_count(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.disable_failed_webhook_subscriptions() CASCADE;
+DROP FUNCTION IF EXISTS public.update_updated_at_column() CASCADE;
+DROP FUNCTION IF EXISTS public.get_pending_earnings(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.create_financial_transaction_on_booking() CASCADE;
+DROP FUNCTION IF EXISTS public.calculate_host_balance(UUID) CASCADE;
 
-CREATE OR REPLACE FUNCTION public.update_payouts_updated_at()
+-- Recreate functions with SECURITY DEFINER and fixed search_path
+
+CREATE FUNCTION public.update_payouts_updated_at()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -47,7 +58,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.calculate_platform_fee(booking_amount NUMERIC)
+CREATE FUNCTION public.calculate_platform_fee(booking_amount NUMERIC)
 RETURNS NUMERIC
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -60,7 +71,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.cleanup_expired_notifications()
+CREATE FUNCTION public.cleanup_expired_notifications()
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -77,7 +88,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.calculate_host_payout(booking_amount NUMERIC)
+CREATE FUNCTION public.calculate_host_payout(booking_amount NUMERIC)
 RETURNS NUMERIC
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -90,7 +101,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.get_unread_notification_count(p_host_id UUID)
+CREATE FUNCTION public.get_unread_notification_count(p_host_id UUID)
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -109,7 +120,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.disable_failed_webhook_subscriptions()
+CREATE FUNCTION public.disable_failed_webhook_subscriptions()
 RETURNS INTEGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -128,7 +139,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+CREATE FUNCTION public.update_updated_at_column()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -140,7 +151,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.get_pending_earnings(p_user_id UUID)
+CREATE FUNCTION public.get_pending_earnings(p_user_id UUID)
 RETURNS NUMERIC
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -162,7 +173,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.create_financial_transaction_on_booking()
+CREATE FUNCTION public.create_financial_transaction_on_booking()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -177,7 +188,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.calculate_host_balance(p_user_id UUID)
+CREATE FUNCTION public.calculate_host_balance(p_user_id UUID)
 RETURNS NUMERIC
 LANGUAGE plpgsql
 SECURITY DEFINER
