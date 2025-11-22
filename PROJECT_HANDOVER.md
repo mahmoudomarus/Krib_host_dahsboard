@@ -282,8 +282,36 @@ Verify Supabase storage bucket is public and storage policies are correct.
 
 ---
 
+## Security Configuration
+
+### Critical Security Fixes Required
+
+**Apply migration:** `supabase/migrations/20251123000001_security_fixes.sql`
+
+This fixes:
+1. Row Level Security not enabled on reference tables
+2. Function search_path vulnerabilities (10 functions)
+
+See `SECURITY_FIXES.md` for detailed instructions.
+
+### Auth Security Settings
+
+Configure in Supabase Dashboard → Authentication:
+1. Set OTP expiry to 600 seconds (10 minutes)
+2. Enable "Check password against HaveIBeenPwned"
+
+### Database Upgrade
+
+Schedule Postgres upgrade in Supabase Dashboard → Settings → Infrastructure when security patches are available.
+
+---
+
 ## Production Checklist
 
+- [ ] Applied security migration (20251123000001_security_fixes.sql)
+- [ ] Verified RLS enabled on all reference tables
+- [ ] Configured Auth OTP expiry < 1 hour
+- [ ] Enabled leaked password protection
 - [ ] All environment variables set in Render
 - [ ] Stripe webhook configured and tested
 - [ ] Database migrations applied
@@ -296,4 +324,5 @@ Verify Supabase storage bucket is public and storage policies are correct.
 - [ ] Test payment processing
 - [ ] Verify payout scheduling
 - [ ] Check webhook delivery logs
+- [ ] Run Supabase linter (0 errors expected)
 
