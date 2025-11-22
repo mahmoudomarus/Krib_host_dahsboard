@@ -19,7 +19,7 @@ def test_root_endpoint_structure():
         "message": "Krib Host Dashboard API",
         "version": "1.0.0",
         "status": "operational",
-        "docs": "/docs"
+        "docs": "/docs",
     }
     assert expected_response["message"] == "Krib Host Dashboard API"
     assert expected_response["status"] == "operational"
@@ -30,4 +30,3 @@ def test_simple_health_structure():
     # Simple health should return {status: ok}
     expected = {"status": "ok"}
     assert expected == {"status": "ok"}
-
