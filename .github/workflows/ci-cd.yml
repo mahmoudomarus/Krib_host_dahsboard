@@ -218,15 +218,6 @@ jobs:
           curl -f https://host.krib.ae || exit 1
           echo "Production deployment successful"
       
-      - name: Create deployment record
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh api repos/${{ github.repository }}/deployments \
-            -f ref='${{ github.sha }}' \
-            -f environment='production' \
-            -f auto_merge=false
-      
       - name: Notify on success
         if: success()
         run: |
