@@ -1,0 +1,66 @@
+name: Rollback Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to rollback to'
+        required: true
+        type: string
+
+jobs:
+  rollback:
+    name: Rollback to Previous Version
+    runs-on: ubuntu-latest
+    environment:
+      name: production
+    
+    steps:
+      - name: Checkout target commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commit_sha }}
+      
+      - name: Verify commit
+        run: |
+          echo "Rolling back to commit: ${{ github.event.inputs.commit_sha }}"
+          git log -1 --oneline
+      
+      - name: Deploy Backend (Rollback)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID_BACKEND: ${{ secrets.RENDER_SERVICE_ID_BACKEND }}
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_BACKEND}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"clearCache\": true, \"gitCommitSHA\": \"${{ github.event.inputs.commit_sha }}\"}"
+      
+      - name: Deploy Frontend (Rollback)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID_FRONTEND: ${{ secrets.RENDER_SERVICE_ID_FRONTEND }}
+        run: |
+          curl -X POST "https://api.render.com/v1/services/${RENDER_SERVICE_ID_FRONTEND}/deploys" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"clearCache\": true, \"gitCommitSHA\": \"${{ github.event.inputs.commit_sha }}\"}"
+      
+      - name: Wait for rollback
+        run: sleep 90
+      
+      - name: Verify rollback
+        run: |
+          curl -f https://api.host.krib.ae/health || exit 1
+          curl -f https://host.krib.ae || exit 1
+          echo "Rollback successful"
+      
+      - name: Create rollback issue
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh issue create \
+            --title "Production Rollback: ${{ github.event.inputs.commit_sha }}" \
+            --body "Production was rolled back to commit ${{ github.event.inputs.commit_sha }} at $(date)" \
+            --label "rollback,production"
+
