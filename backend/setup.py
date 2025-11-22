@@ -14,33 +14,33 @@ def print_step(step_num, description):
     """Print formatted step"""
     print(f"\n{'='*50}")
     print(f"STEP {step_num}: {description}")
-    print('='*50)
+    print(f"{'='*50}")
 
 def run_command(command, description, check=True):
     """Run shell command with error handling"""
-    print(f"\n🔄 {description}...")
+    print(f"\n[RUNNING] {description}...")
     try:
         result = subprocess.run(command, shell=True, check=check, capture_output=True, text=True)
         if result.returncode == 0:
-            print(f"✅ {description} completed successfully")
+            print(f"[SUCCESS] {description} completed")
             if result.stdout:
                 print(result.stdout)
         else:
-            print(f"❌ {description} failed")
+            print(f"[ERROR] {description} failed")
             if result.stderr:
                 print(result.stderr)
         return result
     except subprocess.CalledProcessError as e:
-        print(f"❌ {description} failed with error: {e}")
+        print(f"[ERROR] {description} failed: {e}")
         return None
 
 def check_python_version():
     """Check if Python version is compatible"""
     version = sys.version_info
     if version.major < 3 or (version.major == 3 and version.minor < 8):
-        print("❌ Python 3.8+ is required")
+        print("[ERROR] Python 3.8+ is required")
         return False
-    print(f"✅ Python {version.major}.{version.minor}.{version.micro} detected")
+    print(f"[INFO] Python {version.major}.{version.minor}.{version.micro} detected")
     return True
 
 def setup_environment():
@@ -74,22 +74,21 @@ def setup_environment_file():
     env_example = Path("env_example.txt")
     
     if env_file.exists():
-        print("✅ .env file already exists")
+        print("[INFO] .env file already exists")
         return True
     
     if env_example.exists():
-        # Copy template to .env
         with open(env_example, 'r') as f:
             content = f.read()
         
         with open(env_file, 'w') as f:
             f.write(content)
         
-        print("✅ Created .env file from template")
-        print("⚠️  Please update the .env file with your actual API keys and configuration")
+        print("[SUCCESS] Created .env file from template")
+        print("[WARNING] Update the .env file with your actual API keys and configuration")
         return True
     else:
-        print("❌ env_example.txt not found")
+        print("[ERROR] env_example.txt not found")
         return False
 
 def check_supabase_connection():
@@ -99,13 +98,12 @@ def check_supabase_connection():
     try:
         from app.core.supabase_client import supabase_client
         
-        # Test connection
         result = supabase_client.table("users").select("count").execute()
-        print("✅ Supabase connection successful")
+        print("[SUCCESS] Supabase connection established")
         return True
     except Exception as e:
-        print(f"❌ Supabase connection failed: {e}")
-        print("⚠️  Please check your Supabase credentials in .env file")
+        print(f"[ERROR] Supabase connection failed: {e}")
+        print("[WARNING] Check your Supabase credentials in .env file")
         return False
 
 def initialize_database():
@@ -116,12 +114,11 @@ def initialize_database():
         from app.core.database import init_db
         import asyncio
         
-        # Run database initialization
         asyncio.run(init_db())
-        print("✅ Database initialized successfully")
+        print("[SUCCESS] Database initialized")
         return True
     except Exception as e:
-        print(f"❌ Database initialization failed: {e}")
+        print(f"[ERROR] Database initialization failed: {e}")
         return False
 
 def test_ai_services():
@@ -136,21 +133,21 @@ def test_ai_services():
         has_anthropic = ai_service.anthropic_client is not None
         
         if has_openai:
-            print("✅ OpenAI service configured")
+            print("[SUCCESS] OpenAI service configured")
         else:
-            print("⚠️  OpenAI API key not found - AI features will use fallback")
+            print("[WARNING] OpenAI API key not found, AI features will use fallback")
         
         if has_anthropic:
-            print("✅ Anthropic service configured")
+            print("[SUCCESS] Anthropic service configured")
         else:
-            print("⚠️  Anthropic API key not found - using OpenAI as primary")
+            print("[WARNING] Anthropic API key not found, using OpenAI as primary")
         
         if not has_openai and not has_anthropic:
-            print("⚠️  No AI services configured - descriptions will use templates")
+            print("[WARNING] No AI services configured, descriptions will use templates")
         
         return True
     except Exception as e:
-        print(f"❌ AI service test failed: {e}")
+        print(f"[ERROR] AI service test failed: {e}")
         return False
 
 def test_storage_service():
@@ -161,13 +158,13 @@ def test_storage_service():
         from app.services.storage_service import storage_service
         
         if storage_service.s3_client:
-            print("✅ S3 storage service configured")
+            print("[SUCCESS] S3 storage service configured")
         else:
-            print("⚠️  S3 credentials not found - file uploads will be disabled")
+            print("[WARNING] S3 credentials not found, file uploads will be disabled")
         
         return True
     except Exception as e:
-        print(f"❌ Storage service test failed: {e}")
+        print(f"[ERROR] Storage service test failed: {e}")
         return False
 
 def create_run_script():
@@ -183,10 +180,8 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     with open("run.sh", "w") as f:
         f.write(run_script_unix)
     
-    # Make executable
     os.chmod("run.sh", 0o755)
     
-    # Create run script for Windows
     run_script_windows = """@echo off
 call venv\\Scripts\\activate
 uvicorn main:app --host 0.0.0.0 --port 8000 --reload
@@ -195,21 +190,19 @@ uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     with open("run.bat", "w") as f:
         f.write(run_script_windows)
     
-    print("✅ Created run.sh (Unix/macOS) and run.bat (Windows)")
+    print("[SUCCESS] Created run.sh and run.bat")
     return True
 
 def main():
     """Main setup function"""
-    print("🚀 RentalAI Backend Setup")
-    print("This script will set up your FastAPI backend environment")
+    print("Krib Host Dashboard Backend Setup")
+    print("Setting up FastAPI backend environment")
     
-    # Change to backend directory
     backend_dir = Path(__file__).parent
     os.chdir(backend_dir)
     
     success = True
     
-    # Run setup steps
     success &= setup_environment()
     success &= setup_environment_file()
     success &= check_supabase_connection()
@@ -220,19 +213,19 @@ def main():
     
     print("\n" + "="*50)
     if success:
-        print("🎉 SETUP COMPLETED SUCCESSFULLY!")
+        print("[SETUP COMPLETE]")
         print("\nNext steps:")
         print("1. Update .env file with your API keys")
         print("2. Run the server:")
         print("   Unix/macOS: ./run.sh")
         print("   Windows: run.bat")
         print("   Manual: uvicorn main:app --host 0.0.0.0 --port 8000 --reload")
-        print("\n3. Visit http://localhost:8000/docs for API documentation")
-        print("4. Update your frontend to use the new backend at http://localhost:8000")
+        print("\n3. API documentation: http://localhost:8000/docs")
+        print("4. Update frontend to use backend at http://localhost:8000")
     else:
-        print("❌ SETUP COMPLETED WITH WARNINGS")
-        print("Please check the error messages above and resolve any issues")
-        print("You can run this script again after fixing the problems")
+        print("[SETUP COMPLETE WITH WARNINGS]")
+        print("Check error messages above and resolve issues")
+        print("Run this script again after fixing problems")
     
     print("="*50)
 
