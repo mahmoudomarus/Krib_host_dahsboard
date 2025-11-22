@@ -11,6 +11,7 @@ from app.models.schemas import (
 )
 from app.core.supabase_client import supabase_client
 from app.api.dependencies import get_current_user, verify_booking_access
+from app.services.query_service import query_service
 
 router = APIRouter()
 
@@ -22,47 +23,31 @@ async def create_booking(
 ):
     """Create a new booking"""
     try:
-        # Verify property exists and get details
-        property_result = supabase_client.table("properties").select("*").eq("id", booking_data.property_id).eq("status", "active").execute()
-        
-        if not property_result.data:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Property not found or not available"
-            )
-        
-        property_info = property_result.data[0]
+        # Get active property details
+        property_info = query_service.get_active_property_by_id(booking_data.property_id)
         
         # Validate guest count
-        if booking_data.guests > property_info["max_guests"]:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Property can accommodate maximum {property_info['max_guests']} guests"
-            )
+        query_service.validate_guest_count(booking_data.guests, property_info["max_guests"])
         
         # Calculate nights and total amount
-        nights = (booking_data.check_out - booking_data.check_in).days
-        if nights <= 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Check-out date must be after check-in date"
-            )
-        
-        total_amount = nights * property_info["price_per_night"]
+        nights, total_amount = query_service.calculate_booking_total(
+            property_info["price_per_night"],
+            booking_data.check_in,
+            booking_data.check_out
+        )
         
         # Check for date conflicts
-        conflicts = supabase_client.table("bookings").select("*").eq("property_id", booking_data.property_id).in_("status", ["confirmed", "pending"]).execute()
+        has_conflict = query_service.check_booking_conflicts(
+            booking_data.property_id,
+            booking_data.check_in,
+            booking_data.check_out
+        )
         
-        for conflict in conflicts.data:
-            conflict_checkin = datetime.strptime(conflict["check_in"], "%Y-%m-%d").date()
-            conflict_checkout = datetime.strptime(conflict["check_out"], "%Y-%m-%d").date()
-            
-            # Check if dates overlap
-            if (booking_data.check_in < conflict_checkout and booking_data.check_out > conflict_checkin):
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Property is not available for the selected dates"
-                )
+        if has_conflict:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Property is not available for the selected dates"
+            )
         
         # Create booking record
         booking_record = {
@@ -89,8 +74,6 @@ async def create_booking(
             )
         
         created_booking = result.data[0]
-        
-        # Add property details for response
         created_booking["property_title"] = property_info["title"]
         created_booking["property_address"] = property_info["address"]
         

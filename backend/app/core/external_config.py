@@ -69,25 +69,3 @@ class ExternalAPIConfig:
         """Check if service has specific permission"""
         service_permissions = cls.get_service_permissions(service_name)
         return permission in service_permissions
-
-
-# Deployment instructions
-DEPLOYMENT_INSTRUCTIONS = """
-🔐 EXTERNAL API KEY SETUP
-
-Production Deployment (Render/Heroku/etc):
-   
-   ENVIRONMENT=production
-   KRIB_AI_AGENT_API_KEY=krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8
-
-Current Production Key: krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8
-Rate Limit: 200 requests/minute
-Permissions: read_properties, create_bookings, read_availability, calculate_pricing, read_property_details
-
-Security:
-- Rotate keys quarterly
-- Monitor usage via logs
-- Current key expires: Never (update as needed)
-"""
-
-print(DEPLOYMENT_INSTRUCTIONS)
