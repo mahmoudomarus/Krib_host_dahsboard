@@ -135,6 +135,22 @@ git push origin main
 **Problem:** Frontend deps not installed
 **Solution:** `cd frontend && npm install`
 
+### "Black would reformat X files"
+**Problem:** Code not formatted according to Black standards
+**Solution:** Run `cd backend && black app` before committing
+
+### "F821 undefined name"
+**Problem:** Missing imports in Python files
+**Solution:** Add missing imports (e.g., `from datetime import timedelta`)
+
+### "error TS2304: Cannot find name"
+**Problem:** Variable not defined in TypeScript
+**Solution:** Define variable or use correct reference
+
+### "Option 'X' has been removed"
+**Problem:** Deprecated TypeScript config option
+**Solution:** Remove the option from `tsconfig.json`
+
 ### Tests Pass Locally But Fail in CI/CD
 **Problem:** Environment differences
 **Solution:** Check `.github/workflows/ci-cd.yml` for exact commands used
