@@ -41,13 +41,23 @@ def test_production_config_validation(monkeypatch):
     assert "supabase_anon_key" in str(exc_info.value)
 
 
-def test_secure_secret_generation():
+def test_secure_secret_generation(monkeypatch):
     """Test that secrets are generated securely"""
+    # Clear environment variables to test auto-generation
+    monkeypatch.delenv("SECRET_KEY", raising=False)
+    monkeypatch.delenv("JWT_SECRET_KEY", raising=False)
+    monkeypatch.delenv("WEBHOOK_SECRET_KEY", raising=False)
+    
+    # Create settings instance
     settings = Settings()
+    
+    # Secrets should be auto-generated with sufficient length
+    assert len(settings.secret_key) >= 32, f"secret_key length is {len(settings.secret_key)}, should be >= 32"
+    assert len(settings.jwt_secret_key) >= 32, f"jwt_secret_key length is {len(settings.jwt_secret_key)}, should be >= 32"
+    assert len(settings.webhook_secret_key) >= 32, f"webhook_secret_key length is {len(settings.webhook_secret_key)}, should be >= 32"
     
     # Secrets should not be placeholders
     assert "change-in-production" not in settings.secret_key
     assert "your-" not in settings.jwt_secret_key
-    assert len(settings.secret_key) >= 32
-    assert len(settings.jwt_secret_key) >= 32
+    assert "your-" not in settings.secret_key
 
