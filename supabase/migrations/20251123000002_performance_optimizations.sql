@@ -209,14 +209,14 @@ CREATE POLICY "View active or own properties"
 ON public.properties FOR SELECT
 TO authenticated
 USING (
-    is_active = true OR user_id = (select auth.uid())
+    status = 'active' OR user_id = (select auth.uid())
 );
 
 -- Also allow anon users to view active properties
 CREATE POLICY "Anon users can view active properties"
 ON public.properties FOR SELECT
 TO anon
-USING (is_active = true);
+USING (status = 'active');
 
 -- Payouts table: Keep service role separate, but optimize user policy
 DROP POLICY IF EXISTS "Service role can manage all payouts" ON public.payouts;
