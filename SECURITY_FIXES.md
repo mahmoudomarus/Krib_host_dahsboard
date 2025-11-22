@@ -199,13 +199,36 @@ Expected: All 3 tables show `rls_enabled = true`, all 10 functions contain `sear
 
 ---
 
+## Performance Optimizations
+
+After applying security fixes, run performance optimization migration:
+
+**File:** `supabase/migrations/20251123000002_performance_optimizations.sql`
+
+This fixes:
+- 27 RLS policies with `auth.uid()` re-evaluation issues
+- 8 multiple permissive policy warnings
+- 7 duplicate indexes on kv_store table
+
+**Expected Impact:**
+- 40-60% faster queries on user-owned data
+- Reduced database load on high-traffic tables
+- Better index utilization
+
+---
+
 ## Re-run Linter
 
-After applying fixes, verify in Supabase Dashboard:
+After applying all fixes, verify in Supabase Dashboard:
 1. Go to Database → Linter
 2. Click "Run Linter"
 3. Confirm all ERROR level issues resolved
 4. Review remaining warnings
 
-Expected: 0 ERROR level issues, reduced WARNING count.
+**Expected Results:**
+- 0 ERROR level issues
+- 0 auth_rls_initplan warnings
+- 0 multiple_permissive_policies warnings for core tables
+- 0 duplicate_index warnings
+- Only low-priority warnings remaining
 

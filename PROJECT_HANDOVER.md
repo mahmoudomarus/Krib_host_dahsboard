@@ -286,11 +286,16 @@ Verify Supabase storage bucket is public and storage policies are correct.
 
 ### Critical Security Fixes Required
 
-**Apply migration:** `supabase/migrations/20251123000001_security_fixes.sql`
+**Apply migrations in order:**
 
-This fixes:
-1. Row Level Security not enabled on reference tables
-2. Function search_path vulnerabilities (10 functions)
+1. `supabase/migrations/20251123000001_security_fixes.sql` - Security fixes
+   - Row Level Security on reference tables
+   - Function search_path vulnerabilities (10 functions)
+
+2. `supabase/migrations/20251123000002_performance_optimizations.sql` - Performance fixes
+   - RLS policy optimization (27 policies)
+   - Eliminate duplicate policies (8 tables)
+   - Remove duplicate indexes (7 indexes)
 
 See `SECURITY_FIXES.md` for detailed instructions.
 
@@ -309,7 +314,9 @@ Schedule Postgres upgrade in Supabase Dashboard → Settings → Infrastructure 
 ## Production Checklist
 
 - [ ] Applied security migration (20251123000001_security_fixes.sql)
+- [ ] Applied performance migration (20251123000002_performance_optimizations.sql)
 - [ ] Verified RLS enabled on all reference tables
+- [ ] Verified RLS policies optimized (no auth.uid() re-evaluation)
 - [ ] Configured Auth OTP expiry < 1 hour
 - [ ] Enabled leaked password protection
 - [ ] All environment variables set in Render
