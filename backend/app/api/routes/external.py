@@ -5,24 +5,34 @@ Provides property search, availability, pricing, and booking endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, status, Query, Request, Response
 from typing import List, Optional, Dict, Any
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 import uuid
 import logging
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 
 from app.models.external_schemas import (
-    PropertySearchFilters, PropertySearchResult, PropertySearchResponse,
-    AvailabilityRequest, AvailabilityResponse,
-    PricingRequest, PricingResponse, PricingBreakdownItem,
-    ExternalBookingRequest, ExternalBookingResponse,
-    PropertyLocation, PropertyHost, PropertyRating, PropertyImage,
-    ExternalAPIResponse, ExternalAPIError
+    PropertySearchFilters,
+    PropertySearchResult,
+    PropertySearchResponse,
+    AvailabilityRequest,
+    AvailabilityResponse,
+    PricingRequest,
+    PricingResponse,
+    PricingBreakdownItem,
+    ExternalBookingRequest,
+    ExternalBookingResponse,
+    PropertyLocation,
+    PropertyHost,
+    PropertyRating,
+    PropertyImage,
+    ExternalAPIResponse,
+    ExternalAPIError,
 )
 from app.core.supabase_client import supabase_client
 from app.api.dependencies_external import (
-    get_external_service_context, 
-    verify_property_access_external
+    get_external_service_context,
+    verify_property_access_external,
 )
 
 logger = logging.getLogger(__name__)
@@ -31,12 +41,15 @@ router = APIRouter()
 # Initialize rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
-def add_rate_limit_headers(response: Response, limit: str, service_name: str = "krib_ai_agent"):
+
+def add_rate_limit_headers(
+    response: Response, limit: str, service_name: str = "krib_ai_agent"
+):
     """Add rate limit headers to API responses"""
     # Extract numbers from limit string (e.g., "100/minute" -> 100)
     limit_number = int(limit.split("/")[0])
     remaining = max(0, limit_number - 1)  # Simplified calculation
-    
+
     response.headers["X-RateLimit-Limit"] = str(limit_number)
     response.headers["X-RateLimit-Remaining"] = str(remaining)
     response.headers["X-RateLimit-Reset"] = str(60)  # Reset in 60 seconds
@@ -55,54 +68,60 @@ async def search_properties(
     latitude: Optional[float] = Query(None, description="Latitude coordinate"),
     longitude: Optional[float] = Query(None, description="Longitude coordinate"),
     radius_km: Optional[float] = Query(None, description="Search radius in km"),
-    
     # Property parameters
-    min_price_per_night: Optional[float] = Query(None, description="Minimum price in AED"),
-    max_price_per_night: Optional[float] = Query(None, description="Maximum price in AED"),
+    min_price_per_night: Optional[float] = Query(
+        None, description="Minimum price in AED"
+    ),
+    max_price_per_night: Optional[float] = Query(
+        None, description="Maximum price in AED"
+    ),
     bedrooms: Optional[int] = Query(None, description="Minimum bedrooms"),
     bathrooms: Optional[float] = Query(None, description="Minimum bathrooms"),
     max_guests: Optional[int] = Query(None, description="Minimum guest capacity"),
     property_type: Optional[str] = Query(None, description="Property type"),
-    
     # Date parameters
     check_in: Optional[date] = Query(None, description="Check-in date"),
     check_out: Optional[date] = Query(None, description="Check-out date"),
-    
     # Pagination
     limit: int = Query(20, ge=1, le=50, description="Number of results"),
     offset: int = Query(0, ge=0, description="Results offset"),
     sort_by: str = Query("price_asc", description="Sort order"),
-    
     # Service context
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """
     Search for available properties with filtering and pagination
-    
+
     This endpoint allows external AI platforms to search for rental properties
     with comprehensive filtering options including location, price, features, and availability.
     """
     try:
         logger.info(f"Property search requested by {service_context['service_name']}")
-        
+
         # Start with base query for active properties only
-        query = supabase_client.table("properties").select("""
+        query = (
+            supabase_client.table("properties")
+            .select(
+                """
             *,
             users!inner(id, name, email, created_at)
-        """).eq("status", "active")
-        
+        """
+            )
+            .eq("status", "active")
+        )
+
         # Apply location filters
         if city:
             query = query.ilike("city", f"%{city}%")
         if state:
             query = query.ilike("state", f"%{state}%")
-            
+
         # Apply price filters
         if min_price_per_night:
             query = query.gte("price_per_night", min_price_per_night)
         if max_price_per_night:
             query = query.lte("price_per_night", max_price_per_night)
-            
+
         # Apply property filters
         if bedrooms is not None:
             query = query.gte("bedrooms", bedrooms)
@@ -112,20 +131,27 @@ async def search_properties(
             query = query.gte("max_guests", max_guests)
         if property_type:
             query = query.eq("property_type", property_type)
-        
+
         # Apply availability filters if dates provided
         available_property_ids = None
         if check_in and check_out:
             # Find properties that are NOT booked for these dates
-            conflicting_bookings = supabase_client.table("bookings").select("property_id").in_(
-                "status", ["confirmed", "pending"]
-            ).lt("check_in", check_out.isoformat()).gt("check_out", check_in.isoformat()).execute()
-            
-            booked_property_ids = [booking["property_id"] for booking in conflicting_bookings.data]
-            
+            conflicting_bookings = (
+                supabase_client.table("bookings")
+                .select("property_id")
+                .in_("status", ["confirmed", "pending"])
+                .lt("check_in", check_out.isoformat())
+                .gt("check_out", check_in.isoformat())
+                .execute()
+            )
+
+            booked_property_ids = [
+                booking["property_id"] for booking in conflicting_bookings.data
+            ]
+
             if booked_property_ids:
                 query = query.not_.in_("id", booked_property_ids)
-        
+
         # Apply sorting
         if sort_by == "price_asc":
             query = query.order("price_per_night", desc=False)
@@ -135,10 +161,14 @@ async def search_properties(
             query = query.order("rating", desc=True)
         else:
             query = query.order("created_at", desc=True)
-        
+
         # Get total count before pagination
-        count_result = supabase_client.table("properties").select("id", count="exact").eq("status", "active")
-        
+        count_result = (
+            supabase_client.table("properties")
+            .select("id", count="exact")
+            .eq("status", "active")
+        )
+
         # Apply same filters for count
         if city:
             count_result = count_result.ilike("city", f"%{city}%")
@@ -148,21 +178,21 @@ async def search_properties(
             count_result = count_result.gte("price_per_night", min_price_per_night)
         if max_price_per_night:
             count_result = count_result.lte("price_per_night", max_price_per_night)
-        
+
         total_count = count_result.execute().count or 0
-        
+
         # Apply pagination
         query = query.range(offset, offset + limit - 1)
-        
+
         # Execute query
         result = query.execute()
-        
+
         # Format results
         properties = []
         for prop in result.data:
             # Format property data
             host_info = prop.get("users", {})
-            
+
             property_result = PropertySearchResult(
                 id=prop["id"],
                 title=prop["title"],
@@ -180,8 +210,8 @@ async def search_properties(
                     country=prop.get("country", "UAE"),
                     coordinates={
                         "latitude": float(prop.get("latitude", 0.0) or 0.0),
-                        "longitude": float(prop.get("longitude", 0.0) or 0.0)
-                    }
+                        "longitude": float(prop.get("longitude", 0.0) or 0.0),
+                    },
                 ),
                 amenities=prop.get("amenities", []),
                 images=[
@@ -193,28 +223,34 @@ async def search_properties(
                     name=host_info.get("name", "Host"),
                     response_rate=95,  # Default value
                     is_superhost=False,  # Default value
-                    member_since=host_info.get("created_at", "")
+                    member_since=host_info.get("created_at", ""),
                 ),
-                rating=PropertyRating(
-                    overall=float(prop.get("rating", 0.0)),
-                    total_reviews=prop.get("review_count", 0),
-                    cleanliness=float(prop.get("rating", 0.0)),
-                    communication=float(prop.get("rating", 0.0)),
-                    location=float(prop.get("rating", 0.0)),
-                    value=float(prop.get("rating", 0.0))
-                ) if prop.get("rating", 0) > 0 else None,
+                rating=(
+                    PropertyRating(
+                        overall=float(prop.get("rating", 0.0)),
+                        total_reviews=prop.get("review_count", 0),
+                        cleanliness=float(prop.get("rating", 0.0)),
+                        communication=float(prop.get("rating", 0.0)),
+                        location=float(prop.get("rating", 0.0)),
+                        value=float(prop.get("rating", 0.0)),
+                    )
+                    if prop.get("rating", 0) > 0
+                    else None
+                ),
                 check_in_time="15:00",
                 check_out_time="11:00",
                 minimum_nights=1,
                 house_rules=[],
                 created_at=prop.get("created_at", ""),
-                updated_at=prop.get("updated_at", "")
+                updated_at=prop.get("updated_at", ""),
             )
             properties.append(property_result.dict())
-        
+
         # Add rate limit headers
-        add_rate_limit_headers(response, "100/minute", service_context.get("service_name", "krib_ai_agent"))
-        
+        add_rate_limit_headers(
+            response, "100/minute", service_context.get("service_name", "krib_ai_agent")
+        )
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -229,18 +265,18 @@ async def search_properties(
                         "min_price": min_price_per_night,
                         "max_price": max_price_per_night,
                         "bedrooms": bedrooms,
-                        "property_type": property_type
+                        "property_type": property_type,
                     },
-                    "total_available": total_count
-                }
-            }
+                    "total_available": total_count,
+                },
+            },
         )
-        
+
     except Exception as e:
         logger.error(f"Property search failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Search failed: {str(e)}"
+            detail=f"Search failed: {str(e)}",
         )
 
 
@@ -249,20 +285,22 @@ async def search_properties(
 async def get_property_details(
     request: Request,
     property_id: str,
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """
     Get detailed information for a specific property
-    
+
     Returns comprehensive property details including host information,
     amenities, images, and policies for external AI platforms.
     """
     try:
-        property_data = await verify_property_access_external(property_id, service_context)
-        
+        property_data = await verify_property_access_external(
+            property_id, service_context
+        )
+
         # Format detailed response
         host_info = property_data.get("host_info", {})
-        
+
         detailed_property = {
             "id": property_data["id"],
             "title": property_data["title"],
@@ -280,8 +318,8 @@ async def get_property_details(
                 "country": property_data.get("country", "UAE"),
                 "coordinates": {
                     "latitude": float(property_data.get("latitude", 0.0) or 0.0),
-                    "longitude": float(property_data.get("longitude", 0.0) or 0.0)
-                }
+                    "longitude": float(property_data.get("longitude", 0.0) or 0.0),
+                },
             },
             "amenities": property_data.get("amenities", []),
             "images": [
@@ -292,7 +330,7 @@ async def get_property_details(
                 "base_price": float(property_data["price_per_night"]),
                 "cleaning_fee": 0,  # Could be added to schema later
                 "security_deposit": 0,  # Could be added to schema later
-                "currency": "AED"
+                "currency": "AED",
             },
             "host_info": {
                 "id": host_info.get("id", ""),
@@ -302,7 +340,7 @@ async def get_property_details(
                 "response_time": "within an hour",
                 "is_superhost": False,
                 "total_properties": 1,
-                "languages": ["English", "Arabic"]
+                "languages": ["English", "Arabic"],
             },
             "reviews_summary": {
                 "total_reviews": property_data.get("review_count", 0),
@@ -313,38 +351,37 @@ async def get_property_details(
                     "communication": float(property_data.get("rating", 0.0)),
                     "location": float(property_data.get("rating", 0.0)),
                     "check_in": float(property_data.get("rating", 0.0)),
-                    "value": float(property_data.get("rating", 0.0))
+                    "value": float(property_data.get("rating", 0.0)),
                 },
-                "recent_reviews": []  # Could be populated from reviews table
+                "recent_reviews": [],  # Could be populated from reviews table
             },
             "policies": {
                 "check_in_time": "15:00",
                 "check_out_time": "11:00",
                 "minimum_nights": 1,
                 "cancellation_policy": "moderate",
-                "house_rules": []
+                "house_rules": [],
             },
             "availability_calendar": {},  # Could implement 90-day calendar
             "created_at": property_data.get("created_at", ""),
-            "updated_at": property_data.get("updated_at", "")
+            "updated_at": property_data.get("updated_at", ""),
         }
-        
-        return ExternalAPIResponse(
-            success=True,
-            data={"property": detailed_property}
-        )
-        
+
+        return ExternalAPIResponse(success=True, data={"property": detailed_property})
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get property details: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get property details: {str(e)}"
+            detail=f"Failed to get property details: {str(e)}",
         )
 
 
-@router.get("/v1/properties/{property_id}/availability", response_model=ExternalAPIResponse)
+@router.get(
+    "/v1/properties/{property_id}/availability", response_model=ExternalAPIResponse
+)
 @limiter.limit("150/minute")
 async def check_availability(
     request: Request,
@@ -352,44 +389,52 @@ async def check_availability(
     check_in: date = Query(..., description="Check-in date"),
     check_out: date = Query(..., description="Check-out date"),
     guests: Optional[int] = Query(1, description="Number of guests"),
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """
     Check if property is available for specific dates
-    
+
     Validates availability against existing bookings and property capacity.
     """
     try:
         # Verify property exists
-        property_data = await verify_property_access_external(property_id, service_context)
-        
+        property_data = await verify_property_access_external(
+            property_id, service_context
+        )
+
         # Validate dates
         if check_out <= check_in:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Check-out date must be after check-in date"
+                detail="Check-out date must be after check-in date",
             )
-        
+
         # Check guest capacity
         capacity_ok = guests <= property_data["max_guests"]
-        
+
         # Check for existing bookings
-        existing_bookings = supabase_client.table("bookings").select("*").eq(
-            "property_id", property_id
-        ).in_("status", ["confirmed", "pending"]).lt(
-            "check_in", check_out.isoformat()
-        ).gt("check_out", check_in.isoformat()).execute()
-        
+        existing_bookings = (
+            supabase_client.table("bookings")
+            .select("*")
+            .eq("property_id", property_id)
+            .in_("status", ["confirmed", "pending"])
+            .lt("check_in", check_out.isoformat())
+            .gt("check_out", check_in.isoformat())
+            .execute()
+        )
+
         has_conflicts = len(existing_bookings.data) > 0
-        
+
         is_available = capacity_ok and not has_conflicts
-        
+
         reasons = []
         if not capacity_ok:
-            reasons.append(f"Property max guests is {property_data['max_guests']}, you requested {guests}")
+            reasons.append(
+                f"Property max guests is {property_data['max_guests']}, you requested {guests}"
+            )
         if has_conflicts:
             reasons.append("Property is already booked for these dates")
-        
+
         return ExternalAPIResponse(
             success=True,
             data=AvailabilityResponse(
@@ -399,105 +444,99 @@ async def check_availability(
                 guests=guests,
                 is_available=is_available,
                 reasons=reasons,
-                alternative_dates=[]  # Could implement alternative date suggestions
-            ).dict()
+                alternative_dates=[],  # Could implement alternative date suggestions
+            ).dict(),
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Availability check failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Availability check failed: {str(e)}"
+            detail=f"Availability check failed: {str(e)}",
         )
 
 
-@router.post("/v1/properties/{property_id}/calculate-pricing", response_model=ExternalAPIResponse)
+@router.post(
+    "/v1/properties/{property_id}/calculate-pricing", response_model=ExternalAPIResponse
+)
 @limiter.limit("150/minute")
 async def calculate_pricing(
     request: Request,
     property_id: str,
     pricing_request: PricingRequest,
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """
     Calculate total pricing for a potential booking
-    
+
     Returns detailed price breakdown including all fees and taxes.
     """
     try:
         # Verify property exists
-        property_data = await verify_property_access_external(property_id, service_context)
-        
+        property_data = await verify_property_access_external(
+            property_id, service_context
+        )
+
         # Calculate number of nights
         nights = (pricing_request.check_out - pricing_request.check_in).days
-        
+
         if nights < 1:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Minimum stay is 1 night"
+                detail="Minimum stay is 1 night",
             )
-        
+
         # Base calculation
         base_price_per_night = float(property_data["price_per_night"])
         base_price = base_price_per_night * nights
-        
+
         # Additional fees (could be stored in property data)
         cleaning_fee = 75.0  # Default cleaning fee for UAE market
-        
+
         # Service fee (typically 3% of base price)
         service_fee_rate = 0.03
         service_fee = base_price * service_fee_rate
-        
+
         # Tourism tax (Dubai typically charges 10-20 AED per night)
         tourism_tax_per_night = 15.0
         tourism_tax = nights * tourism_tax_per_night
-        
+
         # Apply promo code discount if provided
         discount = 0.0
         if pricing_request.promo_code:
             # Could implement promo code logic here
             if pricing_request.promo_code.lower() == "krib10":
                 discount = base_price * 0.10  # 10% discount
-        
+
         # Calculate totals
         subtotal = base_price - discount
         total_price = subtotal + cleaning_fee + service_fee + tourism_tax
-        
+
         # Build breakdown
         breakdown = [
             PricingBreakdownItem(
                 name=f"AED {base_price_per_night} × {nights} nights",
                 amount=base_price,
-                type="base"
+                type="base",
             ),
+            PricingBreakdownItem(name="Cleaning fee", amount=cleaning_fee, type="fee"),
             PricingBreakdownItem(
-                name="Cleaning fee",
-                amount=cleaning_fee,
-                type="fee"
+                name="Service fee", amount=round(service_fee, 2), type="fee"
             ),
-            PricingBreakdownItem(
-                name="Service fee",
-                amount=round(service_fee, 2),
-                type="fee"
-            ),
-            PricingBreakdownItem(
-                name="Tourism tax",
-                amount=tourism_tax,
-                type="tax"
-            )
+            PricingBreakdownItem(name="Tourism tax", amount=tourism_tax, type="tax"),
         ]
-        
+
         if discount > 0:
             breakdown.append(
                 PricingBreakdownItem(
                     name=f"Discount ({pricing_request.promo_code})",
                     amount=-discount,
-                    type="discount"
+                    type="discount",
                 )
             )
-        
+
         pricing_response = PricingResponse(
             property_id=property_id,
             check_in=pricing_request.check_in.isoformat(),
@@ -511,21 +550,18 @@ async def calculate_pricing(
             discount=discount,
             total_price=round(total_price, 2),
             currency="AED",
-            breakdown=breakdown
+            breakdown=breakdown,
         )
-        
-        return ExternalAPIResponse(
-            success=True,
-            data=pricing_response.dict()
-        )
-        
+
+        return ExternalAPIResponse(success=True, data=pricing_response.dict())
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Pricing calculation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Pricing calculation failed: {str(e)}"
+            detail=f"Pricing calculation failed: {str(e)}",
         )
 
 
@@ -534,41 +570,47 @@ async def calculate_pricing(
 async def create_external_booking(
     request: Request,
     booking_request: ExternalBookingRequest,
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """
     Create a new booking from external AI platform
-    
+
     Creates a booking request that will be reviewed by the property host.
     """
     try:
         # Verify property exists and is available
-        property_data = await verify_property_access_external(booking_request.property_id, service_context)
-        
+        property_data = await verify_property_access_external(
+            booking_request.property_id, service_context
+        )
+
         # Validate guest capacity
         if booking_request.guests > property_data["max_guests"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Property can accommodate maximum {property_data['max_guests']} guests"
+                detail=f"Property can accommodate maximum {property_data['max_guests']} guests",
             )
-        
+
         # Check for date conflicts
-        existing_bookings = supabase_client.table("bookings").select("*").eq(
-            "property_id", booking_request.property_id
-        ).in_("status", ["confirmed", "pending"]).lt(
-            "check_in", booking_request.check_out.isoformat()
-        ).gt("check_out", booking_request.check_in.isoformat()).execute()
-        
+        existing_bookings = (
+            supabase_client.table("bookings")
+            .select("*")
+            .eq("property_id", booking_request.property_id)
+            .in_("status", ["confirmed", "pending"])
+            .lt("check_in", booking_request.check_out.isoformat())
+            .gt("check_out", booking_request.check_in.isoformat())
+            .execute()
+        )
+
         if existing_bookings.data:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Property not available for selected dates"
+                detail="Property not available for selected dates",
             )
-        
+
         # Calculate nights and validate amount
         nights = (booking_request.check_out - booking_request.check_in).days
         expected_amount = nights * property_data["price_per_night"]
-        
+
         # Create booking record
         booking_id = str(uuid.uuid4())
         booking_record = {
@@ -586,44 +628,58 @@ async def create_external_booking(
             "payment_status": "pending",
             "special_requests": booking_request.special_requests,
             "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
+            "updated_at": datetime.utcnow().isoformat(),
         }
-        
+
         # Insert booking
         result = supabase_client.table("bookings").insert(booking_record).execute()
-        
+
         if not result.data:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create booking"
+                detail="Failed to create booking",
             )
-        
+
         created_booking = result.data[0]
-        
+
         # Send webhook for booking created
-        from app.services.background_jobs import send_booking_webhook, send_host_response_webhook
-        
+        from app.services.background_jobs import (
+            send_booking_webhook,
+            send_host_response_webhook,
+        )
+
         webhook_data = {
             **created_booking,
-            "property_info": {"id": property_data["id"], "title": property_data["title"]},
+            "property_info": {
+                "id": property_data["id"],
+                "title": property_data["title"],
+            },
             "guest_info": booking_request.guest_info.dict(),
-            "payment_info": {"method": booking_request.payment_method, "status": "pending"}
+            "payment_info": {
+                "method": booking_request.payment_method,
+                "status": "pending",
+            },
         }
         send_booking_webhook.delay("booking.created", booking_id, webhook_data)
-        
+
         # Send host response needed webhook
-        send_host_response_webhook.delay(booking_id, property_data["user_id"], {
-            "booking_id": booking_id,
-            "property_id": property_data["id"],
-            "guest_name": f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
-            "check_in": booking_request.check_in.isoformat(),
-            "check_out": booking_request.check_out.isoformat(),
-            "total_amount": booking_request.total_amount,
-            "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat()
-        })
-        
+        send_host_response_webhook.delay(
+            booking_id,
+            property_data["user_id"],
+            {
+                "booking_id": booking_id,
+                "property_id": property_data["id"],
+                "guest_name": f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
+                "check_in": booking_request.check_in.isoformat(),
+                "check_out": booking_request.check_out.isoformat(),
+                "total_amount": booking_request.total_amount,
+                "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
+            },
+        )
+
         # Send host notification
         from app.services.notification_service import NotificationService
+
         await NotificationService.create_booking_notification(
             host_id=property_data["user_id"],
             booking_id=booking_id,
@@ -631,9 +687,9 @@ async def create_external_booking(
             notification_type="new_booking",
             guest_name=f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
             property_title=property_data["title"],
-            booking_details=created_booking
+            booking_details=created_booking,
         )
-        
+
         # Format response
         booking_response = ExternalBookingResponse(
             booking_id=booking_id,
@@ -641,12 +697,12 @@ async def create_external_booking(
             property={
                 "id": property_data["id"],
                 "title": property_data["title"],
-                "address": f"{property_data['address']}, {property_data['city']}, {property_data['state']}"
+                "address": f"{property_data['address']}, {property_data['city']}, {property_data['state']}",
             },
             dates={
                 "check_in": booking_request.check_in.isoformat(),
                 "check_out": booking_request.check_out.isoformat(),
-                "nights": nights
+                "nights": nights,
             },
             guest_info=booking_request.guest_info,
             total_amount=booking_request.total_amount,
@@ -654,55 +710,64 @@ async def create_external_booking(
             payment={
                 "method": booking_request.payment_method,
                 "status": "pending",
-                "payment_intent_id": None
+                "payment_intent_id": None,
             },
             next_steps=[
                 "Booking request submitted to host",
                 "Host will review and confirm within 24 hours",
                 "You will receive confirmation email once approved",
-                "Payment will be processed after confirmation"
+                "Payment will be processed after confirmation",
             ],
             cancellation_policy="moderate",
             host_contact={
                 "name": property_data.get("host_info", {}).get("name", "Host"),
-                "response_time": "within an hour"
-            }
+                "response_time": "within an hour",
+            },
         )
-        
-        logger.info(f"External booking created: {booking_id} by {service_context['service_name']}")
-        
+
+        logger.info(
+            f"External booking created: {booking_id} by {service_context['service_name']}"
+        )
+
         return ExternalAPIResponse(
             success=True,
             data=booking_response.dict(),
-            message="Booking request created successfully"
+            message="Booking request created successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"External booking creation failed: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Booking creation failed: {str(e)}"
+            detail=f"Booking creation failed: {str(e)}",
         )
 
 
-@router.get("/v1/external/hosts/{host_id}/pending-bookings", response_model=ExternalAPIResponse)
+@router.get(
+    "/v1/external/hosts/{host_id}/pending-bookings", response_model=ExternalAPIResponse
+)
 @limiter.limit("100/minute")
 async def get_host_pending_bookings(
     request: Request,
     host_id: str,
     limit: int = Query(20, ge=1, le=100, description="Number of bookings to return"),
     offset: int = Query(0, ge=0, description="Offset for pagination"),
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """Get pending bookings for a host"""
     try:
         # Get host's properties
-        properties_result = supabase_client.table("properties").select("id, title, address, city, state").eq("user_id", host_id).execute()
+        properties_result = (
+            supabase_client.table("properties")
+            .select("id, title, address, city, state")
+            .eq("user_id", host_id)
+            .execute()
+        )
         property_ids = [prop["id"] for prop in properties_result.data]
         properties_dict = {prop["id"]: prop for prop in properties_result.data}
-        
+
         if not property_ids:
             return ExternalAPIResponse(
                 success=True,
@@ -711,45 +776,55 @@ async def get_host_pending_bookings(
                     "total_count": 0,
                     "returned_count": 0,
                     "has_more": False,
-                    "host_id": host_id
-                }
+                    "host_id": host_id,
+                },
             )
-        
+
         # Get total count of pending bookings
-        count_result = supabase_client.table("bookings").select("id", count="exact").in_(
-            "property_id", property_ids
-        ).eq("status", "pending").execute()
-        
+        count_result = (
+            supabase_client.table("bookings")
+            .select("id", count="exact")
+            .in_("property_id", property_ids)
+            .eq("status", "pending")
+            .execute()
+        )
+
         total_count = count_result.count or 0
-        
+
         # Get pending bookings for host's properties with pagination
-        bookings_result = supabase_client.table("bookings").select("*").in_(
-            "property_id", property_ids
-        ).eq("status", "pending").order(
-            "created_at", desc=True
-        ).range(offset, offset + limit - 1).execute()
-        
+        bookings_result = (
+            supabase_client.table("bookings")
+            .select("*")
+            .in_("property_id", property_ids)
+            .eq("status", "pending")
+            .order("created_at", desc=True)
+            .range(offset, offset + limit - 1)
+            .execute()
+        )
+
         bookings = []
         for booking in bookings_result.data:
             property_info = properties_dict.get(booking["property_id"], {})
-            bookings.append({
-                "id": booking["id"],
-                "property_id": booking["property_id"],
-                "property_title": property_info.get("title", ""),
-                "property_address": f"{property_info.get('address', '')}, {property_info.get('city', '')}, {property_info.get('state', '')}",
-                "guest_name": booking["guest_name"],
-                "guest_email": booking["guest_email"],
-                "guest_phone": booking["guest_phone"],
-                "check_in": booking["check_in"],
-                "check_out": booking["check_out"],
-                "nights": booking["nights"],
-                "guests": booking["guests"],
-                "total_amount": booking["total_amount"],
-                "special_requests": booking.get("special_requests", ""),
-                "created_at": booking["created_at"],
-                "updated_at": booking["updated_at"]
-            })
-        
+            bookings.append(
+                {
+                    "id": booking["id"],
+                    "property_id": booking["property_id"],
+                    "property_title": property_info.get("title", ""),
+                    "property_address": f"{property_info.get('address', '')}, {property_info.get('city', '')}, {property_info.get('state', '')}",
+                    "guest_name": booking["guest_name"],
+                    "guest_email": booking["guest_email"],
+                    "guest_phone": booking["guest_phone"],
+                    "check_in": booking["check_in"],
+                    "check_out": booking["check_out"],
+                    "nights": booking["nights"],
+                    "guests": booking["guests"],
+                    "total_amount": booking["total_amount"],
+                    "special_requests": booking.get("special_requests", ""),
+                    "created_at": booking["created_at"],
+                    "updated_at": booking["updated_at"],
+                }
+            )
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -761,25 +836,30 @@ async def get_host_pending_bookings(
                 "pagination": {
                     "limit": limit,
                     "offset": offset,
-                    "next_offset": offset + limit if (offset + limit) < total_count else None
-                }
-            }
+                    "next_offset": (
+                        offset + limit if (offset + limit) < total_count else None
+                    ),
+                },
+            },
         )
-        
+
     except Exception as e:
         logger.error(f"Failed to get pending bookings for host {host_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get pending bookings: {str(e)}"
+            detail=f"Failed to get pending bookings: {str(e)}",
         )
 
-@router.put("/v1/external/bookings/{booking_id}/status", response_model=ExternalAPIResponse)
+
+@router.put(
+    "/v1/external/bookings/{booking_id}/status", response_model=ExternalAPIResponse
+)
 @limiter.limit("50/minute")
 async def update_booking_status_external(
     request: Request,
     booking_id: str,
     status_update: Dict[str, str],
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """Update booking status via external API"""
     try:
@@ -787,41 +867,50 @@ async def update_booking_status_external(
         if new_status not in ["confirmed", "cancelled", "pending"]:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid status. Must be: confirmed, cancelled, or pending"
+                detail="Invalid status. Must be: confirmed, cancelled, or pending",
             )
-        
+
         # Get booking details with property and host info
-        booking_result = supabase_client.table("bookings").select("""
+        booking_result = (
+            supabase_client.table("bookings")
+            .select(
+                """
             *,
             properties!inner(id, title, user_id, address, city, state)
-        """).eq("id", booking_id).execute()
-        
+        """
+            )
+            .eq("id", booking_id)
+            .execute()
+        )
+
         if not booking_result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Booking not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
             )
-        
+
         booking = booking_result.data[0]
         property_info = booking["properties"]
         host_id = property_info["user_id"]
-        
+
         # Update booking status
-        result = supabase_client.table("bookings").update({
-            "status": new_status,
-            "updated_at": datetime.utcnow().isoformat()
-        }).eq("id", booking_id).execute()
-        
+        result = (
+            supabase_client.table("bookings")
+            .update({"status": new_status, "updated_at": datetime.utcnow().isoformat()})
+            .eq("id", booking_id)
+            .execute()
+        )
+
         if not result.data:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to update booking status"
+                detail="Failed to update booking status",
             )
-        
+
         updated_booking = result.data[0]
-        
+
         # Send webhook notification
         from app.services.background_jobs import send_booking_webhook
+
         webhook_data = {
             **updated_booking,
             "property_id": booking["property_id"],
@@ -830,13 +919,14 @@ async def update_booking_status_external(
             "guest_info": {
                 "name": booking["guest_name"],
                 "email": booking["guest_email"],
-                "phone": booking["guest_phone"]
-            }
+                "phone": booking["guest_phone"],
+            },
         }
         send_booking_webhook.delay(f"booking.{new_status}", booking_id, webhook_data)
-        
+
         # Send host notification
         from app.services.notification_service import NotificationService
+
         await NotificationService.create_booking_notification(
             host_id=host_id,
             booking_id=booking_id,
@@ -844,9 +934,9 @@ async def update_booking_status_external(
             notification_type=f"booking_{new_status}",
             guest_name=booking["guest_name"],
             property_title=property_info["title"],
-            booking_details=updated_booking
+            booking_details=updated_booking,
         )
-        
+
         logger.info(
             f"Booking status updated via external API",
             extra={
@@ -854,10 +944,10 @@ async def update_booking_status_external(
                 "old_status": booking["status"],
                 "new_status": new_status,
                 "host_id": host_id,
-                "service_name": service_context.get("service_name", "unknown")
-            }
+                "service_name": service_context.get("service_name", "unknown"),
+            },
         )
-        
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -866,75 +956,90 @@ async def update_booking_status_external(
                 "new_status": new_status,
                 "updated_at": updated_booking["updated_at"],
                 "host_id": host_id,
-                "property_title": property_info["title"]
+                "property_title": property_info["title"],
             },
-            message=f"Booking status updated to {new_status}"
+            message=f"Booking status updated to {new_status}",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to update booking status for {booking_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to update booking status: {str(e)}"
+            detail=f"Failed to update booking status: {str(e)}",
         )
 
-@router.post("/v1/external/bookings/{booking_id}/auto-approve", response_model=ExternalAPIResponse)
+
+@router.post(
+    "/v1/external/bookings/{booking_id}/auto-approve",
+    response_model=ExternalAPIResponse,
+)
 @limiter.limit("20/minute")
 async def auto_approve_booking(
     request: Request,
     booking_id: str,
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """Auto-approve a booking based on host's settings"""
     try:
         # Get booking details with property and host info
-        booking_result = supabase_client.table("bookings").select("""
+        booking_result = (
+            supabase_client.table("bookings")
+            .select(
+                """
             *,
             properties!inner(id, title, user_id, address, city, state)
-        """).eq("id", booking_id).execute()
-        
+        """
+            )
+            .eq("id", booking_id)
+            .execute()
+        )
+
         if not booking_result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Booking not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
             )
-        
+
         booking = booking_result.data[0]
         property_info = booking["properties"]
         host_id = property_info["user_id"]
-        
+
         # Check if booking is in pending status
         if booking["status"] != "pending":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Cannot auto-approve booking with status: {booking['status']}"
+                detail=f"Cannot auto-approve booking with status: {booking['status']}",
             )
-        
+
         # Check if host has auto-approval enabled
-        settings_result = supabase_client.table("host_settings").select(
-            "auto_approve_bookings, auto_approve_amount_limit"
-        ).eq("user_id", host_id).execute()
-        
+        settings_result = (
+            supabase_client.table("host_settings")
+            .select("auto_approve_bookings, auto_approve_amount_limit")
+            .eq("user_id", host_id)
+            .execute()
+        )
+
         auto_approve = False
         amount_limit = 1000.0
-        
+
         if settings_result.data:
             auto_approve = settings_result.data[0].get("auto_approve_bookings", False)
-            amount_limit = float(settings_result.data[0].get("auto_approve_amount_limit", 1000.0))
-        
+            amount_limit = float(
+                settings_result.data[0].get("auto_approve_amount_limit", 1000.0)
+            )
+
         if not auto_approve:
             return ExternalAPIResponse(
                 success=False,
                 data={
                     "booking_id": booking_id,
                     "auto_approve_enabled": False,
-                    "reason": "Auto-approval not enabled for this host"
+                    "reason": "Auto-approval not enabled for this host",
                 },
-                message="Auto-approval not enabled for this host"
+                message="Auto-approval not enabled for this host",
             )
-        
+
         # Check if booking amount is within auto-approval limit
         if booking["total_amount"] > amount_limit:
             return ExternalAPIResponse(
@@ -944,30 +1049,40 @@ async def auto_approve_booking(
                     "auto_approve_enabled": True,
                     "amount_limit": amount_limit,
                     "booking_amount": booking["total_amount"],
-                    "reason": f"Booking amount {booking['total_amount']} exceeds auto-approval limit {amount_limit}"
+                    "reason": f"Booking amount {booking['total_amount']} exceeds auto-approval limit {amount_limit}",
                 },
-                message="Booking amount exceeds auto-approval limit"
+                message="Booking amount exceeds auto-approval limit",
             )
-        
+
         # Auto-approve the booking
         confirmed_at = datetime.utcnow().isoformat()
-        result = supabase_client.table("bookings").update({
-            "status": "confirmed",
-            "confirmed_at": confirmed_at,
-            "updated_at": confirmed_at
-        }).eq("id", booking_id).execute()
-        
+        result = (
+            supabase_client.table("bookings")
+            .update(
+                {
+                    "status": "confirmed",
+                    "confirmed_at": confirmed_at,
+                    "updated_at": confirmed_at,
+                }
+            )
+            .eq("id", booking_id)
+            .execute()
+        )
+
         if not result.data:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to auto-approve booking"
+                detail="Failed to auto-approve booking",
             )
-        
+
         confirmed_booking = result.data[0]
-        
+
         # Send confirmations
-        from app.services.background_jobs import send_booking_webhook, send_booking_confirmation_email
-        
+        from app.services.background_jobs import (
+            send_booking_webhook,
+            send_booking_confirmation_email,
+        )
+
         # Send webhook
         webhook_data = {
             **confirmed_booking,
@@ -976,16 +1091,17 @@ async def auto_approve_booking(
             "guest_info": {
                 "name": booking["guest_name"],
                 "email": booking["guest_email"],
-                "phone": booking["guest_phone"]
-            }
+                "phone": booking["guest_phone"],
+            },
         }
         send_booking_webhook.delay("booking.confirmed", booking_id, webhook_data)
-        
+
         # Send email confirmation
         send_booking_confirmation_email.delay(booking_id, confirmed_booking)
-        
+
         # Send host notification
         from app.services.notification_service import NotificationService
+
         await NotificationService.create_booking_notification(
             host_id=host_id,
             booking_id=booking_id,
@@ -993,9 +1109,9 @@ async def auto_approve_booking(
             notification_type="booking_confirmed",
             guest_name=booking["guest_name"],
             property_title=property_info["title"],
-            booking_details=confirmed_booking
+            booking_details=confirmed_booking,
         )
-        
+
         logger.info(
             f"Booking auto-approved via external API",
             extra={
@@ -1003,10 +1119,10 @@ async def auto_approve_booking(
                 "host_id": host_id,
                 "amount": booking["total_amount"],
                 "amount_limit": amount_limit,
-                "service_name": service_context.get("service_name", "unknown")
-            }
+                "service_name": service_context.get("service_name", "unknown"),
+            },
         )
-        
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1017,44 +1133,53 @@ async def auto_approve_booking(
                 "amount": booking["total_amount"],
                 "amount_limit": amount_limit,
                 "host_id": host_id,
-                "property_title": property_info["title"]
+                "property_title": property_info["title"],
             },
-            message="Booking auto-approved successfully"
+            message="Booking auto-approved successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to auto-approve booking {booking_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to auto-approve booking: {str(e)}"
+            detail=f"Failed to auto-approve booking: {str(e)}",
         )
 
-@router.get("/v1/external/bookings/{booking_id}/status", response_model=ExternalAPIResponse)
+
+@router.get(
+    "/v1/external/bookings/{booking_id}/status", response_model=ExternalAPIResponse
+)
 @limiter.limit("200/minute")
 async def get_booking_status(
     request: Request,
     booking_id: str,
-    service_context: dict = Depends(get_external_service_context)
+    service_context: dict = Depends(get_external_service_context),
 ):
     """Get current booking status"""
     try:
-        result = supabase_client.table("bookings").select("""
+        result = (
+            supabase_client.table("bookings")
+            .select(
+                """
             id, status, created_at, updated_at, confirmed_at, total_amount, nights, guests,
             check_in, check_out, guest_name, guest_email,
             properties!inner(id, title, address, city, state, user_id)
-        """).eq("id", booking_id).execute()
-        
+        """
+            )
+            .eq("id", booking_id)
+            .execute()
+        )
+
         if not result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Booking not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Booking not found"
             )
-        
+
         booking = result.data[0]
         property_info = booking["properties"]
-        
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1073,20 +1198,21 @@ async def get_booking_status(
                 "property": {
                     "id": property_info["id"],
                     "title": property_info["title"],
-                    "address": f"{property_info['address']}, {property_info['city']}, {property_info['state']}"
+                    "address": f"{property_info['address']}, {property_info['city']}, {property_info['state']}",
                 },
-                "host_id": property_info["user_id"]
-            }
+                "host_id": property_info["user_id"],
+            },
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get booking status for {booking_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get booking status: {str(e)}"
+            detail=f"Failed to get booking status: {str(e)}",
         )
+
 
 @router.get("/health", response_model=ExternalAPIResponse)
 async def external_api_health():
@@ -1109,8 +1235,8 @@ async def external_api_health():
                 "GET /external/v1/hosts/{host_id}/pending-bookings",
                 "PUT /external/v1/bookings/{booking_id}/status",
                 "POST /external/v1/bookings/{booking_id}/auto-approve",
-                "GET /external/v1/bookings/{booking_id}/status"
-            ]
+                "GET /external/v1/bookings/{booking_id}/status",
+            ],
         },
-        message="External API is operational"
+        message="External API is operational",
     )

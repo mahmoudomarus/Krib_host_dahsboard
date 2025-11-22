@@ -22,7 +22,6 @@
     "noImplicitAny": false,
     "noImplicitReturns": false,
     "noImplicitThis": false,
-    "noStrictGenericChecks": true,
 
     /* Path mapping */
     "baseUrl": ".",

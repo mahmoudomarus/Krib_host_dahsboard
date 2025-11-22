@@ -134,7 +134,7 @@ export function SettingsPage() {
   }
   
   // Check if user is OAuth user (determine if current password is needed)
-  const isOAuthUser = user?.email && !user?.app_metadata?.provider === 'email'
+  const isOAuthUser = user?.email && (user as any)?.app_metadata?.provider !== 'email'
 
   const handleSignOut = async () => {
     try {

@@ -12,37 +12,63 @@ from decimal import Decimal
 # External Property Search Models
 class PropertySearchFilters(BaseModel):
     # Location filters
-    city: Optional[str] = Field(None, description="City or area name (e.g., 'Dubai Marina', 'Downtown')")
-    state: Optional[str] = Field(None, description="UAE Emirate (Dubai, Abu Dhabi, etc.)")
-    latitude: Optional[float] = Field(None, ge=-90, le=90, description="Latitude coordinate")
-    longitude: Optional[float] = Field(None, ge=-180, le=180, description="Longitude coordinate")
-    radius_km: Optional[float] = Field(None, gt=0, le=100, description="Search radius in kilometers")
-    
+    city: Optional[str] = Field(
+        None, description="City or area name (e.g., 'Dubai Marina', 'Downtown')"
+    )
+    state: Optional[str] = Field(
+        None, description="UAE Emirate (Dubai, Abu Dhabi, etc.)"
+    )
+    latitude: Optional[float] = Field(
+        None, ge=-90, le=90, description="Latitude coordinate"
+    )
+    longitude: Optional[float] = Field(
+        None, ge=-180, le=180, description="Longitude coordinate"
+    )
+    radius_km: Optional[float] = Field(
+        None, gt=0, le=100, description="Search radius in kilometers"
+    )
+
     # Property filters
-    min_price_per_night: Optional[float] = Field(None, ge=0, description="Minimum price per night in AED")
-    max_price_per_night: Optional[float] = Field(None, ge=0, description="Maximum price per night in AED")
-    bedrooms: Optional[int] = Field(None, ge=0, le=20, description="Minimum number of bedrooms")
-    bathrooms: Optional[float] = Field(None, ge=0, le=20, description="Minimum number of bathrooms")
-    max_guests: Optional[int] = Field(None, ge=1, le=50, description="Minimum guest capacity")
-    property_type: Optional[str] = Field(None, description="Property type (apartment, villa, studio, etc.)")
-    
+    min_price_per_night: Optional[float] = Field(
+        None, ge=0, description="Minimum price per night in AED"
+    )
+    max_price_per_night: Optional[float] = Field(
+        None, ge=0, description="Maximum price per night in AED"
+    )
+    bedrooms: Optional[int] = Field(
+        None, ge=0, le=20, description="Minimum number of bedrooms"
+    )
+    bathrooms: Optional[float] = Field(
+        None, ge=0, le=20, description="Minimum number of bathrooms"
+    )
+    max_guests: Optional[int] = Field(
+        None, ge=1, le=50, description="Minimum guest capacity"
+    )
+    property_type: Optional[str] = Field(
+        None, description="Property type (apartment, villa, studio, etc.)"
+    )
+
     # Availability filters
     check_in: Optional[date] = Field(None, description="Check-in date (YYYY-MM-DD)")
     check_out: Optional[date] = Field(None, description="Check-out date (YYYY-MM-DD)")
-    
+
     # Feature filters
     amenities: Optional[List[str]] = Field([], description="Required amenities list")
-    
+
     # Pagination and sorting
-    limit: Optional[int] = Field(20, ge=1, le=50, description="Number of results to return")
+    limit: Optional[int] = Field(
+        20, ge=1, le=50, description="Number of results to return"
+    )
     offset: Optional[int] = Field(0, ge=0, description="Number of results to skip")
-    sort_by: Optional[str] = Field("price_asc", description="Sort order: price_asc, price_desc, rating, distance")
-    
-    @validator('check_out')
+    sort_by: Optional[str] = Field(
+        "price_asc", description="Sort order: price_asc, price_desc, rating, distance"
+    )
+
+    @validator("check_out")
     def validate_dates(cls, v, values):
-        if 'check_in' in values and values['check_in'] and v:
-            if v <= values['check_in']:
-                raise ValueError('Check-out date must be after check-in date')
+        if "check_in" in values and values["check_in"] and v:
+            if v <= values["check_in"]:
+                raise ValueError("Check-out date must be after check-in date")
         return v
 
 
@@ -58,7 +84,9 @@ class PropertyLocation(BaseModel):
 class PropertyHost(BaseModel):
     id: str = Field(..., description="Host user ID")
     name: str = Field(..., description="Host name")
-    response_rate: Optional[int] = Field(95, ge=0, le=100, description="Response rate percentage")
+    response_rate: Optional[int] = Field(
+        95, ge=0, le=100, description="Response rate percentage"
+    )
     is_superhost: bool = Field(False, description="Superhost status")
     member_since: Optional[str] = Field(None, description="Host join date")
 
@@ -66,15 +94,21 @@ class PropertyHost(BaseModel):
 class PropertyRating(BaseModel):
     overall: float = Field(0.0, ge=0, le=5, description="Overall rating")
     total_reviews: int = Field(0, ge=0, description="Total number of reviews")
-    cleanliness: Optional[float] = Field(0.0, ge=0, le=5, description="Cleanliness rating")
-    communication: Optional[float] = Field(0.0, ge=0, le=5, description="Communication rating")
+    cleanliness: Optional[float] = Field(
+        0.0, ge=0, le=5, description="Cleanliness rating"
+    )
+    communication: Optional[float] = Field(
+        0.0, ge=0, le=5, description="Communication rating"
+    )
     location: Optional[float] = Field(0.0, ge=0, le=5, description="Location rating")
     value: Optional[float] = Field(0.0, ge=0, le=5, description="Value rating")
 
 
 class PropertyImage(BaseModel):
     url: str = Field(..., description="Image URL")
-    is_primary: bool = Field(False, description="Whether this is the main property image")
+    is_primary: bool = Field(
+        False, description="Whether this is the main property image"
+    )
     order: int = Field(1, description="Display order")
 
 
@@ -87,28 +121,28 @@ class PropertySearchResult(BaseModel):
     bathrooms: float = Field(..., description="Number of bathrooms")
     max_guests: int = Field(..., description="Maximum guest capacity")
     property_type: str = Field(..., description="Property type")
-    
+
     # Location
     address: PropertyLocation = Field(..., description="Property address details")
-    
+
     # Features
     amenities: List[str] = Field([], description="Property amenities list")
-    
+
     # Images
     images: List[PropertyImage] = Field([], description="Property images")
-    
+
     # Host information
     host: PropertyHost = Field(..., description="Host information")
-    
+
     # Rating and reviews
     rating: Optional[PropertyRating] = Field(None, description="Property ratings")
-    
+
     # Policies and rules
     check_in_time: str = Field("15:00", description="Check-in time")
     check_out_time: str = Field("11:00", description="Check-out time")
     minimum_nights: int = Field(1, ge=1, description="Minimum stay in nights")
     house_rules: List[str] = Field([], description="House rules list")
-    
+
     # Metadata
     created_at: str = Field(..., description="Property creation date")
     updated_at: str = Field(..., description="Last update date")
@@ -125,11 +159,11 @@ class AvailabilityRequest(BaseModel):
     check_in: date = Field(..., description="Check-in date")
     check_out: date = Field(..., description="Check-out date")
     guests: Optional[int] = Field(1, ge=1, le=50, description="Number of guests")
-    
-    @validator('check_out')
+
+    @validator("check_out")
     def validate_dates(cls, v, values):
-        if 'check_in' in values and v <= values['check_in']:
-            raise ValueError('Check-out date must be after check-in date')
+        if "check_in" in values and v <= values["check_in"]:
+            raise ValueError("Check-out date must be after check-in date")
         return v
 
 
@@ -140,7 +174,9 @@ class AvailabilityResponse(BaseModel):
     guests: int = Field(..., description="Number of guests")
     is_available: bool = Field(..., description="Whether property is available")
     reasons: List[Optional[str]] = Field([], description="Reasons if not available")
-    alternative_dates: List[Dict[str, str]] = Field([], description="Alternative date suggestions")
+    alternative_dates: List[Dict[str, str]] = Field(
+        [], description="Alternative date suggestions"
+    )
 
 
 # Pricing Models
@@ -149,11 +185,11 @@ class PricingRequest(BaseModel):
     check_out: date = Field(..., description="Check-out date")
     guests: int = Field(..., ge=1, le=50, description="Number of guests")
     promo_code: Optional[str] = Field(None, description="Promotional code")
-    
-    @validator('check_out')
+
+    @validator("check_out")
     def validate_dates(cls, v, values):
-        if 'check_in' in values and v <= values['check_in']:
-            raise ValueError('Check-out date must be after check-in date')
+        if "check_in" in values and v <= values["check_in"]:
+            raise ValueError("Check-out date must be after check-in date")
         return v
 
 
@@ -176,13 +212,19 @@ class PricingResponse(BaseModel):
     discount: float = Field(0, description="Applied discount")
     total_price: float = Field(..., description="Total price including all fees")
     currency: str = Field("AED", description="Currency code")
-    breakdown: List[PricingBreakdownItem] = Field([], description="Detailed price breakdown")
+    breakdown: List[PricingBreakdownItem] = Field(
+        [], description="Detailed price breakdown"
+    )
 
 
 # External Booking Models
 class GuestInfo(BaseModel):
-    first_name: str = Field(..., min_length=1, max_length=50, description="Guest first name")
-    last_name: str = Field(..., min_length=1, max_length=50, description="Guest last name")
+    first_name: str = Field(
+        ..., min_length=1, max_length=50, description="Guest first name"
+    )
+    last_name: str = Field(
+        ..., min_length=1, max_length=50, description="Guest last name"
+    )
     email: str = Field(..., description="Guest email address")
     phone: str = Field(..., description="Guest phone number")
     country_code: str = Field("+971", description="Phone country code")
@@ -194,15 +236,19 @@ class ExternalBookingRequest(BaseModel):
     check_out: date = Field(..., description="Check-out date")
     guests: int = Field(..., ge=1, le=50, description="Number of guests")
     guest_info: GuestInfo = Field(..., description="Guest information")
-    special_requests: Optional[str] = Field(None, max_length=500, description="Special requests")
+    special_requests: Optional[str] = Field(
+        None, max_length=500, description="Special requests"
+    )
     total_amount: float = Field(..., gt=0, description="Total booking amount in AED")
-    payment_method: str = Field("pending", description="Payment method (pending, stripe, bank_transfer)")
+    payment_method: str = Field(
+        "pending", description="Payment method (pending, stripe, bank_transfer)"
+    )
     source: str = Field("krib_ai_agent", description="Booking source")
-    
-    @validator('check_out')
+
+    @validator("check_out")
     def validate_dates(cls, v, values):
-        if 'check_in' in values and v <= values['check_in']:
-            raise ValueError('Check-out date must be after check-in date')
+        if "check_in" in values and v <= values["check_in"]:
+            raise ValueError("Check-out date must be after check-in date")
         return v
 
 

@@ -67,7 +67,7 @@ export function AnalyticsDashboard() {
       properties: analyticsData?.totalProperties || 0,
       occupancyRate: analyticsData?.occupancyRate || 0,
       forecast: forecastData,
-      marketComparison: marketComparisonData,
+      marketComparison: analyticsData?.marketComparison || null,
       generatedAt: new Date().toISOString()
     }
     

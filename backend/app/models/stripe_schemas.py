@@ -12,15 +12,20 @@ from decimal import Decimal
 # Connect Account Schemas
 # =====================================================================
 
+
 class ConnectAccountCreate(BaseModel):
     """Request to create Stripe Connect account"""
+
     country: str = Field(default="AE", description="ISO country code (AE for UAE)")
     email: EmailStr = Field(description="Host email address")
-    business_type: str = Field(default="individual", description="individual or company")
+    business_type: str = Field(
+        default="individual", description="individual or company"
+    )
 
 
 class ConnectAccountStatus(BaseModel):
     """Stripe Connect account status"""
+
     stripe_account_id: str
     status: str  # not_connected, pending, active, restricted, disabled
     charges_enabled: bool
@@ -33,7 +38,7 @@ class ConnectAccountStatus(BaseModel):
         default_factory=lambda: {
             "currently_due": [],
             "eventually_due": [],
-            "past_due": []
+            "past_due": [],
         }
     )
     updated_at: Optional[datetime] = None
@@ -41,6 +46,7 @@ class ConnectAccountStatus(BaseModel):
 
 class OnboardingLinkResponse(BaseModel):
     """Response with onboarding link"""
+
     url: str
     expires_at: int  # Unix timestamp
     created: int  # Unix timestamp
@@ -48,6 +54,7 @@ class OnboardingLinkResponse(BaseModel):
 
 class DashboardLinkResponse(BaseModel):
     """Response with dashboard link"""
+
     url: str
     expires_at: int  # Unix timestamp
 
@@ -56,8 +63,10 @@ class DashboardLinkResponse(BaseModel):
 # Payment Intent Schemas
 # =====================================================================
 
+
 class PaymentIntentCreate(BaseModel):
     """Request to create payment intent"""
+
     booking_id: str = Field(description="UUID of the booking")
     amount: Decimal = Field(gt=0, description="Total amount in AED")
     currency: str = Field(default="AED")
@@ -68,6 +77,7 @@ class PaymentIntentCreate(BaseModel):
 
 class PaymentIntentResponse(BaseModel):
     """Payment intent response"""
+
     payment_intent_id: str
     client_secret: str
     amount: Decimal
@@ -78,12 +88,14 @@ class PaymentIntentResponse(BaseModel):
 
 class PaymentConfirm(BaseModel):
     """Request to confirm payment"""
+
     payment_intent_id: str
     booking_id: str
 
 
 class PaymentStatus(BaseModel):
     """Payment status response"""
+
     payment_intent_id: str
     booking_id: str
     payment_status: str
@@ -97,8 +109,10 @@ class PaymentStatus(BaseModel):
 # Payout Schemas
 # =====================================================================
 
+
 class PayoutProcess(BaseModel):
     """Request to process payout"""
+
     booking_id: str
     platform_fee_percentage: Optional[Decimal] = Field(default=15.0, ge=0, le=100)
     description: Optional[str] = None
@@ -106,6 +120,7 @@ class PayoutProcess(BaseModel):
 
 class PayoutResponse(BaseModel):
     """Payout processing response"""
+
     payout_id: str
     transfer_id: Optional[str] = None
     host_user_id: str
@@ -121,6 +136,7 @@ class PayoutResponse(BaseModel):
 
 class PayoutDetail(BaseModel):
     """Detailed payout information"""
+
     id: str
     booking_id: Optional[str] = None
     property_id: Optional[str] = None
@@ -140,6 +156,7 @@ class PayoutDetail(BaseModel):
 
 class PayoutList(BaseModel):
     """List of payouts for a host"""
+
     payouts: List[PayoutDetail]
     total_count: int
     total_paid: Decimal
@@ -152,8 +169,10 @@ class PayoutList(BaseModel):
 # Webhook Schemas
 # =====================================================================
 
+
 class WebhookEvent(BaseModel):
     """Stripe webhook event"""
+
     id: str = Field(description="Stripe event ID")
     type: str = Field(description="Event type")
     data: Dict[str, Any] = Field(description="Event data")
@@ -165,15 +184,20 @@ class WebhookEvent(BaseModel):
 # Refund Schemas
 # =====================================================================
 
+
 class RefundCreate(BaseModel):
     """Request to create refund"""
+
     booking_id: str
-    amount: Optional[Decimal] = Field(default=None, ge=0, description="Amount to refund (None for full refund)")
+    amount: Optional[Decimal] = Field(
+        default=None, ge=0, description="Amount to refund (None for full refund)"
+    )
     reason: Optional[str] = Field(default=None, description="Reason for refund")
 
 
 class RefundResponse(BaseModel):
     """Refund response"""
+
     refund_id: str
     booking_id: str
     payment_intent_id: str
@@ -188,17 +212,26 @@ class RefundResponse(BaseModel):
 # External API Payment Schemas (for AI agents)
 # =====================================================================
 
+
 class ExternalBookingPayment(BaseModel):
     """Payment information for external booking"""
+
     payment_method: str = Field(description="Payment method type (card, etc.)")
-    payment_token: Optional[str] = Field(default=None, description="Stripe payment token")
-    payment_method_id: Optional[str] = Field(default=None, description="Stripe PaymentMethod ID")
-    process_payment: bool = Field(default=True, description="Whether to process payment immediately")
+    payment_token: Optional[str] = Field(
+        default=None, description="Stripe payment token"
+    )
+    payment_method_id: Optional[str] = Field(
+        default=None, description="Stripe PaymentMethod ID"
+    )
+    process_payment: bool = Field(
+        default=True, description="Whether to process payment immediately"
+    )
     save_payment_method: bool = Field(default=False, description="Save for future use")
 
 
 class ExternalBookingWithPayment(BaseModel):
     """External booking request with payment"""
+
     property_id: str
     guest_name: str
     guest_email: EmailStr
@@ -213,11 +246,13 @@ class ExternalBookingWithPayment(BaseModel):
 
 class ExternalBookingPaymentResponse(BaseModel):
     """Response for external booking with payment"""
+
     booking_id: str
     status: str  # pending_payment, confirmed, failed
     payment_status: str
     confirmation_code: Optional[str] = None
     payment_details: Optional[PaymentStatus] = None
     requires_action: bool = Field(default=False)
-    client_secret: Optional[str] = Field(default=None, description="For 3D Secure if needed")
-
+    client_secret: Optional[str] = Field(
+        default=None, description="For 3D Secure if needed"
+    )

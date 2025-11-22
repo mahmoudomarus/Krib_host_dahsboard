@@ -12,7 +12,7 @@ async def init_db():
     """Initialize database tables if they don't exist"""
     try:
         # Check if our tables exist, if not create them
-        
+
         # Users table (extends Supabase auth.users)
         users_table_sql = """
         CREATE TABLE IF NOT EXISTS public.users (
@@ -27,7 +27,7 @@ async def init_db():
             total_revenue DECIMAL(10,2) DEFAULT 0
         );
         """
-        
+
         # Properties table
         properties_table_sql = """
         CREATE TABLE IF NOT EXISTS public.properties (
@@ -57,7 +57,7 @@ async def init_db():
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
         );
         """
-        
+
         # Bookings table
         bookings_table_sql = """
         CREATE TABLE IF NOT EXISTS public.bookings (
@@ -78,7 +78,7 @@ async def init_db():
             updated_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
         );
         """
-        
+
         # Reviews table
         reviews_table_sql = """
         CREATE TABLE IF NOT EXISTS public.reviews (
@@ -92,7 +92,7 @@ async def init_db():
             created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
         );
         """
-        
+
         # Property analytics table
         analytics_table_sql = """
         CREATE TABLE IF NOT EXISTS public.property_analytics (
@@ -108,7 +108,7 @@ async def init_db():
             UNIQUE(property_id, date)
         );
         """
-        
+
         # Create indexes
         indexes_sql = """
         CREATE INDEX IF NOT EXISTS idx_properties_user_id ON public.properties(user_id);
@@ -120,7 +120,7 @@ async def init_db():
         CREATE INDEX IF NOT EXISTS idx_reviews_property_id ON public.reviews(property_id);
         CREATE INDEX IF NOT EXISTS idx_analytics_property_date ON public.property_analytics(property_id, date);
         """
-        
+
         # Create triggers for updated_at
         triggers_sql = """
         CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -149,7 +149,7 @@ async def init_db():
             FOR EACH ROW
             EXECUTE FUNCTION update_updated_at_column();
         """
-        
+
         # Enable Row Level Security
         rls_sql = """
         ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
@@ -193,7 +193,7 @@ async def init_db():
                 )
             );
         """
-        
+
         # Execute all SQL commands
         sql_commands = [
             users_table_sql,
@@ -203,18 +203,18 @@ async def init_db():
             analytics_table_sql,
             indexes_sql,
             triggers_sql,
-            rls_sql
+            rls_sql,
         ]
-        
+
         for sql in sql_commands:
             try:
-                supabase_client.rpc('execute_sql', {'sql': sql}).execute()
+                supabase_client.rpc("execute_sql", {"sql": sql}).execute()
             except Exception as e:
                 # Log the error but continue - tables might already exist
                 logger.warning(f"SQL execution warning: {e}")
-        
+
         logger.info("Database initialization completed successfully")
-        
+
     except Exception as e:
         logger.error(f"Database initialization failed: {e}")
         raise

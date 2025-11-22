@@ -7,7 +7,11 @@ from typing import Optional, List, Dict, Any
 from datetime import datetime, date
 from decimal import Decimal
 from enum import Enum
-from app.constants.uae_locations import UAE_EMIRATES, validate_uae_location, UAE_PROPERTY_TYPES
+from app.constants.uae_locations import (
+    UAE_EMIRATES,
+    validate_uae_location,
+    UAE_PROPERTY_TYPES,
+)
 
 
 # Enums
@@ -104,14 +108,16 @@ class UserResponse(BaseModel):
 
 
 class PasswordChangeRequest(BaseModel):
-    current_password: Optional[str] = Field(None, min_length=6)  # Optional for OAuth users
+    current_password: Optional[str] = Field(
+        None, min_length=6
+    )  # Optional for OAuth users
     new_password: str = Field(..., min_length=6)
     confirm_password: str = Field(..., min_length=6)
-    
-    @validator('confirm_password')
+
+    @validator("confirm_password")
     def passwords_match(cls, v, values, **kwargs):
-        if 'new_password' in values and v != values['new_password']:
-            raise ValueError('passwords do not match')
+        if "new_password" in values and v != values["new_password"]:
+            raise ValueError("passwords do not match")
         return v
 
 
@@ -120,8 +126,15 @@ class PropertyCreate(BaseModel):
     title: str = Field(..., min_length=3, max_length=200)
     description: Optional[str] = Field(None, max_length=2000)
     address: str = Field(..., min_length=5, max_length=500)
-    city: str = Field(..., min_length=1, max_length=100, description="Area/City within the emirate")
-    state: str = Field(..., min_length=1, max_length=100, description="UAE Emirate (Dubai, Abu Dhabi, etc.)")
+    city: str = Field(
+        ..., min_length=1, max_length=100, description="Area/City within the emirate"
+    )
+    state: str = Field(
+        ...,
+        min_length=1,
+        max_length=100,
+        description="UAE Emirate (Dubai, Abu Dhabi, etc.)",
+    )
     country: str = Field(default="UAE", description="Country code - defaults to UAE")
     latitude: Optional[float] = Field(None, ge=-90, le=90)
     longitude: Optional[float] = Field(None, ge=-180, le=180)
@@ -129,38 +142,44 @@ class PropertyCreate(BaseModel):
     bedrooms: int = Field(..., ge=0, le=20)
     bathrooms: float = Field(..., ge=0, le=20)
     max_guests: int = Field(..., ge=1, le=50)
-    price_per_night: float = Field(..., gt=0, le=50000)  # Increased for Dubai luxury market
+    price_per_night: float = Field(
+        ..., gt=0, le=50000
+    )  # Increased for Dubai luxury market
     amenities: List[str] = []
     images: List[str] = []
-    
-    @validator('bathrooms')
+
+    @validator("bathrooms")
     def validate_bathrooms(cls, v):
         # Allow half bathrooms (0.5, 1.5, etc.)
         if v * 2 != int(v * 2):
-            raise ValueError('Bathrooms must be whole or half numbers (e.g., 1, 1.5, 2)')
+            raise ValueError(
+                "Bathrooms must be whole or half numbers (e.g., 1, 1.5, 2)"
+            )
         return v
-    
-    @validator('country')
+
+    @validator("country")
     def validate_country(cls, v):
         # Ensure country is UAE for this system
-        if v.upper() not in ['UAE', 'UNITED ARAB EMIRATES']:
-            return 'UAE'
-        return 'UAE'
-    
-    @validator('state')
+        if v.upper() not in ["UAE", "UNITED ARAB EMIRATES"]:
+            return "UAE"
+        return "UAE"
+
+    @validator("state")
     def validate_emirate(cls, v):
         # Validate that the emirate exists
         if v not in UAE_EMIRATES:
-            raise ValueError(f'Invalid emirate. Must be one of: {", ".join(UAE_EMIRATES.keys())}')
+            raise ValueError(
+                f'Invalid emirate. Must be one of: {", ".join(UAE_EMIRATES.keys())}'
+            )
         return v
-    
-    @validator('city')
+
+    @validator("city")
     def validate_city_area(cls, v, values):
         # Validate city/area exists in the specified emirate
-        if 'state' in values and values['state']:
-            emirate = values['state']
+        if "state" in values and values["state"]:
+            emirate = values["state"]
             if emirate in UAE_EMIRATES:
-                valid_areas = UAE_EMIRATES[emirate]['major_areas']
+                valid_areas = UAE_EMIRATES[emirate]["major_areas"]
                 if v not in valid_areas:
                     # Allow custom areas but warn in logs
                     pass  # Could log this for monitoring
@@ -223,11 +242,11 @@ class BookingCreate(BaseModel):
     check_out: date
     guests: int = Field(..., ge=1, le=50)
     special_requests: Optional[str] = Field(None, max_length=500)
-    
-    @validator('check_out')
+
+    @validator("check_out")
     def validate_dates(cls, v, values):
-        if 'check_in' in values and v <= values['check_in']:
-            raise ValueError('Check-out date must be after check-in date')
+        if "check_in" in values and v <= values["check_in"]:
+            raise ValueError("Check-out date must be after check-in date")
         return v
 
 
@@ -259,7 +278,7 @@ class BookingResponse(BaseModel):
     special_requests: Optional[str] = None
     created_at: datetime
     updated_at: datetime
-    
+
     # Include property details for convenience
     property_title: Optional[str] = None
     property_address: Optional[str] = None
