@@ -27,7 +27,7 @@ krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8
 All API endpoints are prefixed with:
 
 ```
-https://krib-host-dahsboard-backend.onrender.com
+https://api.host.krib.ae
 ```
 
 ---
@@ -47,7 +47,7 @@ Content-Type: application/json
 ```bash
 curl -H "Authorization: Bearer krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8" \
      -H "Content-Type: application/json" \
-     "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/search"
+     "https://api.host.krib.ae/api/v1/properties/search"
 ```
 
 **Python:**
@@ -60,7 +60,7 @@ headers = {
 }
 
 response = requests.get(
-    "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/search",
+    "https://api.host.krib.ae/api/v1/properties/search",
     headers=headers
 )
 ```
@@ -68,7 +68,7 @@ response = requests.get(
 **JavaScript/Node.js:**
 ```javascript
 const response = await fetch(
-  'https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/search',
+  'https://api.host.krib.ae/api/v1/properties/search',
   {
     headers: {
       'Authorization': 'Bearer krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8',
@@ -104,7 +104,7 @@ Find properties based on location, price, dates, and more.
 **Example Request:**
 ```bash
 curl -H "Authorization: Bearer krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8" \
-  "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/search?city=Dubai%20Marina&bedrooms=2&max_price_per_night=500"
+  "https://api.host.krib.ae/api/v1/properties/search?city=Dubai%20Marina&bedrooms=2&max_price_per_night=500"
 ```
 
 **Example Response:**
@@ -162,7 +162,7 @@ Get complete details about a specific property.
 **Example:**
 ```bash
 curl -H "Authorization: Bearer krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8" \
-  "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/090851a1-2cb6-4735-9561-60adb7e5fda9"
+  "https://api.host.krib.ae/api/v1/properties/090851a1-2cb6-4735-9561-60adb7e5fda9"
 ```
 
 ---
@@ -179,7 +179,7 @@ Check if a property is available for specific dates.
 **Example:**
 ```bash
 curl -H "Authorization: Bearer krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8" \
-  "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/090851a1-2cb6-4735-9561-60adb7e5fda9/availability?check_in=2025-11-01&check_out=2025-11-05"
+  "https://api.host.krib.ae/api/v1/properties/090851a1-2cb6-4735-9561-60adb7e5fda9/availability?check_in=2025-11-01&check_out=2025-11-05"
 ```
 
 **Response:**
@@ -211,7 +211,7 @@ Get total price for a stay including all fees.
 **Example:**
 ```bash
 curl -H "Authorization: Bearer krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8" \
-  "https://krib-host-dahsboard-backend.onrender.com/api/v1/properties/090851a1-2cb6-4735-9561-60adb7e5fda9/pricing?check_in=2025-11-01&check_out=2025-11-05&guests=2"
+  "https://api.host.krib.ae/api/v1/properties/090851a1-2cb6-4735-9561-60adb7e5fda9/pricing?check_in=2025-11-01&check_out=2025-11-05&guests=2"
 ```
 
 **Response:**
@@ -278,7 +278,7 @@ curl -X POST \
     "number_of_guests": 2,
     "total_price": 1860.0
   }' \
-  "https://krib-host-dahsboard-backend.onrender.com/api/v1/external/bookings"
+  "https://api.host.krib.ae/api/v1/external/bookings"
 ```
 
 ---

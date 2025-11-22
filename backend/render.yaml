@@ -72,6 +72,6 @@ services:
       - key: CURRENCY
         value: "AED"
       - key: CONNECT_REFRESH_URL
-        value: "https://krib-host-dashboard.vercel.app/dashboard/financials"
+        value: "https://host.krib.ae/dashboard/financials"
       - key: CONNECT_RETURN_URL
-        value: "https://krib-host-dashboard.vercel.app/dashboard/financials"
+        value: "https://host.krib.ae/dashboard/financials"

@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/webhooks")
+@router.post("/billing/webhook")
 async def handle_stripe_webhook(
     request: Request,
     stripe_signature: str = Header(None, alias="Stripe-Signature")
@@ -81,7 +81,7 @@ async def handle_stripe_webhook(
                 "event_created": datetime.fromtimestamp(event.get("created")).isoformat() if event.get("created") else None
             }).execute()
             
-            logger.info(f"Logged Stripe event {event_id} ({event_type})")
+            logger.info(f"Logged Stripe event: {event_id}, type: {event_type}")
         except Exception as log_error:
             # Don't fail webhook if logging fails
             logger.error(f"Failed to log webhook event: {log_error}")
@@ -90,7 +90,6 @@ async def handle_stripe_webhook(
         try:
             await process_webhook_event(event_id, event_type, event_data)
             
-            # Mark as processed
             supabase_client.table("stripe_events").update({
                 "processed": True,
                 "processed_at": datetime.utcnow().isoformat()
@@ -101,7 +100,6 @@ async def handle_stripe_webhook(
             error_message = str(process_error)
             logger.error(f"Error processing webhook event {event_id}: {error_message}")
             
-            # Update event with error
             supabase_client.table("stripe_events").update({
                 "error_message": error_message,
                 "retry_count": 1
@@ -192,7 +190,7 @@ async def handle_payment_failed(payment_intent_id: str, payment_intent_data: dic
                 "updated_at": datetime.utcnow().isoformat()
             }).eq("id", booking_id).execute()
             
-            logger.info(f"Marked booking {booking_id} as failed payment")
+            logger.info(f"Marked booking as failed payment: {booking_id}")
     except Exception as e:
         logger.error(f"Error handling payment failed: {e}")
         raise
@@ -211,7 +209,7 @@ async def handle_charge_succeeded(charge_data: dict):
                 "updated_at": datetime.utcnow().isoformat()
             }).eq("stripe_payment_intent_id", payment_intent_id).execute()
             
-            logger.info(f"Updated booking with charge ID {charge_id}")
+            logger.info(f"Updated booking with charge ID: {charge_id}")
     except Exception as e:
         logger.error(f"Error handling charge succeeded: {e}")
         raise
@@ -242,7 +240,7 @@ async def handle_charge_refunded(charge_data: dict):
                 "updated_at": datetime.utcnow().isoformat()
             }).eq("id", booking["id"]).execute()
             
-            logger.info(f"Updated booking {booking['id']} with refund status")
+            logger.info(f"Updated booking with refund status: {booking['id']}")
     except Exception as e:
         logger.error(f"Error handling charge refunded: {e}")
         raise
@@ -259,7 +257,7 @@ async def handle_transfer_created(transfer_data: dict):
             "updated_at": datetime.utcnow().isoformat()
         }).eq("stripe_transfer_id", transfer_id).execute()
         
-        logger.info(f"Marked transfer {transfer_id} as in_transit")
+        logger.info(f"Marked transfer as in_transit: {transfer_id}")
     except Exception as e:
         logger.error(f"Error handling transfer created: {e}")
         raise

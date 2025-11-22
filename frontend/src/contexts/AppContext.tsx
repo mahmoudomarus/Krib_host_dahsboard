@@ -1,29 +1,18 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { supabase } from '../utils/supabase/client'
 
-// Environment configuration - FORCE HTTPS in production
-const PRODUCTION_API_URL = 'https://krib-host-dahsboard-backend.onrender.com/api'
-const DEVELOPMENT_API_URL = import.meta.env.VITE_API_URL || PRODUCTION_API_URL
+const PRODUCTION_API_URL = 'https://api.host.krib.ae/api'
+const DEVELOPMENT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
-// Always use HTTPS in production (Vercel), allow override only in development
-const API_BASE_URL = window.location.protocol === 'https:' ? PRODUCTION_API_URL : DEVELOPMENT_API_URL
+const API_BASE_URL = window.location.hostname === 'localhost' ? DEVELOPMENT_API_URL : PRODUCTION_API_URL
 
-// Extra safety: ensure HTTPS is used regardless
-const SECURE_API_URL = API_BASE_URL.replace('http://', 'https://')
-
-// Debug logging for API URL
-console.log('🔒 API Configuration [FORCE UPDATE v2]:', {
-  protocol: window.location.protocol,
-  hostname: window.location.hostname,
-  isDevelopment: window.location.hostname === 'localhost',
-  original: API_BASE_URL,
-  final: SECURE_API_URL,
-  environment: import.meta.env.VITE_API_URL,
-  timestamp: new Date().toISOString()
-})
-
-// EMERGENCY: Log every API call to debug
-console.log('🚨 SECURE_API_URL being used for all calls:', SECURE_API_URL)
+if (process.env.NODE_ENV === 'development') {
+  console.log('[API] Configuration:', {
+    hostname: window.location.hostname,
+    apiUrl: API_BASE_URL,
+    isDevelopment: window.location.hostname === 'localhost'
+  })
+}
 
 interface User {
   id: string
@@ -202,7 +191,7 @@ async function makeAPIRequest(endpoint: string, options: RequestInit = {}) {
     },
   }
 
-  const fullUrl = `${SECURE_API_URL}${endpoint}`
+  const fullUrl = `${API_BASE_URL}${endpoint}`
   console.log('🔥 MAKING API CALL TO:', fullUrl)
   const response = await fetch(fullUrl, config)
   

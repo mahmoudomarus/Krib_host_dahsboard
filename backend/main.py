@@ -28,41 +28,38 @@ from slowapi.errors import RateLimitExceeded
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    print("🚀 Starting Krib AI Backend...")
+    print("[STARTUP] Initializing Krib Host Dashboard Backend")
     
-    # Initialize Sentry error tracking
     init_sentry()
-    print("✅ Sentry error tracking initialized")
+    print("[STARTUP] Sentry error tracking initialized")
     
     await init_db()
-    print("✅ Database initialized")
+    print("[STARTUP] Database connection established")
     
-    # Initialize Redis
     await redis_client.connect()
     if redis_client.is_connected:
-        print("✅ Redis cache connected")
+        print("[STARTUP] Redis cache connected")
     else:
-        print("⚠️ Redis cache unavailable - running without cache")
+        print("[STARTUP] WARNING: Redis cache unavailable, running without cache")
     
     yield
     
     # Shutdown
-    print("🛑 Shutting down Krib AI Backend...")
+    print("[SHUTDOWN] Gracefully shutting down backend services")
     
-    # Cancel all SSE connections gracefully
     try:
         from app.api.routes.sse import sse_manager
         await sse_manager.shutdown_all_connections()
-        print("✅ SSE connections closed")
+        print("[SHUTDOWN] SSE connections closed")
     except Exception as e:
-        print(f"⚠️ Error closing SSE connections: {e}")
+        print(f"[SHUTDOWN] ERROR: Failed to close SSE connections: {e}")
     
     await redis_client.disconnect()
-    print("✅ Redis connection closed")
+    print("[SHUTDOWN] Redis connection closed")
 
 app = FastAPI(
-    title="Krib AI API",
-    description="Krib AI - AI-Powered Property Rental Management Platform",
+    title="Krib Host Dashboard API",
+    description="Property rental management platform for hosts with integrated payment processing",
     version="1.0.0",
     lifespan=lifespan
 )
@@ -89,7 +86,7 @@ app.add_middleware(
     allow_origins=[
         "http://localhost:3000", 
         "http://localhost:5173", 
-        "https://krib-host-dahsboard.vercel.app",
+        "https://host.krib.ae",
         "https://krib.ai",
         "https://*.krib.ai",
         "*"
@@ -135,14 +132,15 @@ app.include_router(sse.router, prefix="/api", tags=["sse"])
 app.include_router(stripe_connect.router, prefix="/api/v1/stripe", tags=["stripe-connect"])
 app.include_router(payments.router, prefix="/api/v1/payments", tags=["payments"])
 app.include_router(payouts.router, prefix="/api/v1/payouts", tags=["payouts"])
-app.include_router(stripe_webhooks.router, prefix="/api/v1/stripe", tags=["stripe-webhooks"])
+app.include_router(stripe_webhooks.router, prefix="/api", tags=["stripe-webhooks"])
 app.include_router(external_payments.router, prefix="/api/external", tags=["external-payments"])
 
 @app.get("/")
 async def root():
     return {
-        "message": "RentalAI API is running! 🏠✨",
+        "message": "Krib Host Dashboard API",
         "version": "1.0.0",
+        "status": "operational",
         "docs": "/docs"
     }
 

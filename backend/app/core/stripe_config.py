@@ -26,11 +26,11 @@ class StripeConfig:
     # Connect settings
     CONNECT_REFRESH_URL: str = os.getenv(
         "CONNECT_REFRESH_URL",
-        "https://krib-host-dashboard.vercel.app/dashboard/financials"
+        "https://host.krib.ae/dashboard/financials"
     )
     CONNECT_RETURN_URL: str = os.getenv(
         "CONNECT_RETURN_URL",
-        "https://krib-host-dashboard.vercel.app/dashboard/financials"
+        "https://host.krib.ae/dashboard/financials"
     )
     
     # API version
@@ -40,19 +40,19 @@ class StripeConfig:
     def initialize(cls):
         """Initialize Stripe with API key"""
         if not cls.STRIPE_SECRET_KEY:
-            print("⚠️  WARNING: STRIPE_SECRET_KEY not set - Stripe features disabled")
+            print("[STRIPE] WARNING: STRIPE_SECRET_KEY not configured, payment features disabled")
             return
         
         if cls.STRIPE_SECRET_KEY.startswith("sk_test"):
-            print(f"✅ Stripe initialized in TEST mode")
+            print("[STRIPE] Initialized in TEST mode")
         elif cls.STRIPE_SECRET_KEY.startswith("sk_live"):
-            print(f"✅ Stripe initialized in LIVE mode")
+            print("[STRIPE] Initialized in LIVE mode")
         else:
-            print(f"⚠️  WARNING: Invalid Stripe key format")
+            print("[STRIPE] WARNING: Invalid key format detected")
             
         stripe.api_key = cls.STRIPE_SECRET_KEY
         stripe.api_version = cls.STRIPE_API_VERSION
-        print(f"✅ Stripe API initialized with key: {cls.STRIPE_SECRET_KEY[:12]}...")
+        print(f"[STRIPE] API initialized, key prefix: {cls.STRIPE_SECRET_KEY[:12]}")
     
     @classmethod
     def is_test_mode(cls) -> bool:
