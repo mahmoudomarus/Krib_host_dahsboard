@@ -34,13 +34,13 @@ async def get_financial_summary(
 
         # Calculate total balance using our database function
         balance_result = supabase_client.rpc(
-            "calculate_host_balance", {"host_user_id": user_id}
+            "calculate_host_balance", {"p_user_id": user_id}
         ).execute()
         total_balance = float(balance_result.data) if balance_result.data else 0.0
 
         # Calculate pending earnings
         pending_result = supabase_client.rpc(
-            "get_pending_earnings", {"host_user_id": user_id}
+            "get_pending_earnings", {"p_user_id": user_id}
         ).execute()
         pending_earnings = float(pending_result.data) if pending_result.data else 0.0
 
@@ -247,7 +247,7 @@ async def request_payout(
 
         # Check available balance
         pending_result = supabase_client.rpc(
-            "get_pending_earnings", {"host_user_id": user_id}
+            "get_pending_earnings", {"p_user_id": user_id}
         ).execute()
         available_amount = float(pending_result.data) if pending_result.data else 0.0
 
