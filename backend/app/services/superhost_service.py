@@ -27,7 +27,7 @@ class SuperhostService:
         - Cancellation rate <= 5%
         """
         try:
-            result = await supabase_client.rpc(
+            result = supabase_client.rpc(
                 "check_superhost_eligibility", {"host_user_id": user_id}
             ).execute()
 
@@ -49,7 +49,7 @@ class SuperhostService:
     async def get_host_metrics(user_id: str) -> Dict[str, Any]:
         """Get host performance metrics"""
         try:
-            result = await supabase_client.rpc(
+            result = supabase_client.rpc(
                 "calculate_host_metrics", {"host_user_id": user_id}
             ).execute()
 
@@ -92,13 +92,13 @@ class SuperhostService:
             }
 
             result = (
-                await supabase_client.table("superhost_verification_requests")
+                supabase_client.table("superhost_verification_requests")
                 .insert(request_data)
                 .execute()
             )
 
             # Update user status to pending
-            await supabase_client.table("users").update(
+            supabase_client.table("users").update(
                 {
                     "superhost_status": "pending",
                     "superhost_requested_at": datetime.utcnow().isoformat(),
@@ -122,7 +122,7 @@ class SuperhostService:
         try:
             # Get user's superhost status
             user_result = (
-                await supabase_client.table("users")
+                supabase_client.table("users")
                 .select(
                     "is_superhost, superhost_status, superhost_requested_at, superhost_approved_at"
                 )
@@ -137,7 +137,7 @@ class SuperhostService:
 
             # Get pending request if any
             request_result = (
-                await supabase_client.table("superhost_verification_requests")
+                supabase_client.table("superhost_verification_requests")
                 .select("*")
                 .eq("user_id", user_id)
                 .eq("status", "pending")
@@ -164,7 +164,7 @@ class SuperhostService:
         """Get all pending verification requests (Admin only)"""
         try:
             result = (
-                await supabase_client.table("superhost_verification_requests")
+                supabase_client.table("superhost_verification_requests")
                 .select("*, users!inner(id, email, name, created_at)")
                 .eq("status", "pending")
                 .order("created_at", desc=True)
@@ -184,7 +184,7 @@ class SuperhostService:
         try:
             # Get the request
             request_result = (
-                await supabase_client.table("superhost_verification_requests")
+                supabase_client.table("superhost_verification_requests")
                 .select("*")
                 .eq("id", request_id)
                 .execute()
@@ -197,7 +197,7 @@ class SuperhostService:
             user_id = request_data["user_id"]
 
             # Update request status
-            await supabase_client.table("superhost_verification_requests").update(
+            supabase_client.table("superhost_verification_requests").update(
                 {
                     "status": "approved",
                     "reviewed_at": datetime.utcnow().isoformat(),
@@ -207,7 +207,7 @@ class SuperhostService:
             ).eq("id", request_id).execute()
 
             # Update user to superhost
-            await supabase_client.table("users").update(
+            supabase_client.table("users").update(
                 {
                     "is_superhost": True,
                     "superhost_status": "approved",
@@ -237,7 +237,7 @@ class SuperhostService:
         try:
             # Get the request
             request_result = (
-                await supabase_client.table("superhost_verification_requests")
+                supabase_client.table("superhost_verification_requests")
                 .select("*")
                 .eq("id", request_id)
                 .execute()
@@ -250,7 +250,7 @@ class SuperhostService:
             user_id = request_data["user_id"]
 
             # Update request status
-            await supabase_client.table("superhost_verification_requests").update(
+            supabase_client.table("superhost_verification_requests").update(
                 {
                     "status": "rejected",
                     "reviewed_at": datetime.utcnow().isoformat(),
@@ -261,7 +261,7 @@ class SuperhostService:
             ).eq("id", request_id).execute()
 
             # Update user status
-            await supabase_client.table("users").update(
+            supabase_client.table("users").update(
                 {"is_superhost": False, "superhost_status": "rejected"}
             ).eq("id", user_id).execute()
 
