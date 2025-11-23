@@ -50,12 +50,24 @@ class StripeConnectService:
 
             user = user_result.data[0]
 
-            # If account exists, return existing
+            # If account exists, verify it's still valid
             if user.get("stripe_account_id"):
                 logger.info(
                     f"User {user_id} already has Stripe account: {user['stripe_account_id']}"
                 )
-                return await StripeConnectService.get_account_status(user_id)
+                try:
+                    status = await StripeConnectService.get_account_status(user_id)
+                    # If status is "not_connected", the account was invalid and cleared
+                    if status.get("status") != "not_connected":
+                        return status
+                    # Otherwise, continue to create a new account
+                    logger.info(
+                        f"Creating new Stripe account for user {user_id} (previous was invalid)"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Error checking existing account status: {e}. Creating new account."
+                    )
 
             # Create Stripe Connect Express account
             logger.info(
@@ -150,12 +162,26 @@ class StripeConnectService:
             stripe_account_id = user_result.data[0]["stripe_account_id"]
 
             # Create account link
-            account_link = stripe.AccountLink.create(
-                account=stripe_account_id,
-                refresh_url=refresh_url or StripeConfig.CONNECT_REFRESH_URL,
-                return_url=return_url or StripeConfig.CONNECT_RETURN_URL,
-                type="account_onboarding",
-            )
+            try:
+                account_link = stripe.AccountLink.create(
+                    account=stripe_account_id,
+                    refresh_url=refresh_url or StripeConfig.CONNECT_REFRESH_URL,
+                    return_url=return_url or StripeConfig.CONNECT_RETURN_URL,
+                    type="account_onboarding",
+                )
+            except stripe.error.PermissionError as e:
+                # Account belongs to different API keys
+                logger.error(
+                    f"Stripe account {stripe_account_id} not accessible with current keys. "
+                    f"Clearing invalid account. Error: {e}"
+                )
+                # Clear invalid account ID
+                supabase_client.table("users").update(
+                    {"stripe_account_id": None, "stripe_account_status": None}
+                ).eq("id", user_id).execute()
+                raise ValueError(
+                    "Your Stripe account is no longer valid. Please create a new account."
+                )
 
             logger.info(f"Created onboarding link for account {stripe_account_id}")
 
@@ -212,7 +238,38 @@ class StripeConnectService:
 
             # Fetch fresh data from Stripe
             stripe_account_id = user["stripe_account_id"]
-            account = stripe.Account.retrieve(stripe_account_id)
+
+            try:
+                account = stripe.Account.retrieve(stripe_account_id)
+            except stripe.error.PermissionError as e:
+                # Account belongs to different API keys (e.g., switched from test to live)
+                logger.warning(
+                    f"Stripe account {stripe_account_id} not accessible with current keys "
+                    f"for user {user_id}. Clearing invalid account ID. Error: {e}"
+                )
+                # Clear invalid Stripe account data
+                supabase_client.table("users").update(
+                    {
+                        "stripe_account_id": None,
+                        "stripe_account_status": None,
+                        "stripe_charges_enabled": False,
+                        "stripe_payouts_enabled": False,
+                        "stripe_details_submitted": False,
+                        "stripe_onboarding_completed": False,
+                        "bank_account_last4": None,
+                        "bank_account_country": None,
+                        "stripe_requirements": None,
+                        "stripe_updated_at": datetime.utcnow().isoformat(),
+                    }
+                ).eq("id", user_id).execute()
+
+                return {
+                    "status": "not_connected",
+                    "charges_enabled": False,
+                    "payouts_enabled": False,
+                    "details_submitted": False,
+                    "onboarding_completed": False,
+                }
 
             # Determine overall status
             if account.charges_enabled and account.payouts_enabled:
@@ -310,7 +367,21 @@ class StripeConnectService:
             stripe_account_id = user_result.data[0]["stripe_account_id"]
 
             # Create login link
-            login_link = stripe.Account.create_login_link(stripe_account_id)
+            try:
+                login_link = stripe.Account.create_login_link(stripe_account_id)
+            except stripe.error.PermissionError as e:
+                # Account belongs to different API keys
+                logger.error(
+                    f"Stripe account {stripe_account_id} not accessible with current keys. "
+                    f"Clearing invalid account. Error: {e}"
+                )
+                # Clear invalid account ID
+                supabase_client.table("users").update(
+                    {"stripe_account_id": None, "stripe_account_status": None}
+                ).eq("id", user_id).execute()
+                raise ValueError(
+                    "Your Stripe account is no longer valid. Please create a new account."
+                )
 
             logger.info(f"Created dashboard login link for account {stripe_account_id}")
 
