@@ -221,3 +221,50 @@ async def verify_booking_access(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Could not verify booking access",
         )
+
+
+async def require_admin(current_user: dict = Depends(get_current_user)) -> dict:
+    """
+    Verify that the current user has admin or super_admin role
+
+    Args:
+        current_user: Current authenticated user
+
+    Returns:
+        User data if user is admin
+
+    Raises:
+        HTTPException: If user is not an admin
+    """
+    try:
+        # Get user role from database
+        result = (
+            supabase_client.table("users")
+            .select("role")
+            .eq("id", current_user["id"])
+            .execute()
+        )
+
+        if not result.data:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Access denied"
+            )
+
+        user_role = result.data[0].get("role", "user")
+
+        if user_role not in ["admin", "super_admin"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Admin privileges required",
+            )
+
+        return current_user
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Admin verification error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Could not verify admin status",
+        )

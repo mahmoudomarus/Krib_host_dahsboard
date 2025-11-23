@@ -7,7 +7,7 @@ from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, Field
 from typing import Optional
 
-from app.core.auth import get_current_user, require_admin
+from app.api.dependencies import get_current_user, require_admin
 from app.services.superhost_service import superhost_service
 
 logger = logging.getLogger(__name__)
