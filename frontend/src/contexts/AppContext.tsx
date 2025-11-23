@@ -192,7 +192,12 @@ async function makeAPIRequest(endpoint: string, options: RequestInit = {}) {
   }
 
   const fullUrl = `${API_BASE_URL}${endpoint}`
-  console.log('🔥 MAKING API CALL TO:', fullUrl)
+  
+  // Only log API calls in development
+  if (process.env.NODE_ENV === 'development') {
+    console.log('[API Request]', endpoint)
+  }
+  
   const response = await fetch(fullUrl, config)
   
   if (!response.ok) {

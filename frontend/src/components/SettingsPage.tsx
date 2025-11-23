@@ -53,8 +53,8 @@ export function SettingsPage() {
       systemUpdates: true
     },
     preferences: {
-      currency: 'USD',
-      timezone: 'America/New_York',
+      currency: 'AED',
+      timezone: 'Asia/Dubai',
       language: 'English'
     }
   })
@@ -284,10 +284,11 @@ export function SettingsPage() {
                     preferences: { ...settings.preferences, currency: e.target.value }
                   })}
                 >
+                  <option value="AED">AED (د.إ)</option>
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
                   <option value="GBP">GBP (£)</option>
-                  <option value="CAD">CAD (C$)</option>
+                  <option value="SAR">SAR (﷼)</option>
                 </select>
               </div>
               <div className="space-y-2">
@@ -301,12 +302,12 @@ export function SettingsPage() {
                     preferences: { ...settings.preferences, timezone: e.target.value }
                   })}
                 >
-                  <option value="America/New_York">Eastern Time</option>
-                  <option value="America/Chicago">Central Time</option>
-                  <option value="America/Denver">Mountain Time</option>
-                  <option value="America/Los_Angeles">Pacific Time</option>
-                  <option value="Europe/London">GMT</option>
-                  <option value="Europe/Paris">CET</option>
+                  <option value="Asia/Dubai">UAE / Gulf Standard Time (GST)</option>
+                  <option value="Asia/Riyadh">Saudi Arabia (AST)</option>
+                  <option value="Europe/London">London (GMT)</option>
+                  <option value="Europe/Paris">Paris (CET)</option>
+                  <option value="America/New_York">New York (EST)</option>
+                  <option value="America/Los_Angeles">Los Angeles (PST)</option>
                 </select>
               </div>
               <div className="space-y-2">
