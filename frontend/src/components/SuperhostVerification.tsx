@@ -34,7 +34,7 @@ interface VerificationStatus {
 }
 
 export function SuperhostVerification() {
-  const { apiCall } = useApp()
+  const { checkSuperhostEligibility, getSuperhostStatus, requestSuperhostVerification } = useApp()
   const [loading, setLoading] = useState(true)
   const [eligibility, setEligibility] = useState<EligibilityData | null>(null)
   const [status, setStatus] = useState<VerificationStatus | null>(null)
@@ -49,8 +49,8 @@ export function SuperhostVerification() {
     try {
       setLoading(true)
       const [eligibilityRes, statusRes] = await Promise.all([
-        apiCall('/superhost/eligibility', { method: 'GET' }),
-        apiCall('/superhost/status', { method: 'GET' })
+        checkSuperhostEligibility(),
+        getSuperhostStatus()
       ])
       setEligibility(eligibilityRes)
       setStatus(statusRes)
@@ -66,10 +66,7 @@ export function SuperhostVerification() {
 
     try {
       setSubmitting(true)
-      await apiCall('/superhost/request', {
-        method: 'POST',
-        body: JSON.stringify({ request_message: requestMessage || undefined })
-      })
+      await requestSuperhostVerification(requestMessage || undefined)
       await loadData()
       setRequestMessage('')
     } catch (error) {

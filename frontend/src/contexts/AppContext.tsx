@@ -165,6 +165,11 @@ interface AppContextType {
   validateLocation: (emirate: string, area?: string) => Promise<any>
   getUAEAmenities: () => Promise<string[]>
   getUAEPropertyTypes: () => Promise<any>
+  
+  // Superhost methods
+  checkSuperhostEligibility: () => Promise<any>
+  getSuperhostStatus: () => Promise<any>
+  requestSuperhostVerification: (requestMessage?: string) => Promise<any>
 }
 
 const AppContext = createContext<AppContextType | null>(null)
@@ -732,6 +737,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Superhost methods
+  async function checkSuperhostEligibility(): Promise<any> {
+    try {
+      return await makeAPIRequest('/superhost/eligibility')
+    } catch (error) {
+      console.error('Check superhost eligibility error:', error)
+      throw error
+    }
+  }
+
+  async function getSuperhostStatus(): Promise<any> {
+    try {
+      return await makeAPIRequest('/superhost/status')
+    } catch (error) {
+      console.error('Get superhost status error:', error)
+      throw error
+    }
+  }
+
+  async function requestSuperhostVerification(requestMessage?: string): Promise<any> {
+    try {
+      return await makeAPIRequest('/superhost/request', {
+        method: 'POST',
+        body: JSON.stringify({ request_message: requestMessage })
+      })
+    } catch (error) {
+      console.error('Request superhost verification error:', error)
+      throw error
+    }
+  }
+
   const contextValue: AppContextType = {
     // State
     user,
@@ -791,6 +827,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
     getStripeAccountStatus,
     getStripeDashboardLink,
     getHostPayouts,
+    
+    // Superhost methods
+    checkSuperhostEligibility,
+    getSuperhostStatus,
+    requestSuperhostVerification,
   }
 
   return (
