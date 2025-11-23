@@ -1,4 +1,4 @@
-import { Home, Building2, Plus, BarChart3, Calendar, Settings, Bot, LogOut, User, DollarSign } from "lucide-react"
+import { Home, Building2, Plus, BarChart3, Calendar, Settings, Bot, LogOut, User, DollarSign, Award } from "lucide-react"
 import KribLogo from "../assets/krib-logo.svg"
 import {
   Sidebar,
@@ -57,6 +57,12 @@ const navigationItems = [
     title: 'Financials',
     icon: DollarSign,
     description: 'Earnings & payouts'
+  },
+  {
+    id: 'superhost' as NavigationItem,
+    title: 'Superhost',
+    icon: Award,
+    description: 'Verification status'
   },
   {
     id: 'settings' as NavigationItem,

@@ -13,8 +13,9 @@ import { AnalyticsDashboard } from "./components/AnalyticsDashboard"
 import { BookingManagement } from "./components/BookingManagement"
 import { FinancialDashboard } from "./components/FinancialDashboard"
 import { SettingsPage } from "./components/SettingsPage"
+import { SuperhostVerification } from "./components/SuperhostVerification"
 
-export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'settings'
+export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'superhost' | 'settings'
 
 function AppContent() {
   const { user, isLoading } = useApp()
@@ -23,14 +24,14 @@ function AppContent() {
   
   // Check if we're on a dashboard route
   const isDashboardRoute = location.pathname.startsWith('/dashboard') || 
-    ['overview', 'properties', 'add-property', 'analytics', 'bookings', 'financials', 'settings'].some(path => 
+    ['overview', 'properties', 'add-property', 'analytics', 'bookings', 'financials', 'superhost', 'settings'].some(path => 
       location.pathname === `/${path}`
     )
   
   // Map URL paths to navigation items
   const getActiveSection = (pathname: string): NavigationItem => {
     const path = pathname.replace('/dashboard/', '').replace('/', '') || 'overview'
-    return ['overview', 'properties', 'add-property', 'analytics', 'bookings', 'financials', 'settings'].includes(path) 
+    return ['overview', 'properties', 'add-property', 'analytics', 'bookings', 'financials', 'superhost', 'settings'].includes(path) 
       ? path as NavigationItem 
       : 'overview'
   }
@@ -111,6 +112,7 @@ function AppContent() {
             <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
             <Route path="/dashboard/bookings" element={<BookingManagement />} />
             <Route path="/dashboard/financials" element={<FinancialDashboard />} />
+            <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
             <Route path="/dashboard/settings" element={<SettingsPage />} />
           </Routes>
         </main>
