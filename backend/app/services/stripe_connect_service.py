@@ -74,16 +74,28 @@ class StripeConnectService:
                 f"Creating Stripe Express account for user {user_id}, email {email}, country {country}"
             )
 
+            # For UAE (AE), Express accounts can only receive transfers from platform
+            # Platform account collects payments, then transfers to Express accounts
+            # card_payments is NOT supported for UAE Express accounts
+            capabilities = {}
+            if country == "AE":
+                # UAE: Only transfers capability (platform collects, transfers to host)
+                capabilities = {"transfers": {"requested": True}}
+                logger.info(f"UAE account detected - using transfers-only capability")
+            else:
+                # Other countries: Can accept card payments directly
+                capabilities = {
+                    "card_payments": {"requested": True},
+                    "transfers": {"requested": True},
+                }
+
             try:
                 account = stripe.Account.create(
                     type="express",
                     country=country,
                     email=email,
                     business_type=business_type,
-                    capabilities={
-                        "card_payments": {"requested": True},
-                        "transfers": {"requested": True},
-                    },
+                    capabilities=capabilities,
                     settings={
                         "payouts": {
                             "schedule": {
