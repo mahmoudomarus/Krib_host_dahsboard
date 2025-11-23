@@ -9,50 +9,52 @@ export function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        console.log('🔄 Processing OAuth callback...')
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Auth] Processing OAuth callback')
+        }
         setIsProcessing(true)
 
         // First, try to get the session from the URL hash/fragment
         const { data, error } = await supabase.auth.getSession()
         
         if (error) {
-          console.error('❌ Auth callback error:', error)
+          console.error('[Auth] Callback error:', error)
           navigate('/auth?error=' + encodeURIComponent(error.message))
           return
         }
 
         if (data.session?.user) {
-          console.log('✅ Authentication successful:', data.session.user.email)
-          console.log('🚀 Redirecting to dashboard...')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[Auth] Authentication successful:', data.session.user.email)
+          }
           
           // Small delay to ensure everything is processed
           setTimeout(() => {
             navigate('/dashboard', { replace: true })
           }, 500)
         } else {
-          console.log('❌ No session found after OAuth, checking URL...')
+          if (process.env.NODE_ENV === 'development') {
+            console.log('[Auth] No session found, checking URL')
+          }
           
           // Try to extract session from URL fragment manually if needed
           const hashParams = new URLSearchParams(window.location.hash.substring(1))
           const accessToken = hashParams.get('access_token')
           
           if (accessToken) {
-            console.log('🔍 Found access token in URL, attempting to set session...')
             // Let Supabase handle the session from the URL
             const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
             
             if (sessionData?.session) {
-              console.log('✅ Session established from URL token')
               navigate('/dashboard', { replace: true })
               return
             }
           }
           
-          console.log('❌ No valid session found, redirecting to auth')
           navigate('/auth', { replace: true })
         }
       } catch (error) {
-        console.error('❌ Auth callback error:', error)
+        console.error('[Auth] Callback error:', error)
         navigate('/auth?error=' + encodeURIComponent('Authentication failed'), { replace: true })
       } finally {
         setIsProcessing(false)
