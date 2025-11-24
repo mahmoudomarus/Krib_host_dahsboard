@@ -226,12 +226,18 @@ async def get_analytics(
         recommendations = _generate_recommendations(properties, bookings, total_revenue)
 
         # Calculate current and last month revenue
-        from datetime import datetime
-        from dateutil.relativedelta import relativedelta
+        from datetime import datetime, timedelta
+        from calendar import monthrange
         
         now = datetime.now()
         current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        last_month_start = (current_month_start - relativedelta(months=1))
+        
+        # Calculate last month start
+        if now.month == 1:
+            last_month_start = now.replace(year=now.year - 1, month=12, day=1, hour=0, minute=0, second=0, microsecond=0)
+        else:
+            last_month_start = now.replace(month=now.month - 1, day=1, hour=0, minute=0, second=0, microsecond=0)
+        
         last_month_end = current_month_start
         
         current_month_revenue = sum(

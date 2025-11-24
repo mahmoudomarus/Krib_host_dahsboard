@@ -419,35 +419,22 @@ export function AnalyticsDashboard() {
                 <div className="space-y-2">
                   <h4 className="font-medium">Dubai Seasonal Demand</h4>
                   <div className="grid grid-cols-1 gap-2 text-sm">
-                    {marketInsights?.seasonal_trends ? (
-                      marketInsights.seasonal_trends.map((trend: any, idx: number) => (
-                        <div key={idx} className="flex justify-between">
-                          <span>{trend.period}</span>
-                          <span className={`font-medium ${trend.change >= 30 ? 'text-green-600' : trend.change >= 10 ? 'text-blue-600' : trend.change < 0 ? 'text-red-600' : ''}`}>
-                            {trend.change > 0 ? '+' : ''}{trend.change}%
-                          </span>
-                        </div>
-                      ))
-                    ) : (
-                      <>
-                        <div className="flex justify-between">
-                          <span>Winter Peak (Dec-Feb)</span>
-                          <span className="font-medium text-green-600">+50%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Winter High (Mar, Nov)</span>
-                          <span className="font-medium text-blue-600">+30%</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Shoulder (Apr, Oct)</span>
-                          <span className="font-medium">Normal</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span>Summer Low (May-Sep)</span>
-                          <span className="font-medium text-red-600">-30%</span>
-                        </div>
-                      </>
-                    )}
+                    <div className="flex justify-between">
+                      <span>Winter Peak (Dec-Feb)</span>
+                      <span className="font-medium text-green-600">+50%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Winter High (Mar, Nov)</span>
+                      <span className="font-medium text-blue-600">+30%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Shoulder (Apr, Oct)</span>
+                      <span className="font-medium">Normal</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Summer Low (May-Sep)</span>
+                      <span className="font-medium text-red-600">-30%</span>
+                    </div>
                   </div>
                 </div>
 
