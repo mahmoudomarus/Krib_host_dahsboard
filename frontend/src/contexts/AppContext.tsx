@@ -1,13 +1,21 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 import { supabase } from '../utils/supabase/client'
 
-const PRODUCTION_API_URL = 'https://api.host.krib.ae/api'
-const DEVELOPMENT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+// API Configuration - Always use HTTPS in production
+const getApiBaseUrl = () => {
+  if (typeof window === 'undefined') return 'https://api.host.krib.ae/api'
+  
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  
+  if (isDevelopment) {
+    return import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
+  }
+  
+  // Production - always HTTPS
+  return 'https://api.host.krib.ae/api'
+}
 
-// Force HTTPS in production
-const API_BASE_URL = window.location.hostname === 'localhost' 
-  ? DEVELOPMENT_API_URL 
-  : PRODUCTION_API_URL
+const API_BASE_URL = getApiBaseUrl()
 
 if (process.env.NODE_ENV === 'development') {
   console.log('[API] Configuration:', {
