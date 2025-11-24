@@ -62,25 +62,37 @@ class DubaiMarketService:
     def _get_area_pricing_multipliers(self) -> Dict[str, float]:
         """Pricing multipliers based on Dubai area desirability and demand"""
         return {
-            DubaiArea.PALM_JUMEIRAH.value: 2.0,  # Ultra premium
-            DubaiArea.MARINA.value: 1.6,  # Premium waterfront
-            DubaiArea.DOWNTOWN.value: 1.5,  # Business/tourist hub
-            DubaiArea.JBR.value: 1.4,  # Beach access
-            DubaiArea.BUSINESS_BAY.value: 1.2,  # Modern business district
-            DubaiArea.JUMEIRAH.value: 1.3,  # Traditional upscale
-            DubaiArea.JLT.value: 1.0,  # Base rate area
-            DubaiArea.SILICON_OASIS.value: 0.8,  # Tech hub, suburban
-            DubaiArea.DEIRA.value: 0.7,  # Traditional, lower cost
-            DubaiArea.BURDUBAI.value: 0.6,  # Historic, budget area
+            DubaiArea.PALM_JUMEIRAH.value: float(
+                os.getenv("AREA_MULT_PALM_JUMEIRAH", "2.0")
+            ),
+            DubaiArea.MARINA.value: float(os.getenv("AREA_MULT_MARINA", "1.6")),
+            DubaiArea.DOWNTOWN.value: float(os.getenv("AREA_MULT_DOWNTOWN", "1.5")),
+            DubaiArea.JBR.value: float(os.getenv("AREA_MULT_JBR", "1.4")),
+            DubaiArea.BUSINESS_BAY.value: float(
+                os.getenv("AREA_MULT_BUSINESS_BAY", "1.2")
+            ),
+            DubaiArea.JUMEIRAH.value: float(os.getenv("AREA_MULT_JUMEIRAH", "1.3")),
+            DubaiArea.JLT.value: float(os.getenv("AREA_MULT_JLT", "1.0")),
+            DubaiArea.SILICON_OASIS.value: float(
+                os.getenv("AREA_MULT_SILICON_OASIS", "0.8")
+            ),
+            DubaiArea.DEIRA.value: float(os.getenv("AREA_MULT_DEIRA", "0.7")),
+            DubaiArea.BURDUBAI.value: float(os.getenv("AREA_MULT_BURDUBAI", "0.6")),
         }
 
     def _get_seasonal_multipliers(self) -> Dict[str, float]:
         """Seasonal demand multipliers for Dubai"""
         return {
-            DubaiSeason.PEAK_WINTER.value: 1.5,  # Dec-Feb: European winter escape
-            DubaiSeason.HIGH_WINTER.value: 1.3,  # Mar, Nov: Pleasant weather
-            DubaiSeason.SHOULDER.value: 1.0,  # Apr, Oct: Moderate demand
-            DubaiSeason.LOW_SUMMER.value: 0.7,  # May-Sep: Hot summer discount
+            DubaiSeason.PEAK_WINTER.value: float(
+                os.getenv("SEASON_MULT_PEAK_WINTER", "1.5")
+            ),
+            DubaiSeason.HIGH_WINTER.value: float(
+                os.getenv("SEASON_MULT_HIGH_WINTER", "1.3")
+            ),
+            DubaiSeason.SHOULDER.value: float(os.getenv("SEASON_MULT_SHOULDER", "1.0")),
+            DubaiSeason.LOW_SUMMER.value: float(
+                os.getenv("SEASON_MULT_LOW_SUMMER", "0.7")
+            ),
         }
 
     def _get_event_multipliers(self) -> Dict[str, float]:
@@ -382,7 +394,7 @@ class DubaiMarketService:
     ) -> Dict[str, Any]:
         """Get market benchmarks for a specific Dubai area"""
         area_mult = self.area_multipliers.get(area, 1.0)
-        base_adr = 120  # Base Average Daily Rate
+        base_adr = float(os.getenv("BASE_ADR", "120"))
 
         market_adr = base_adr * area_mult
 

@@ -2,6 +2,7 @@
 Analytics API routes with real data calculations
 """
 
+import os
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date, timedelta
@@ -603,7 +604,8 @@ def _generate_property_performance(
 
     # Sort by revenue
     performance_data.sort(key=lambda x: x["revenue"], reverse=True)
-    return performance_data[:5]  # Top 5 properties
+    top_n = int(os.getenv("ANALYTICS_TOP_PROPERTIES", "5"))
+    return performance_data[:top_n]
 
 
 def _generate_dubai_market_insights(
@@ -646,25 +648,20 @@ def _generate_dubai_market_insights(
         (avg_booking_value / market_adr * 100) if market_adr > 0 else 100
     )
 
+    excellent_threshold = float(os.getenv("COMPETITIVE_EXCELLENT_THRESHOLD", "110"))
+    good_threshold = float(os.getenv("COMPETITIVE_GOOD_THRESHOLD", "90"))
+
     return {
         "market_health_score": benchmarks["market_metrics"]["market_health_score"],
         "competitive_position": (
-            2 if performance_vs_market > 110 else 3 if performance_vs_market > 90 else 4
+            2
+            if performance_vs_market > excellent_threshold
+            else 3 if performance_vs_market > good_threshold else 4
         ),
         "area_insights": benchmarks["area_insights"],
         "performance_vs_market": round(performance_vs_market, 1),
-        "seasonal_trends": {
-            "winter_peak": "Dec-Feb: 50% premium demand",
-            "winter_high": "Mar, Nov: 30% premium demand",
-            "shoulder": "Apr, Oct: Normal demand",
-            "summer_low": "May-Sep: 30% discount needed",
-        },
-        "demand_patterns": [
-            {"period": "Winter Peak", "multiplier": 1.5, "months": "Dec-Feb"},
-            {"period": "Winter High", "multiplier": 1.3, "months": "Mar, Nov"},
-            {"period": "Shoulder", "multiplier": 1.0, "months": "Apr, Oct"},
-            {"period": "Summer Low", "multiplier": 0.7, "months": "May-Sep"},
-        ],
+        "seasonal_trends": benchmarks.get("seasonal_trends", {}),
+        "demand_patterns": benchmarks.get("demand_patterns", []),
         "area_recommendations": benchmarks["recommendations"],
     }
 
@@ -677,7 +674,10 @@ def _generate_dubai_forecast(
     market_forecast = dubai_market_service.get_market_forecast(12)
 
     # Calculate user's baseline performance
-    user_monthly_baseline = total_revenue / 12 if total_revenue > 0 else 1000
+    default_baseline = float(os.getenv("ANALYTICS_DEFAULT_BASELINE", "1000"))
+    user_monthly_baseline = (
+        total_revenue / 12 if total_revenue > 0 else default_baseline
+    )
 
     # Apply market forecast to user's baseline
     forecasted_months = []
