@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { Button } from './ui/button'
 import { Input } from './ui/input'
@@ -6,8 +6,10 @@ import { Label } from './ui/label'
 import { Separator } from './ui/separator'
 import { Switch } from './ui/switch'
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './ui/dialog'
+import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'
 import { useApp } from '../contexts/AppContext'
 import { toast } from 'sonner'
+import { Camera, Upload } from 'lucide-react'
 
 interface UserSettings {
   displayName: string
@@ -43,6 +45,9 @@ export function SettingsPage() {
     new: '',
     confirm: ''
   })
+  const [avatarUrl, setAvatarUrl] = useState((user as any)?.avatar_url || '')
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [settings, setSettings] = useState<UserSettings>({
     displayName: user?.name || '',
     email: user?.email || '',
@@ -163,7 +168,85 @@ export function SettingsPage() {
               Update your personal information and contact details
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+            <div className="flex items-center gap-6">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={avatarUrl} alt={settings.displayName} />
+                <AvatarFallback className="text-2xl">
+                  {settings.displayName.charAt(0).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="space-y-2">
+                <Label>Profile Picture</Label>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingAvatar}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    {uploadingAvatar ? 'Uploading...' : 'Upload Photo'}
+                  </Button>
+                  {avatarUrl && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        try {
+                          await updateUserProfile({ avatar_url: '' })
+                          setAvatarUrl('')
+                          toast.success('Profile picture removed')
+                        } catch (error) {
+                          toast.error('Failed to remove picture')
+                        }
+                      }}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </div>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={async (e) => {
+                    const file = e.target.files?.[0]
+                    if (!file) return
+                    
+                    if (file.size > 5 * 1024 * 1024) {
+                      toast.error('Image must be less than 5MB')
+                      return
+                    }
+                    
+                    setUploadingAvatar(true)
+                    try {
+                      const reader = new FileReader()
+                      reader.onloadend = async () => {
+                        const base64 = reader.result as string
+                        await updateUserProfile({ avatar_url: base64 })
+                        setAvatarUrl(base64)
+                        toast.success('Profile picture updated')
+                      }
+                      reader.readAsDataURL(file)
+                    } catch (error) {
+                      toast.error('Failed to upload picture')
+                    } finally {
+                      setUploadingAvatar(false)
+                    }
+                  }}
+                />
+                <p className="text-xs text-muted-foreground">
+                  JPG, PNG or GIF. Max size 5MB.
+                </p>
+              </div>
+            </div>
+
+            <Separator />
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="displayName">Display Name</Label>
