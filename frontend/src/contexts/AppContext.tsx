@@ -794,6 +794,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     signUp,
     signInWithGoogle,
     signOut,
+    apiCall,
     
     // Property methods
     createProperty,
