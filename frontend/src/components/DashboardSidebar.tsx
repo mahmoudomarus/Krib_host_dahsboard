@@ -124,13 +124,22 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
       
       <SidebarFooter className="border-t border-sidebar-border p-4 krib-sidebar-header">
         <div className="space-y-3">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10">
-              <User className="h-4 w-4 text-krib-gray-dark" />
-            </div>
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10 cursor-pointer hover:bg-white/80 transition-all" onClick={() => onSectionChange('settings')}>
+            {user?.avatar_url ? (
+              <img 
+                src={user.avatar_url} 
+                alt={user.name || 'User'} 
+                className="h-10 w-10 rounded-full object-cover border-2 border-krib-lime/30"
+              />
+            ) : (
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10 border-2 border-krib-lime/30">
+                <User className="h-5 w-5 text-krib-gray-dark" />
+              </div>
+            )}
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'User'}</p>
+              <p className="text-sm font-semibold text-sidebar-foreground truncate">{user?.name || 'User'}</p>
               <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
+              <p className="text-[10px] text-krib-lime/80 font-medium mt-0.5">Click to edit profile</p>
             </div>
           </div>
           <Button
