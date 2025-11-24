@@ -181,6 +181,9 @@ interface AppContextType {
   checkSuperhostEligibility: () => Promise<any>
   getSuperhostStatus: () => Promise<any>
   requestSuperhostVerification: (requestMessage?: string) => Promise<any>
+  
+  // API method
+  apiCall: (endpoint: string, method?: string, body?: any) => Promise<any>
 }
 
 const AppContext = createContext<AppContextType | null>(null)
