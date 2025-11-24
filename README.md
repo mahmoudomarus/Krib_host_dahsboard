@@ -1,198 +1,284 @@
-# 🏠 Krib AI Dashboard
+# Krib Host Platform
 
-An AI-powered rental property management platform with automated listing generation, analytics, and booking management.
+Enterprise-grade property management platform for short-term rental hosts in the UAE.
 
-## 🚀 Live Demo
+## Features
 
-- **Frontend**: Deploy on Vercel
-- **Backend**: Deploy on Render  
-- **Database**: Supabase PostgreSQL
+- **Property Management**: Multi-property dashboard with image management
+- **Booking System**: Complete reservation workflow with status tracking
+- **Advanced Analytics**: AI-powered insights and Dubai market intelligence
+- **Financial Dashboard**: Revenue tracking, Stripe Connect integration, automated payouts
+- **Messaging System**: Guest-host communication with AI response suggestions
+- **Superhost Program**: Performance-based verification system
+- **Market Intelligence**: Real-time Dubai market data and pricing recommendations
 
-## 📁 Project Structure
+## Tech Stack
 
-```
-rental-ai-dashboard/
-├── frontend/                    # React + TypeScript + Vite frontend
-│   ├── src/
-│   │   ├── components/         # React components
-│   │   ├── contexts/          # React contexts
-│   │   ├── utils/             # Utility functions
-│   │   └── styles/            # Global styles
-│   ├── package.json           # Frontend dependencies
-│   ├── vite.config.ts        # Vite configuration
-│   ├── vercel.json           # Vercel deployment config
-│   └── env.example           # Frontend environment variables
-├── backend/                     # FastAPI + Python backend
-│   ├── app/
-│   │   ├── api/              # API routes
-│   │   ├── core/             # Core configuration
-│   │   ├── models/           # Data models
-│   │   └── services/         # Business logic
-│   ├── requirements.txt      # Python dependencies
-│   ├── main.py              # FastAPI entry point
-│   ├── Dockerfile           # Docker configuration
-│   ├── render.yaml          # Render deployment config
-│   └── env_example.txt      # Backend environment variables
-├── supabase/                   # Database migrations and config
-│   ├── migrations/           # SQL migration files
-│   └── config.toml          # Supabase configuration
-└── README.md                  # This file
-```
+**Frontend:**
+- React 18 + TypeScript
+- Vite
+- TailwindCSS + shadcn/ui
+- Recharts
+- Supabase Auth
 
-## ✨ Features
+**Backend:**
+- FastAPI (Python 3.11)
+- PostgreSQL (Supabase)
+- Redis (caching)
+- Stripe Connect (payments)
+- Resend (emails)
+- OpenAI (AI features)
 
-### 🤖 AI-Powered Property Management
-- **Automated Descriptions**: Generate compelling property descriptions using OpenAI/Claude
-- **Smart Amenities**: AI-suggested amenities based on property type and location  
-- **Dynamic Pricing**: Intelligent pricing recommendations based on market data
-- **Content Optimization**: SEO-friendly titles and descriptions
-
-### 📊 Advanced Analytics
-- **Revenue Tracking**: Real-time revenue and booking analytics
-- **Performance Metrics**: Property-wise performance insights
-- **Occupancy Rates**: Track and optimize property utilization
-- **Market Insights**: Competitive analysis and pricing trends
-
-### 🏨 Complete Booking System
-- **Guest Management**: Full guest lifecycle management
-- **Payment Tracking**: Integrated payment status monitoring
-- **Calendar Management**: Availability and booking calendar
-- **Review System**: Guest reviews and host responses
-
-### 🔐 Enterprise Security
-- **Row Level Security**: Supabase RLS for data protection
-- **JWT Authentication**: Secure token-based authentication
-- **Google OAuth**: Social login integration
-- **User Isolation**: Complete data separation between users
-
-## 🛠️ Development Setup
+## Quick Start
 
 ### Prerequisites
+
 - Node.js 18+
 - Python 3.11+
-- Supabase account
-- OpenAI API key
-- Anthropic API key (optional)
+- PostgreSQL (Supabase account)
+- Redis
+- Stripe account
+- Resend account
+- OpenAI account
 
-### Frontend Setup
+### Installation
 
-1. **Navigate to frontend directory**
-   ```bash
-   cd frontend
-   ```
+```bash
+# Clone repository
+git clone https://github.com/yourusername/krib-host-platform.git
+cd krib-host-platform
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+# Backend setup
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp env_example.txt .env
+# Edit .env with your credentials
+uvicorn main:app --reload
 
-3. **Environment configuration**
-   ```bash
-   cp env.example .env.local
-   ```
-   
-   Update `.env.local`:
-   ```env
-   VITE_API_URL=http://localhost:8000/api
-   VITE_SUPABASE_URL=your_supabase_url
-   VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-   ```
+# Frontend setup (new terminal)
+cd frontend
+npm install
+cp env.example .env
+# Edit .env with your credentials
+npm run dev
+```
 
-4. **Start development server**
-   ```bash
-   npm run dev
-   ```
+Visit:
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
-### Backend Setup
+## Documentation
 
-1. **Navigate to backend directory**
-   ```bash
-   cd backend
-   ```
+Comprehensive documentation is available in the `/docs` directory:
 
-2. **Create virtual environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+- **[Setup Guide](docs/SETUP.md)**: Complete installation and deployment guide
+- **[Superadmin Guide](docs/SUPERADMIN_GUIDE.md)**: Platform administration and configuration
+- **[API Documentation](docs/API_DOCUMENTATION.md)**: REST API reference for integrations
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+## Deployment
 
-4. **Environment configuration**
-   ```bash
-   cp env_example.txt .env
-   ```
-   
-   Update `.env` with your actual values
+### Production URLs
 
-5. **Start the server**
-   ```bash
-   uvicorn main:app --reload --host 0.0.0.0 --port 8000
-   ```
+- Frontend: https://host.krib.ae
+- Backend API: https://api.host.krib.ae
+- Database: Supabase (managed PostgreSQL)
 
-## 🚀 Deployment
+### Deployment Platforms
 
-### Frontend (Vercel)
+- Frontend: Render (Static Site)
+- Backend: Render (Web Service)
+- Database: Supabase
+- Redis: Redis Cloud or Render
 
-1. **Connect GitHub repository to Vercel**
-2. **Set Root Directory**: `frontend`
-3. **Set Build Command**: `npm run build`
-4. **Set Output Directory**: `dist`
-5. **Add Environment Variables**:
-   - `VITE_API_URL`: Your deployed backend URL
-   - `VITE_SUPABASE_URL`: Your Supabase URL
-   - `VITE_SUPABASE_ANON_KEY`: Your Supabase anon key
+See [Setup Guide](docs/SETUP.md) for detailed deployment instructions.
 
-### Backend (Render)
+## Environment Variables
 
-1. **Create Web Service on Render**
-2. **Set Root Directory**: `backend`
-3. **Set Build Command**: `pip install -r requirements.txt`
-4. **Set Start Command**: `uvicorn main:app --host 0.0.0.0 --port $PORT`
-5. **Add Environment Variables** (all secrets from your `.env` file)
+### Required Backend Variables
 
-### Database (Supabase)
+```bash
+# Core
+SECRET_KEY=your_secret_key
+JWT_SECRET_KEY=your_jwt_secret
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-The database schema is already deployed. The migrations are in `supabase/migrations/`.
+# Stripe
+STRIPE_SECRET_KEY=sk_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+PLATFORM_FEE_PERCENTAGE=15.0
 
-## 🔧 API Documentation
+# Email
+RESEND_API_KEY=re_...
+FROM_EMAIL=notifications@host.krib.ae
 
-- **Interactive Docs**: `{your-backend-url}/docs`
-- **OpenAPI Schema**: `{your-backend-url}/openapi.json`
+# AI
+OPENAI_API_KEY=sk-...
+```
 
-## 🤝 Contributing
+### Required Frontend Variables
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_anon_key
+VITE_API_URL=https://api.host.krib.ae/api
+```
 
-## 📝 Tech Stack
+See [Setup Guide](docs/SETUP.md) for complete list of environment variables.
 
-- **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, shadcn/ui
-- **Backend**: FastAPI, Python, SQLAlchemy, Pydantic
-- **Database**: Supabase PostgreSQL
-- **Storage**: Supabase S3-compatible storage
-- **AI**: OpenAI GPT-4, Anthropic Claude
-- **Deployment**: Vercel (frontend), Render (backend)
+## Testing
 
-## 📊 Database Schema
+### Backend Tests
 
-The project includes a comprehensive database schema with:
-- User management and authentication
-- Property listings with AI integration
-- Booking system with payment tracking
-- Review and rating system
-- Analytics and reporting
-- Reference data for amenities and locations
+```bash
+cd backend
+pytest tests/ -v --cov=app
+```
 
-## 🆘 Support
+### Frontend Type Checking
 
-For support, create an issue in the GitHub repository.
+```bash
+cd frontend
+npm run type-check
+```
 
-## 📄 License
+### E2E Tests
 
-MIT License - see LICENSE file for details.
+```bash
+cd frontend
+npx playwright install
+npx playwright test
+```
+
+## CI/CD
+
+GitHub Actions pipeline includes:
+- Automated testing (backend + frontend)
+- Code quality checks (Black, Flake8, ESLint)
+- Security auditing
+- Automated deployment to Render
+
+## Key Features
+
+### Property Management
+- Create, edit, delete properties
+- Multi-image upload
+- UAE location picker (Emirates/Areas)
+- Real-time availability calendar
+- Amenities and property type selection
+
+### Booking System
+- Complete booking workflow
+- Status management (pending, confirmed, cancelled, completed)
+- Guest information tracking
+- Internal notes for hosts
+- Email notifications
+
+### Analytics Dashboard
+- Revenue trends and forecasts
+- Occupancy rates
+- Market comparison
+- Seasonal insights
+- Dubai-specific market data
+- AI-powered recommendations
+
+### Financial Management
+- Stripe Connect integration
+- Automated commission calculation (15% platform fee)
+- Real-time earnings tracking
+- Transaction history
+- Payout management
+
+### Messaging System
+- Guest-host communication
+- AI-powered response suggestions
+- Unread message tracking
+- Email notifications
+- Conversation archiving
+
+### Superhost Program
+- Automatic eligibility checking
+- Performance metrics tracking
+- Admin approval workflow
+- Verified badge display
+
+## Security Features
+
+- Row Level Security (RLS) on all database tables
+- JWT-based authentication
+- Secure secret generation
+- Rate limiting
+- SQL injection protection
+- XSS protection
+- CORS configuration
+- Secure password hashing
+
+## Performance Optimizations
+
+- Redis caching for frequently accessed data
+- Optimized database queries with proper indexes
+- CDN caching for static assets
+- Lazy loading for images
+- Code splitting for frontend
+
+## Contributing
+
+This is a proprietary project. For access or contributions, contact the development team.
+
+## License
+
+Proprietary - All rights reserved
+
+## Support
+
+For support or questions:
+- Technical Documentation: See `/docs` directory
+- Email: dev@krib.ae
+
+## Architecture
+
+```
+┌─────────────────┐
+│  React Frontend │ (Vite + TypeScript)
+└────────┬────────┘
+         │ HTTPS
+         ▼
+┌─────────────────┐
+│  FastAPI Backend│ (Python)
+└────────┬────────┘
+         │
+    ┌────┴──────┬──────────┬────────────┐
+    ▼           ▼          ▼            ▼
+┌────────┐  ┌────────┐  ┌──────┐   ┌────────┐
+│Supabase│  │ Redis  │  │Stripe│   │ OpenAI │
+└────────┘  └────────┘  └──────┘   └────────┘
+(PostgreSQL)  (Cache)   (Payments)    (AI)
+```
+
+## Project Status
+
+✅ Production Ready
+- All core features implemented
+- Security audited
+- Performance optimized
+- Documentation complete
+- CI/CD pipeline active
+
+## Roadmap
+
+Future enhancements:
+- Mobile app (React Native)
+- Advanced admin dashboard
+- Multi-language support
+- Calendar sync with Airbnb/Booking.com
+- Automated pricing optimization
+- Guest review system
+- WhatsApp integration
+
+---
+
+**Built with ❤️ for UAE property hosts**
