@@ -4,18 +4,18 @@ Bookings API routes
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
-from datetime import datetime, date
+from datetime import datetime
 import logging
 
 from app.models.schemas import (
     BookingCreate,
     BookingUpdate,
     BookingResponse,
-    SuccessResponse,
 )
 from app.core.supabase_client import supabase_client
 from app.api.dependencies import get_current_user, verify_booking_access
 from app.services.query_service import query_service
+from app.services.email_service import email_service
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
