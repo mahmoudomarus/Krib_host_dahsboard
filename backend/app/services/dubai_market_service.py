@@ -417,6 +417,34 @@ class DubaiMarketService:
                 "seasonality_impact": "High" if area_mult >= 1.3 else "Medium",
             },
             "recommendations": self._get_area_recommendations(area, area_mult),
+            "seasonal_trends": {
+                "winter_peak": f"Dec-Feb: {int((float(os.getenv('SEASON_MULT_PEAK_WINTER', '1.5')) - 1) * 100)}% premium demand",
+                "winter_high": f"Mar, Nov: {int((float(os.getenv('SEASON_MULT_HIGH_WINTER', '1.3')) - 1) * 100)}% premium demand",
+                "shoulder": "Apr, Oct: Normal demand",
+                "summer_low": f"May-Sep: {int((1 - float(os.getenv('SEASON_MULT_LOW_SUMMER', '0.7'))) * 100)}% discount needed",
+            },
+            "demand_patterns": [
+                {
+                    "period": "Winter Peak",
+                    "multiplier": float(os.getenv("SEASON_MULT_PEAK_WINTER", "1.5")),
+                    "months": "Dec-Feb",
+                },
+                {
+                    "period": "Winter High",
+                    "multiplier": float(os.getenv("SEASON_MULT_HIGH_WINTER", "1.3")),
+                    "months": "Mar, Nov",
+                },
+                {
+                    "period": "Shoulder",
+                    "multiplier": float(os.getenv("SEASON_MULT_SHOULDER", "1.0")),
+                    "months": "Apr, Oct",
+                },
+                {
+                    "period": "Summer Low",
+                    "multiplier": float(os.getenv("SEASON_MULT_LOW_SUMMER", "0.7")),
+                    "months": "May-Sep",
+                },
+            ],
         }
 
         return benchmarks
