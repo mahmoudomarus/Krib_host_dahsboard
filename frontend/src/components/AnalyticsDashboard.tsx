@@ -21,6 +21,7 @@ export function AnalyticsDashboard() {
   const [loading, setLoading] = useState(true)
   const [marketInsights, setMarketInsights] = useState<any>(null)
   const [forecastData, setForecastData] = useState<any>(null)
+  const [activeTab, setActiveTab] = useState("revenue")
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -201,7 +202,7 @@ export function AnalyticsDashboard() {
         ))}
       </div>
 
-      <Tabs defaultValue="revenue" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="revenue">Revenue</TabsTrigger>
           <TabsTrigger value="forecast">Forecast</TabsTrigger>
