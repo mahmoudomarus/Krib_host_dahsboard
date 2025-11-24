@@ -90,17 +90,20 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
   return (
     <Sidebar className="krib-sidebar">
       <SidebarHeader className="krib-sidebar-header border-b border-sidebar-border p-6">
-        <div className="flex items-center gap-4">
+        <button 
+          onClick={() => onSectionChange('overview')}
+          className="flex items-center gap-4 w-full hover:opacity-80 transition-opacity cursor-pointer"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl krib-logo-container">
             <img src={KribLogo} alt="Krib" className="h-8 w-8" />
           </div>
-          <div>
+          <div className="text-left">
             <h2 className="text-xl font-bold text-sidebar-foreground bg-gradient-to-r from-krib-gray-dark to-krib-black bg-clip-text">
               Krib
             </h2>
             <p className="text-sm text-sidebar-foreground/70 font-medium">Property Dashboard</p>
           </div>
-        </div>
+        </button>
       </SidebarHeader>
       
       <SidebarContent>
@@ -130,15 +133,18 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
       
       <SidebarFooter className="border-t border-sidebar-border p-4 krib-sidebar-header">
         <div className="space-y-3">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10">
+          <button 
+            onClick={() => onSectionChange('settings')}
+            className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10 w-full hover:bg-white/70 hover:border-krib-lime/20 transition-all cursor-pointer"
+          >
             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10">
               <User className="h-4 w-4 text-krib-gray-dark" />
             </div>
-            <div className="flex-1 min-w-0">
+            <div className="flex-1 min-w-0 text-left">
               <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'User'}</p>
               <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
             </div>
-          </div>
+          </button>
           <Button
             variant="ghost"
             size="sm"
