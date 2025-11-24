@@ -1,4 +1,4 @@
-import { Home, Building2, Plus, BarChart3, Calendar, Settings, Bot, LogOut, User, DollarSign, Award, MessageSquare } from "lucide-react"
+import { Home, Building2, Plus, BarChart3, Calendar, Settings, Bot, LogOut, User, DollarSign, Award, MessageSquare, Star } from "lucide-react"
 import KribLogo from "../assets/krib-logo.svg"
 import {
   Sidebar,
@@ -69,6 +69,12 @@ const navigationItems = [
     title: 'Messages',
     icon: MessageSquare,
     description: 'Guest communications'
+  },
+  {
+    id: 'reviews' as NavigationItem,
+    title: 'Reviews',
+    icon: Star,
+    description: 'Guest feedback'
   },
   {
     id: 'settings' as NavigationItem,

@@ -45,6 +45,7 @@ from app.api.routes import (
     external_payments,
     superhost,
     messages,
+    reviews,
 )
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
@@ -149,6 +150,7 @@ app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(superhost.router, prefix="/api/superhost", tags=["superhost"])
 app.include_router(messages.router, prefix="/api/messages", tags=["messages"])
+app.include_router(reviews.router, prefix="/api", tags=["reviews"])
 app.include_router(locations.router, prefix="/api/locations", tags=["locations"])
 app.include_router(properties.router, prefix="/api/properties", tags=["properties"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])

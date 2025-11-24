@@ -15,8 +15,10 @@ import { FinancialDashboard } from "./components/FinancialDashboard"
 import { SettingsPage } from "./components/SettingsPage"
 import { SuperhostVerification } from "./components/SuperhostVerification"
 import { MessagingDashboard } from "./components/MessagingDashboard"
+import { NotificationBell } from "./components/NotificationBell"
+import { ReviewsDashboard } from "./components/ReviewsDashboard"
 
-export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'superhost' | 'messages' | 'settings'
+export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'superhost' | 'messages' | 'reviews' | 'settings'
 
 function AppContent() {
   const { user, isLoading } = useApp()
@@ -100,11 +102,16 @@ function AppContent() {
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
-                <DashboardSidebar 
+        <DashboardSidebar 
           activeSection={activeSection} 
           onSectionChange={handleSectionChange} 
         />
         <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '16rem' }}>
+          <div className="sticky top-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+            <div className="flex items-center justify-end h-16 px-6">
+              <NotificationBell />
+            </div>
+          </div>
           <Routes>
             <Route path="/dashboard" element={<DashboardOverview />} />
             <Route path="/dashboard/overview" element={<DashboardOverview />} />
@@ -115,6 +122,7 @@ function AppContent() {
             <Route path="/dashboard/financials" element={<FinancialDashboard />} />
             <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
             <Route path="/dashboard/messages" element={<MessagingDashboard />} />
+            <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
             <Route path="/dashboard/settings" element={<SettingsPage />} />
           </Routes>
         </main>

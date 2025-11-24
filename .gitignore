@@ -1,74 +1,35 @@
-# Environment variables - NEVER commit these!
+# Test files
+test_*.sql
+cleanup_*.sql
+*_test.sql
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+venv/
+ENV/
+env/
+.venv
+*.egg-info/
+
+# Environment
 .env
-.env.*
-**/.env
-**/.env.*
-**/env.real
-**/env.production
-**/env.secret
+.env.local
+.env.*.local
 
-# API Keys and Secrets - NEVER commit these!
-**/config/*secret*
-**/config/*key*
-**/*secret*
-**/*private*
-**/secrets/
-**/keys/
-
-# IDE files
+# IDE
 .vscode/
 .idea/
 *.swp
-*.swo
-*~
-
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
 
 # Logs
-logs
 *.log
+logs/
 
-# Frontend (React/Vite)
-frontend/node_modules/
-frontend/dist/
-frontend/build/
-frontend/.cache/
-frontend/.parcel-cache/
-frontend/.npm
-frontend/.eslintcache
-
-# Backend (Python/FastAPI)
-backend/__pycache__/
-backend/*.py[cod]
-backend/*$py.class
-backend/*.so
-backend/.Python
-backend/env/
-backend/venv/
-backend/ENV/
-backend/env.bak/
-backend/venv.bak/
-backend/.venv/
-backend/pip-log.txt
-backend/pip-delete-this-directory.txt
-backend/.pytest_cache/
-backend/.coverage
-backend/htmlcov/
-backend/.mypy_cache/
-backend/.dmypy.json
-backend/dmypy.json
-
-# Supabase
-supabase/.temp/
-supabase/.env
-
-# Deployment
-.vercel
-*.tgz
+# OS
+.DS_Store
+Thumbs.db

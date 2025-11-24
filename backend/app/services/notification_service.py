@@ -11,6 +11,14 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
+try:
+    from app.services.email_service import EmailService
+
+    email_service = EmailService()
+except Exception as e:
+    logger.warning(f"Email service not available: {e}")
+    email_service = None
+
 NOTIFICATION_EXPIRY_HOURS = {
     "new_booking": int(os.getenv("NOTIFICATION_EXPIRY_NEW_BOOKING", "72")),
     "default": int(os.getenv("NOTIFICATION_EXPIRY_DEFAULT", "168")),
@@ -105,6 +113,26 @@ class NotificationService:
             await NotificationService._send_realtime_update(
                 host_id, notification_record
             )
+
+            # Send email notification
+            if email_service:
+                try:
+                    host_result = (
+                        supabase_client.table("users")
+                        .select("email, first_name")
+                        .eq("id", host_id)
+                        .single()
+                        .execute()
+                    )
+                    if host_result.data:
+                        host_email = host_result.data.get("email")
+                        host_name = host_result.data.get("first_name", "Host")
+                        if host_email:
+                            await NotificationService._send_email_notification(
+                                host_email, host_name, notification, notification_record
+                            )
+                except Exception as e:
+                    logger.error(f"Failed to send email notification: {e}")
 
             # Log the notification
             logger.info(
@@ -411,6 +439,98 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Failed to send real-time update to host {host_id}: {e}")
             # Don't raise exception as this is non-critical functionality
+
+    @staticmethod
+    async def _send_email_notification(
+        host_email: str,
+        host_name: str,
+        notification: NotificationRequest,
+        notification_record: Dict[str, Any],
+    ):
+        """Send email notification to host"""
+        if not email_service:
+            return
+
+        try:
+            subject = notification.title
+
+            email_templates = {
+                "new_booking": f"""
+                    <h2>New Booking Request</h2>
+                    <p>Hi {host_name},</p>
+                    <p>{notification.message}</p>
+                    <p><a href="https://host.krib.ae{notification.action_url or '/dashboard/bookings'}" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
+                       View Booking
+                    </a></p>
+                    <p>Best regards,<br>Krib Team</p>
+                """,
+                "payment_received": f"""
+                    <h2>Payment Received</h2>
+                    <p>Hi {host_name},</p>
+                    <p>{notification.message}</p>
+                    <p><a href="https://host.krib.ae/dashboard/financials" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
+                       View Financials
+                    </a></p>
+                    <p>Best regards,<br>Krib Team</p>
+                """,
+                "guest_message": f"""
+                    <h2>New Message from Guest</h2>
+                    <p>Hi {host_name},</p>
+                    <p>{notification.message}</p>
+                    <p><a href="https://host.krib.ae/dashboard/messages" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
+                       View Message
+                    </a></p>
+                    <p>Best regards,<br>Krib Team</p>
+                """,
+                "urgent": f"""
+                    <h2>Urgent: Action Required</h2>
+                    <p>Hi {host_name},</p>
+                    <p><strong>{notification.message}</strong></p>
+                    <p><a href="https://host.krib.ae{notification.action_url or '/dashboard'}" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #dc2626; color: #fff; text-decoration: none; border-radius: 6px;">
+                       Take Action
+                    </a></p>
+                    <p>Best regards,<br>Krib Team</p>
+                """,
+                "booking_update": f"""
+                    <h2>Booking Update</h2>
+                    <p>Hi {host_name},</p>
+                    <p>{notification.message}</p>
+                    <p><a href="https://host.krib.ae{notification.action_url or '/dashboard/bookings'}" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
+                       View Booking
+                    </a></p>
+                    <p>Best regards,<br>Krib Team</p>
+                """,
+            }
+
+            html_content = email_templates.get(
+                notification.type,
+                f"""
+                    <h2>{notification.title}</h2>
+                    <p>Hi {host_name},</p>
+                    <p>{notification.message}</p>
+                    <p><a href="https://host.krib.ae/dashboard" 
+                       style="display: inline-block; padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 6px;">
+                       Go to Dashboard
+                    </a></p>
+                    <p>Best regards,<br>Krib Team</p>
+                """,
+            )
+
+            await email_service.send_email(
+                to_email=host_email, subject=subject, html_content=html_content
+            )
+
+            logger.info(
+                f"Email notification sent to {host_email} for notification {notification_record['id']}"
+            )
+
+        except Exception as e:
+            logger.error(f"Failed to send email notification to {host_email}: {e}")
 
     @staticmethod
     async def create_booking_notification(
