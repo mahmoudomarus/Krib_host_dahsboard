@@ -10,11 +10,7 @@ from typing import Dict, List
 class ExternalAPIConfig:
     """Configuration for external API integrations"""
 
-    # Production API Key (solid, always works)
-    PRODUCTION_API_KEY = os.getenv(
-        "KRIB_AI_AGENT_API_KEY",
-        "krib_prod_c4323aa1d8896254316e396995bf7f6fffacdaa8985ec09da4067da37f1e6ae8",
-    )
+    PRODUCTION_API_KEY = os.getenv("KRIB_AI_AGENT_API_KEY", "")
 
     # Valid API Keys
     VALID_API_KEYS = {
@@ -32,8 +28,10 @@ class ExternalAPIConfig:
         ]
     }
 
-    # Rate Limits per service (requests per minute)
-    RATE_LIMITS = {"krib_ai_agent": 200, "default": 60}
+    RATE_LIMITS = {
+        "krib_ai_agent": int(os.getenv("RATE_LIMIT_AI_AGENT", "200")),
+        "default": int(os.getenv("RATE_LIMIT_DEFAULT", "60")),
+    }
 
     @classmethod
     def get_api_keys(cls) -> Dict[str, str]:

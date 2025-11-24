@@ -2,6 +2,7 @@
 High-level caching service for common operations
 """
 
+import os
 from typing import Dict, List, Any, Optional
 from datetime import timedelta
 import hashlib
@@ -19,14 +20,14 @@ class CacheService:
 
     # Cache expiration times (in seconds)
     CACHE_TIMES = {
-        "user_profile": 300,  # 5 minutes
-        "properties": 180,  # 3 minutes
-        "analytics": 600,  # 10 minutes
-        "market_data": 1800,  # 30 minutes
-        "financial_summary": 300,  # 5 minutes
-        "bookings": 120,  # 2 minutes
-        "property_details": 600,  # 10 minutes
-        "search_results": 180,  # 3 minutes
+        "user_profile": int(os.getenv("CACHE_TTL_USER_PROFILE", "300")),
+        "properties": int(os.getenv("CACHE_TTL_PROPERTIES", "180")),
+        "analytics": int(os.getenv("CACHE_TTL_ANALYTICS", "600")),
+        "market_data": int(os.getenv("CACHE_TTL_MARKET_DATA", "1800")),
+        "financial_summary": int(os.getenv("CACHE_TTL_FINANCIAL_SUMMARY", "300")),
+        "bookings": int(os.getenv("CACHE_TTL_BOOKINGS", "120")),
+        "property_details": int(os.getenv("CACHE_TTL_PROPERTY_DETAILS", "600")),
+        "search_results": int(os.getenv("CACHE_TTL_SEARCH_RESULTS", "180")),
     }
 
     @staticmethod

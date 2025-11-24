@@ -25,7 +25,9 @@ class Settings(BaseSettings):
     # JWT
     jwt_secret_key: str = os.getenv("JWT_SECRET_KEY") or secrets.token_urlsafe(32)
     algorithm: str = "HS256"
-    access_token_expire_minutes: int = 60
+    access_token_expire_minutes: int = int(
+        os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+    )
 
     # Supabase
     supabase_url: str = os.getenv(
@@ -61,12 +63,12 @@ class Settings(BaseSettings):
     webhook_secret_key: str = os.getenv("WEBHOOK_SECRET_KEY") or secrets.token_urlsafe(
         32
     )
-    webhook_timeout: int = 30
-    webhook_max_retries: int = 3
+    webhook_timeout: int = int(os.getenv("WEBHOOK_TIMEOUT", "30"))
+    webhook_max_retries: int = int(os.getenv("WEBHOOK_MAX_RETRIES", "3"))
 
     # SSE Configuration
-    sse_heartbeat_interval: int = 5
-    sse_max_connections: int = 1000
+    sse_heartbeat_interval: int = int(os.getenv("SSE_HEARTBEAT_INTERVAL", "5"))
+    sse_max_connections: int = int(os.getenv("SSE_MAX_CONNECTIONS", "1000"))
 
     # API
     api_host: str = "0.0.0.0"

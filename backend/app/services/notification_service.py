@@ -2,6 +2,7 @@
 Host notification service
 """
 
+import os
 import logging
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timedelta
@@ -9,6 +10,11 @@ from app.core.supabase_client import supabase_client
 from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
+
+NOTIFICATION_EXPIRY_HOURS = {
+    "new_booking": int(os.getenv("NOTIFICATION_EXPIRY_NEW_BOOKING", "72")),
+    "default": int(os.getenv("NOTIFICATION_EXPIRY_DEFAULT", "168")),
+}
 
 
 class NotificationRequest(BaseModel):
@@ -463,7 +469,14 @@ class NotificationService:
             action_required=template["action_required"],
             action_url=template["action_url"],
             expires_at=(
-                (datetime.utcnow() + timedelta(hours=72)).isoformat()
+                (
+                    datetime.utcnow()
+                    + timedelta(
+                        hours=NOTIFICATION_EXPIRY_HOURS.get(
+                            notification_type, NOTIFICATION_EXPIRY_HOURS["default"]
+                        )
+                    )
+                ).isoformat()
                 if notification_type == "new_booking"
                 else None
             ),
