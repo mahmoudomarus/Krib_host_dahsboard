@@ -394,10 +394,6 @@ class AnalyticsResponse(BaseModel):
     market_insights: Dict[str, Any]
     forecast: Dict[str, Any]
     recommendations: List[Dict[str, Any]]
-    current_month_revenue: float = 0.0
-    last_month_revenue: float = 0.0
-    diversification_score: float = 0.0
-    stability_score: float = 0.0
 
 
 # Authentication Models

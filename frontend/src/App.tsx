@@ -23,14 +23,6 @@ function AppContent() {
   const location = useLocation()
   const navigate = useNavigate()
   
-  // Apply winter theme
-  useEffect(() => {
-    document.body.classList.add('winter-theme')
-    return () => {
-      document.body.classList.remove('winter-theme')
-    }
-  }, [])
-  
   // Check if we're on a dashboard route
   const isDashboardRoute = location.pathname.startsWith('/dashboard') || 
     ['overview', 'properties', 'add-property', 'analytics', 'bookings', 'financials', 'superhost', 'messages', 'settings'].some(path => 
