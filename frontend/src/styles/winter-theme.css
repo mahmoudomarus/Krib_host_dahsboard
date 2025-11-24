@@ -92,14 +92,21 @@
   box-shadow: 0 2px 12px rgba(14, 165, 233, 0.08) !important;
 }
 
-/* Keep Krib Lime Buttons - Don't Override Brand Colors */
+/* Keep Krib Lime Buttons - Brand Identity */
 .winter-theme .krib-button-primary {
-  /* Keep original lime buttons */
+  /* Keep original lime green buttons */
 }
 
-/* Subtle Winter Tab Enhancement - Don't Override Active State */
+/* Winter Tab Styling */
 .winter-theme [data-state="active"][data-slot="tabs-trigger"] {
-  /* Keep original active styles */
+  background: linear-gradient(135deg, #FFFFFF 0%, var(--winter-ice-blue) 100%) !important;
+  border: 1px solid var(--winter-blue) !important;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.15) !important;
+}
+
+/* Winter Accent Borders */
+.winter-theme .krib-accent-border {
+  border-left: 3px solid var(--winter-blue) !important;
 }
 
 /* Winter Frost Effect on Hover */
@@ -108,8 +115,12 @@
   box-shadow: 0 8px 30px rgba(14, 165, 233, 0.2), 0 0 50px rgba(186, 230, 253, 0.25) !important;
 }
 
-/* Keep Brand Colors - Only Winter Background Effects */
-/* Don't override primary buttons, badges, or progress bars */
+/* Keep Brand Colors for Interactive Elements */
+.winter-theme .text-krib-lime,
+.winter-theme .bg-krib-lime,
+.winter-theme .krib-progress {
+  /* Keep original lime green */
+}
 
 /* Frosted Glass Effect for Cards */
 .winter-theme .card-elevated {

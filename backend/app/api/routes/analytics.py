@@ -228,38 +228,57 @@ async def get_analytics(
         # Calculate current and last month revenue
         from datetime import datetime, timedelta
         from calendar import monthrange
-        
+
         now = datetime.now()
-        current_month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        
+        current_month_start = now.replace(
+            day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+
         # Calculate last month start
         if now.month == 1:
-            last_month_start = now.replace(year=now.year - 1, month=12, day=1, hour=0, minute=0, second=0, microsecond=0)
+            last_month_start = now.replace(
+                year=now.year - 1,
+                month=12,
+                day=1,
+                hour=0,
+                minute=0,
+                second=0,
+                microsecond=0,
+            )
         else:
-            last_month_start = now.replace(month=now.month - 1, day=1, hour=0, minute=0, second=0, microsecond=0)
-        
+            last_month_start = now.replace(
+                month=now.month - 1, day=1, hour=0, minute=0, second=0, microsecond=0
+            )
+
         last_month_end = current_month_start
-        
+
         current_month_revenue = sum(
             float(b["total_amount"])
             for b in bookings
             if b["status"] in ["confirmed", "completed"]
-            and datetime.fromisoformat(b["created_at"].replace('Z', '+00:00')) >= current_month_start
+            and datetime.fromisoformat(b["created_at"].replace("Z", "+00:00"))
+            >= current_month_start
         )
-        
+
         last_month_revenue = sum(
             float(b["total_amount"])
             for b in bookings
             if b["status"] in ["confirmed", "completed"]
-            and datetime.fromisoformat(b["created_at"].replace('Z', '+00:00')) >= last_month_start
-            and datetime.fromisoformat(b["created_at"].replace('Z', '+00:00')) < last_month_end
+            and datetime.fromisoformat(b["created_at"].replace("Z", "+00:00"))
+            >= last_month_start
+            and datetime.fromisoformat(b["created_at"].replace("Z", "+00:00"))
+            < last_month_end
         )
-        
+
         # Calculate diversification score (based on number of properties and revenue distribution)
-        diversification_score = min(100, (total_properties * 10) + 50) if total_properties > 0 else 0
-        
+        diversification_score = (
+            min(100, (total_properties * 10) + 50) if total_properties > 0 else 0
+        )
+
         # Calculate stability score (based on booking frequency and revenue consistency)
-        stability_score = min(100, (total_bookings * 5) + 60) if total_bookings > 0 else 0
+        stability_score = (
+            min(100, (total_bookings * 5) + 60) if total_bookings > 0 else 0
+        )
 
         analytics_response = AnalyticsResponse(
             total_revenue=total_revenue,

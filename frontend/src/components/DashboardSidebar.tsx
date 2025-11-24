@@ -124,22 +124,31 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
       
       <SidebarFooter className="border-t border-sidebar-border p-4 krib-sidebar-header">
         <div className="space-y-3">
-          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10 cursor-pointer hover:bg-white/80 transition-all" onClick={() => onSectionChange('settings')}>
-            {user?.avatar_url ? (
-              <img 
-                src={user.avatar_url} 
-                alt={user.name || 'User'} 
-                className="h-10 w-10 rounded-full object-cover border-2 border-krib-lime/30"
-              />
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10 border-2 border-krib-lime/30">
-                <User className="h-5 w-5 text-krib-gray-dark" />
+          <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10">
+            <div className="relative cursor-pointer" onClick={() => window.location.href = '/dashboard/settings'}>
+              {user?.avatar_url ? (
+                <img 
+                  src={user.avatar_url} 
+                  alt={user.name || 'User'} 
+                  className="h-10 w-10 rounded-full object-cover border-2 border-krib-lime"
+                />
+              ) : (
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10 border-2 border-krib-lime/30">
+                  <User className="h-5 w-5 text-krib-gray-dark" />
+                </div>
+              )}
+              <div className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-krib-lime border-2 border-white flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-2.5 h-2.5 text-krib-black">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                </svg>
               </div>
-            )}
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-sidebar-foreground truncate">{user?.name || 'User'}</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'User'}</p>
               <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
-              <p className="text-[10px] text-krib-lime/80 font-medium mt-0.5">Click to edit profile</p>
+              {user?.bio && (
+                <p className="text-xs text-sidebar-foreground/50 truncate mt-0.5">{user.bio}</p>
+              )}
             </div>
           </div>
           <Button
