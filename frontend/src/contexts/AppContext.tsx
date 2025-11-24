@@ -233,6 +233,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [properties, setProperties] = useState<Property[]>([])
   const [bookings, setBookings] = useState<Booking[]>([])
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
+  
+  async function apiCall(endpoint: string, method: string = 'GET', body?: any): Promise<any> {
+    return makeAPIRequest(endpoint, {
+      method,
+      ...(body && { body: JSON.stringify(body) }),
+    })
+  }
 
   // Initialize auth state
   useEffect(() => {
