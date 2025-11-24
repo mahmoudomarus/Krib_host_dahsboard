@@ -13,8 +13,9 @@ import { Progress } from "./ui/progress"
 import { Alert, AlertDescription } from "./ui/alert"
 import { useApp } from "../contexts/AppContext"
 import { uploadMultipleImages } from "../services/imageUpload"
+import { LocationPicker } from "./LocationPicker"
 
-type WizardStep = 'basic-info' | 'details' | 'images' | 'amenities' | 'pricing' | 'preview' | 'published'
+type WizardStep = 'basic-info' | 'location' | 'details' | 'images' | 'amenities' | 'pricing' | 'preview' | 'published'
 
 interface PropertyData {
   title: string
@@ -22,6 +23,8 @@ interface PropertyData {
   city: string
   state: string
   country: string
+  latitude?: number
+  longitude?: number
   property_type: string
   bedrooms: number
   bathrooms: number
@@ -73,6 +76,7 @@ export function AddPropertyWizard() {
 
   const steps = [
     { id: 'basic-info', title: 'Basic Info', icon: Building, description: 'Property basics' },
+    { id: 'location', title: 'Location', icon: MapPin, description: 'Set on map' },
     { id: 'details', title: 'Details', icon: Home, description: 'Size & capacity' },
     { id: 'images', title: 'Photos', icon: Camera, description: 'Upload images' },
     { id: 'amenities', title: 'Amenities', icon: Sparkles, description: 'Features & perks' },
@@ -199,10 +203,17 @@ export function AddPropertyWizard() {
     switch (step) {
       case 'basic-info':
         if (!propertyData.title.trim()) newErrors.title = 'Property title is required'
-        if (!propertyData.address.trim()) newErrors.address = 'Address is required'
         if (!propertyData.city.trim()) newErrors.city = 'City is required'
         if (!propertyData.state.trim()) newErrors.state = 'State is required'
         if (!propertyData.property_type) newErrors.property_type = 'Property type is required'
+        break
+      case 'location':
+        if (!propertyData.latitude || !propertyData.longitude) {
+          newErrors.location = 'Please select a location on the map'
+        }
+        if (!propertyData.address.trim()) {
+          newErrors.address = 'Address is required'
+        }
         break
       case 'details':
         if (propertyData.bedrooms < 0) newErrors.bedrooms = 'Bedrooms cannot be negative'
@@ -476,6 +487,36 @@ export function AddPropertyWizard() {
               </div>
             </div>
                 </div>
+        )
+
+      case 'location':
+        return (
+          <div className="space-y-6">
+            <div className="text-center mb-6">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Set Property Location</h2>
+              <p className="text-gray-600">Pin your exact property location on the map</p>
+            </div>
+            
+            <LocationPicker
+              initialLat={propertyData.latitude}
+              initialLng={propertyData.longitude}
+              initialAddress={propertyData.address}
+              onLocationChange={(lat, lng, address) => {
+                setPropertyData(prev => ({
+                  ...prev,
+                  latitude: lat,
+                  longitude: lng,
+                  address: address
+                }))
+              }}
+            />
+            
+            {errors.location && (
+              <Alert variant="destructive">
+                <AlertDescription>{errors.location}</AlertDescription>
+              </Alert>
+            )}
+          </div>
         )
 
       case 'details':
