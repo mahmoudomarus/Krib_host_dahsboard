@@ -7,6 +7,14 @@
 :root {
   --font-size: 14px;
   
+  /* Winter Theme Colors */
+  --winter-ice-blue: #E0F2FE;
+  --winter-snow: #FAFEFF;
+  --winter-frost: #CBE7F5;
+  --winter-blue: #0EA5E9;
+  --winter-deep-blue: #0369A1;
+  --winter-accent: #BAE6FD;
+  
   /* Krib Brand Colors */
   --krib-lime: #B8FF00;
   --krib-lime-light: #CBFC50;

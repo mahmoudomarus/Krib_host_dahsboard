@@ -4,6 +4,7 @@ import App from './App'
 import { AppProvider } from './contexts/AppContext'
 import { Toaster } from './components/ui/sonner'
 import './styles/globals.css'
+import './styles/winter-theme.css'
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
