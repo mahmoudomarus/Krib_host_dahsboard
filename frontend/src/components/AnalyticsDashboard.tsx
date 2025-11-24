@@ -248,15 +248,21 @@ export function AnalyticsDashboard() {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">This Month</span>
-                    <span className="font-medium">$7,100</span>
+                    <span className="font-medium">
+                      ${analyticsData?.current_month_revenue?.toLocaleString() || '0'}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Last Month</span>
-                    <span className="font-medium">$5,900</span>
+                    <span className="font-medium">
+                      ${analyticsData?.last_month_revenue?.toLocaleString() || '0'}
+                    </span>
                   </div>
                   <div className="flex justify-between text-green-600">
                     <span className="text-sm">Growth</span>
-                    <span className="font-medium">{forecastData?.confidence ? `${forecastData.confidence}%` : '0%'}</span>
+                    <span className="font-medium">
+                      {analyticsData?.monthly_growth ? `${analyticsData.monthly_growth > 0 ? '+' : ''}${analyticsData.monthly_growth.toFixed(1)}%` : '0%'}
+                    </span>
                   </div>
                 </div>
                 
@@ -265,14 +271,14 @@ export function AnalyticsDashboard() {
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
                       <span>Diversification</span>
-                      <span>85%</span>
+                      <span>{analyticsData?.diversification_score || 0}%</span>
                     </div>
-                    <Progress value={85} className="h-2" />
+                    <Progress value={analyticsData?.diversification_score || 0} className="h-2" />
                     <div className="flex justify-between text-sm">
                       <span>Stability</span>
-                      <span>92%</span>
+                      <span>{analyticsData?.stability_score || 0}%</span>
                     </div>
-                    <Progress value={92} className="h-2" />
+                    <Progress value={analyticsData?.stability_score || 0} className="h-2" />
                   </div>
                 </div>
               </CardContent>
@@ -413,22 +419,35 @@ export function AnalyticsDashboard() {
                 <div className="space-y-2">
                   <h4 className="font-medium">Dubai Seasonal Demand</h4>
                   <div className="grid grid-cols-1 gap-2 text-sm">
-                    <div className="flex justify-between">
-                      <span>Winter Peak (Dec-Feb)</span>
-                      <span className="font-medium text-green-600">+50%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Winter High (Mar, Nov)</span>
-                      <span className="font-medium text-blue-600">+30%</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Shoulder (Apr, Oct)</span>
-                      <span className="font-medium">Normal</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Summer Low (May-Sep)</span>
-                      <span className="font-medium text-red-600">-30%</span>
-                    </div>
+                    {marketInsights?.seasonal_trends ? (
+                      marketInsights.seasonal_trends.map((trend: any, idx: number) => (
+                        <div key={idx} className="flex justify-between">
+                          <span>{trend.period}</span>
+                          <span className={`font-medium ${trend.change >= 30 ? 'text-green-600' : trend.change >= 10 ? 'text-blue-600' : trend.change < 0 ? 'text-red-600' : ''}`}>
+                            {trend.change > 0 ? '+' : ''}{trend.change}%
+                          </span>
+                        </div>
+                      ))
+                    ) : (
+                      <>
+                        <div className="flex justify-between">
+                          <span>Winter Peak (Dec-Feb)</span>
+                          <span className="font-medium text-green-600">+50%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Winter High (Mar, Nov)</span>
+                          <span className="font-medium text-blue-600">+30%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Shoulder (Apr, Oct)</span>
+                          <span className="font-medium">Normal</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Summer Low (May-Sep)</span>
+                          <span className="font-medium text-red-600">-30%</span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
