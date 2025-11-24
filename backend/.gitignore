@@ -50,3 +50,12 @@ coverage.xml
 *.log
 logs/
 
+
+# Test scripts
+test_*.py
+*_test.py
+README_TESTING.md
+
+# Local environment
+.env
+.env.local
