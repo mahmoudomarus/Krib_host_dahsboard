@@ -4,7 +4,10 @@ import { supabase } from '../utils/supabase/client'
 const PRODUCTION_API_URL = 'https://api.host.krib.ae/api'
 const DEVELOPMENT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api'
 
-const API_BASE_URL = window.location.hostname === 'localhost' ? DEVELOPMENT_API_URL : PRODUCTION_API_URL
+// Force HTTPS in production
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? DEVELOPMENT_API_URL 
+  : PRODUCTION_API_URL
 
 if (process.env.NODE_ENV === 'development') {
   console.log('[API] Configuration:', {
