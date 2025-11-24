@@ -33,8 +33,9 @@ export function NotificationBell() {
     
     try {
       setLoading(true)
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.host.krib.ae'
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'https://api.host.krib.ae/api'}/v1/hosts/${user.id}/notifications?limit=20`,
+        `${apiUrl}/v1/hosts/${user.id}/notifications?limit=20`,
         {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
@@ -61,8 +62,9 @@ export function NotificationBell() {
     if (!user) return
     
     try {
+      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.host.krib.ae'
       const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'https://api.host.krib.ae/api'}/v1/hosts/${user.id}/notifications/${notificationId}/read`,
+        `${apiUrl}/v1/hosts/${user.id}/notifications/${notificationId}/read`,
         {
           method: 'PUT',
           headers: {

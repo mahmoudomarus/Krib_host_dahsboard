@@ -2,6 +2,7 @@
 test_*.sql
 cleanup_*.sql
 *_test.sql
+QUICK_TESTING_GUIDE.md
 
 # Python
 __pycache__/
