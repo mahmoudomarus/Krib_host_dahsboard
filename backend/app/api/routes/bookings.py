@@ -83,6 +83,34 @@ async def create_booking(
         created_booking["property_title"] = property_info["title"]
         created_booking["property_address"] = property_info["address"]
 
+        host_result = (
+            supabase_client.table("users")
+            .select("id,name,email")
+            .eq("id", property_info["user_id"])
+            .single()
+            .execute()
+        )
+
+        if host_result.data:
+            try:
+                await email_service.send_booking_notification(
+                    host_email=host_result.data["email"],
+                    host_name=host_result.data["name"],
+                    booking_data={
+                        "property_title": property_info["title"],
+                        "guest_name": booking_data.guest_name,
+                        "check_in": booking_data.check_in.isoformat(),
+                        "check_out": booking_data.check_out.isoformat(),
+                        "total_guests": booking_data.guests,
+                        "total_amount": total_amount,
+                        "booking_id": created_booking["id"],
+                    },
+                )
+            except Exception as email_error:
+                logger.error(
+                    f"Failed to send booking notification email: {email_error}"
+                )
+
         return BookingResponse(**created_booking)
 
     except HTTPException:

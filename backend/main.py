@@ -44,6 +44,7 @@ from app.api.routes import (
     stripe_webhooks,
     external_payments,
     superhost,
+    messages,
 )
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
@@ -147,6 +148,7 @@ security = HTTPBearer()
 app.include_router(auth.router, prefix="/api/auth", tags=["authentication"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(superhost.router, prefix="/api/superhost", tags=["superhost"])
+app.include_router(messages.router, prefix="/api/messages", tags=["messages"])
 app.include_router(locations.router, prefix="/api/locations", tags=["locations"])
 app.include_router(properties.router, prefix="/api/properties", tags=["properties"])
 app.include_router(bookings.router, prefix="/api/bookings", tags=["bookings"])

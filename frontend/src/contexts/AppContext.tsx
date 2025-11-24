@@ -390,8 +390,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
       setProperties([])
       setBookings([])
       setAnalytics(null)
+      window.location.href = '/auth'
     } catch (error) {
       console.error('Sign out error:', error)
+      throw error
     }
   }
 
