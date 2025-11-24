@@ -276,12 +276,30 @@ class BookingResponse(BaseModel):
     status: BookingStatus
     payment_status: PaymentStatus
     special_requests: Optional[str] = None
+    internal_notes: Optional[str] = None
+    booking_source: Optional[str] = None
+    commission_rate: Optional[float] = None
+    confirmed_at: Optional[datetime] = None
+    cancelled_at: Optional[datetime] = None
+    cancellation_reason: Optional[str] = None
+    stripe_payment_intent_id: Optional[str] = None
+    stripe_charge_id: Optional[str] = None
+    stripe_transfer_id: Optional[str] = None
+    stripe_client_secret: Optional[str] = None
+    platform_fee_amount: Optional[float] = None
+    host_payout_amount: Optional[float] = None
+    host_payout_status: Optional[str] = None
+    host_payout_date: Optional[datetime] = None
+    refund_amount: Optional[float] = None
+    refund_reason: Optional[str] = None
     created_at: datetime
     updated_at: datetime
 
-    # Include property details for convenience
     property_title: Optional[str] = None
     property_address: Optional[str] = None
+
+    class Config:
+        extra = "ignore"
 
 
 # Review Models
