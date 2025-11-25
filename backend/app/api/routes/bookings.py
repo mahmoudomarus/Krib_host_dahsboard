@@ -165,6 +165,13 @@ async def get_user_bookings(
             booking_data["property_address"] = booking["properties"]["address"]
             # Remove nested properties object
             del booking_data["properties"]
+            
+            # Calculate nights if missing
+            if not booking_data.get("nights"):
+                check_in = datetime.strptime(str(booking_data["check_in"]), "%Y-%m-%d").date() if isinstance(booking_data["check_in"], str) else booking_data["check_in"]
+                check_out = datetime.strptime(str(booking_data["check_out"]), "%Y-%m-%d").date() if isinstance(booking_data["check_out"], str) else booking_data["check_out"]
+                booking_data["nights"] = (check_out - check_in).days
+            
             bookings.append(BookingResponse(**booking_data))
 
         return bookings
