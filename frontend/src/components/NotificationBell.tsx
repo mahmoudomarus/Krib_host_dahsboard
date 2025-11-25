@@ -29,20 +29,33 @@ export function NotificationBell() {
   const [loading, setLoading] = useState(false)
 
   const loadNotifications = async () => {
-    if (!user) return
+    if (!user) {
+      console.log('[NotificationBell] No user, skipping notification load')
+      return
+    }
+    
+    console.log('[NotificationBell] Loading notifications for user:', user.id)
     
     try {
       setLoading(true)
-      const data = await apiCall(`/v1/hosts/${user.id}/notifications?limit=20`)
+      const url = `/v1/hosts/${user.id}/notifications?limit=20`
+      console.log('[NotificationBell] API call to:', url)
+      
+      const data = await apiCall(url)
+      console.log('[NotificationBell] API response:', data)
       
       if (data.success && data.data.notifications) {
+        console.log('[NotificationBell] Setting notifications:', data.data.notifications.length, 'items')
         setNotifications(data.data.notifications)
         setUnreadCount(data.data.unread_count || 0)
+      } else {
+        console.warn('[NotificationBell] Unexpected API response structure:', data)
       }
     } catch (error) {
-      console.error('Failed to load notifications:', error)
+      console.error('[NotificationBell] Failed to load notifications:', error)
     } finally {
       setLoading(false)
+      console.log('[NotificationBell] Finished loading notifications')
     }
   }
 
@@ -125,24 +138,44 @@ export function NotificationBell() {
   }
 
   useEffect(() => {
+    console.log('[NotificationBell] Mount effect triggered, user:', user?.id)
     loadNotifications()
-    const interval = setInterval(loadNotifications, 30000)
-    return () => clearInterval(interval)
+    const interval = setInterval(() => {
+      console.log('[NotificationBell] Auto-refresh triggered')
+      loadNotifications()
+    }, 30000)
+    return () => {
+      console.log('[NotificationBell] Unmount, clearing interval')
+      clearInterval(interval)
+    }
   }, [user])
 
   useEffect(() => {
+    console.log('[NotificationBell] isOpen changed to:', isOpen)
     if (isOpen) {
+      console.log('[NotificationBell] Popover opened, reloading notifications')
       loadNotifications()
     }
   }, [isOpen])
 
+  const handleOpenChange = (open: boolean) => {
+    console.log('[NotificationBell] handleOpenChange called with:', open)
+    setIsOpen(open)
+  }
+
+  const handleButtonClick = (e: React.MouseEvent) => {
+    console.log('[NotificationBell] Bell button clicked, current state:', isOpen)
+    console.log('[NotificationBell] Toggling to:', !isOpen)
+  }
+
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <Button 
           variant="ghost" 
           size="icon" 
           className="relative"
+          onClick={handleButtonClick}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (

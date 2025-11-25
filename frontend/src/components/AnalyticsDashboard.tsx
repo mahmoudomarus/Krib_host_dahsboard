@@ -6,7 +6,7 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Progress } from "./ui/progress"
 import { Alert, AlertDescription, AlertTitle } from "./ui/alert"
-import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, Star, Eye, Heart, Target, Brain, Download, BarChart3, PieChart, AlertTriangle, CheckCircle, Zap, MapPin, Clock, Activity } from "lucide-react"
+import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, Star, Eye, Heart, Target, Brain, Download, BarChart3, PieChart, AlertTriangle, CheckCircle, Zap, MapPin, Clock, Activity, RefreshCw } from "lucide-react"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart as RechartsPieChart, Pie, Cell, AreaChart, Area, ComposedChart, Scatter, ScatterChart } from "recharts"
 import { useApp } from "../contexts/AppContext"
 
@@ -25,24 +25,42 @@ export function AnalyticsDashboard() {
 
   useEffect(() => {
     const loadAnalytics = async () => {
+      console.log('[AnalyticsDashboard] Starting analytics load, period:', selectedPeriod)
       setLoading(true)
+      
+      const startTime = performance.now()
+      
       try {
-        console.log('Loading analytics data...')
+        console.log('[AnalyticsDashboard] Calling getAnalytics with refresh=true')
         const data = await getAnalytics(true)
-        console.log('Analytics data received:', data)
+        
+        const endTime = performance.now()
+        console.log('[AnalyticsDashboard] Analytics loaded in', Math.round(endTime - startTime), 'ms')
+        console.log('[AnalyticsDashboard] Data received:', {
+          totalRevenue: data.totalRevenue || data.total_revenue,
+          totalBookings: data.totalBookings || data.total_bookings,
+          totalProperties: data.totalProperties || data.total_properties,
+          occupancyRate: data.occupancyRate || data.occupancy_rate,
+          hasMarketInsights: !!data.market_insights,
+          hasForecast: !!data.forecast
+        })
+        
         setAnalyticsData(data)
         
-        // Extract market insights and forecast from the analytics data
         if (data.market_insights) {
+          console.log('[AnalyticsDashboard] Setting market insights')
           setMarketInsights(data.market_insights)
         }
         if (data.forecast) {
+          console.log('[AnalyticsDashboard] Setting forecast data')
           setForecastData(data.forecast)
         }
-      } catch (error) {
-        console.error('Failed to load analytics:', error)
-        console.error('Error details:', error.message, error.status)
-        // Set some default data so the page isn't completely empty
+      } catch (error: any) {
+        console.error('[AnalyticsDashboard] Failed to load analytics:', error)
+        console.error('[AnalyticsDashboard] Error type:', error.constructor.name)
+        console.error('[AnalyticsDashboard] Error message:', error.message)
+        console.error('[AnalyticsDashboard] Error status:', error.status)
+        
         setAnalyticsData({
           totalRevenue: 0,
           totalBookings: 0,
@@ -52,6 +70,7 @@ export function AnalyticsDashboard() {
           propertyPerformance: []
         })
       } finally {
+        console.log('[AnalyticsDashboard] Analytics load complete, setting loading=false')
         setLoading(false)
       }
     }
@@ -59,8 +78,29 @@ export function AnalyticsDashboard() {
     loadAnalytics()
   }, [selectedPeriod])
 
+  const handleRefresh = async () => {
+    console.log('[AnalyticsDashboard] Manual refresh triggered')
+    setLoading(true)
+    
+    try {
+      const data = await getAnalytics(true)
+      console.log('[AnalyticsDashboard] Manual refresh complete')
+      setAnalyticsData(data)
+      
+      if (data.market_insights) {
+        setMarketInsights(data.market_insights)
+      }
+      if (data.forecast) {
+        setForecastData(data.forecast)
+      }
+    } catch (error) {
+      console.error('[AnalyticsDashboard] Manual refresh failed:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const exportReport = () => {
-    // Mock export functionality
     const data = {
       period: selectedPeriod,
       revenue: analyticsData?.totalRevenue || 0,
@@ -86,14 +126,14 @@ export function AnalyticsDashboard() {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-muted rounded w-64"></div>
-          <div className="grid gap-4 md:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} className="h-24 bg-muted rounded"></div>
-            ))}
+        <div className="flex items-center justify-center min-h-[60vh]">
+          <div className="text-center space-y-4">
+            <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-krib-lime mx-auto"></div>
+            <div className="space-y-2">
+              <p className="text-lg font-semibold">Loading Analytics</p>
+              <p className="text-sm text-muted-foreground">Calculating revenue, bookings, and market insights...</p>
+            </div>
           </div>
-          <div className="h-96 bg-muted rounded"></div>
         </div>
       </div>
     )
@@ -152,6 +192,10 @@ export function AnalyticsDashboard() {
           </p>
         </div>
         <div className="flex gap-2">
+          <Button onClick={handleRefresh} variant="outline" size="sm" disabled={loading}>
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
           <Button onClick={exportReport} variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export Report
