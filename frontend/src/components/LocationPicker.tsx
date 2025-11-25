@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react"
 import { GoogleMap, useJsApiLoader, Marker } from "@react-google-maps/api"
-import { Search, MapPin, Loader2 } from "lucide-react"
+import { Search, MapPin, Loader2, AlertTriangle } from "lucide-react"
 import { Input } from "./ui/input"
 import { Button } from "./ui/button"
 import { Card, CardContent } from "./ui/card"
@@ -23,6 +23,8 @@ const defaultCenter = {
   lng: 55.2708,
 }
 
+const GOOGLE_MAPS_LIBRARIES: ("places")[] = ["places"]
+
 export function LocationPicker({
   initialLat,
   initialLng,
@@ -32,7 +34,7 @@ export function LocationPicker({
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "",
-    libraries: ["places"],
+    libraries: GOOGLE_MAPS_LIBRARIES,
   })
 
   const [markerPosition, setMarkerPosition] = useState<{ lat: number; lng: number } | null>(

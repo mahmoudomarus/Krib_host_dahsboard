@@ -44,11 +44,12 @@ async def get_financial_summary(
         ).execute()
         pending_earnings = float(pending_result.data) if pending_result.data else 0.0
 
-        # Get recent transactions
-        transactions_result = (
-            supabase_client.table("financial_transactions")
-            .select("*, bookings(guest_name, check_in, check_out), properties(title)")
-            .eq("user_id", user_id)
+        # Calculate earnings from bookings if financial_transactions table is empty
+        bookings_result = (
+            supabase_client.table("bookings")
+            .select("*, properties!inner(title, user_id)")
+            .eq("properties.user_id", user_id)
+            .in_("payment_status", ["succeeded", "paid"])
             .order("created_at", desc=True)
             .limit(20)
             .execute()
@@ -56,24 +57,22 @@ async def get_financial_summary(
 
         recent_transactions = []
         total_earnings = 0
-        for tx in transactions_result.data:
+        platform_fee_rate = 0.15
+        
+        for booking in bookings_result.data:
+            host_amount = float(booking["total_amount"]) * (1 - platform_fee_rate)
+            total_earnings += host_amount
             recent_transactions.append(
                 {
-                    "id": tx["id"],
-                    "type": tx["transaction_type"],
-                    "amount": float(tx["net_amount"]),
-                    "status": tx["status"],
-                    "date": tx["payment_date"],
-                    "property_title": (
-                        tx["properties"]["title"] if tx["properties"] else "Unknown"
-                    ),
-                    "guest_name": (
-                        tx["bookings"]["guest_name"] if tx["bookings"] else "Unknown"
-                    ),
+                    "id": booking["id"],
+                    "type": "booking",
+                    "amount": host_amount,
+                    "status": "completed" if booking["status"] == "completed" else "pending",
+                    "date": booking["check_in"],
+                    "property_title": booking["properties"]["title"] if booking.get("properties") else "Unknown",
+                    "guest_name": booking["guest_name"],
                 }
             )
-            if tx["status"] == "completed":
-                total_earnings += float(tx["net_amount"])
 
         # Get payouts for the period
         date_filter = _get_date_filter(period)
@@ -91,18 +90,19 @@ async def get_financial_summary(
             if p["status"] == "completed"
         )
 
-        # Platform fees calculation
-        platform_fees_result = (
-            supabase_client.table("financial_transactions")
-            .select("platform_fee, payment_processing_fee")
-            .eq("user_id", user_id)
+        # Platform fees calculation from bookings
+        fees_bookings = (
+            supabase_client.table("bookings")
+            .select("total_amount, properties!inner(user_id)")
+            .eq("properties.user_id", user_id)
+            .in_("payment_status", ["succeeded", "paid"])
             .gte("created_at", date_filter.isoformat())
             .execute()
         )
 
         total_platform_fees = sum(
-            float(tx["platform_fee"]) + float(tx["payment_processing_fee"])
-            for tx in platform_fees_result.data
+            float(b["total_amount"]) * platform_fee_rate
+            for b in fees_bookings.data
         )
 
         return FinancialSummary(
