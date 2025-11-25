@@ -483,9 +483,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   }
 
   // Analytics methods
-  async function getAnalytics() {
+  async function getAnalytics(refresh: boolean = false) {
     try {
-      const analyticsData = await makeAPIRequest('/analytics')
+      const url = refresh ? '/analytics?refresh=true' : '/analytics'
+      const analyticsData = await makeAPIRequest(url)
       setAnalytics(analyticsData)
       return analyticsData
     } catch (error) {

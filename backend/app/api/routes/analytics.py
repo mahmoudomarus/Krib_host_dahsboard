@@ -3,7 +3,7 @@ Analytics API routes with real data calculations
 """
 
 import os
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date, timedelta
 from decimal import Decimal
@@ -151,16 +151,19 @@ async def get_market_comparison(
 @router.get("", response_model=AnalyticsResponse)
 @router.get("/", response_model=AnalyticsResponse)
 async def get_analytics(
-    period: str = "12months", current_user: dict = Depends(get_current_user)
+    period: str = "12months",
+    refresh: bool = Query(False, description="Bypass cache and recalculate"),
+    current_user: dict = Depends(get_current_user)
 ):
     """Get comprehensive analytics for user's properties"""
     user_id = current_user["id"]
 
-    # Try to get from cache first
-    cached_analytics = await cache_service.get_analytics_data(user_id, period)
-    if cached_analytics:
-        metrics.record_cache_hit("analytics")
-        return AnalyticsResponse(**cached_analytics)
+    # Try to get from cache first (unless refresh is requested)
+    if not refresh:
+        cached_analytics = await cache_service.get_analytics_data(user_id, period)
+        if cached_analytics:
+            metrics.record_cache_hit("analytics")
+            return AnalyticsResponse(**cached_analytics)
 
     metrics.record_cache_miss("analytics")
 

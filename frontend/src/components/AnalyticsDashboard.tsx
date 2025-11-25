@@ -28,7 +28,7 @@ export function AnalyticsDashboard() {
       setLoading(true)
       try {
         console.log('Loading analytics data...')
-        const data = await getAnalytics()
+        const data = await getAnalytics(true)
         console.log('Analytics data received:', data)
         setAnalyticsData(data)
         
