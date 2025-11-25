@@ -31,7 +31,7 @@ class ReviewResponse(BaseModel):
     created_at: str
     responded_at: Optional[str] = None
     property_title: Optional[str] = None
-    
+
     class Config:
         extra = "ignore"
 

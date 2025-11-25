@@ -58,7 +58,7 @@ async def get_financial_summary(
         recent_transactions = []
         total_earnings = 0
         platform_fee_rate = 0.15
-        
+
         for booking in bookings_result.data:
             host_amount = float(booking["total_amount"]) * (1 - platform_fee_rate)
             total_earnings += host_amount
@@ -67,9 +67,15 @@ async def get_financial_summary(
                     "id": booking["id"],
                     "type": "booking",
                     "amount": host_amount,
-                    "status": "completed" if booking["status"] == "completed" else "pending",
+                    "status": (
+                        "completed" if booking["status"] == "completed" else "pending"
+                    ),
                     "date": booking["check_in"],
-                    "property_title": booking["properties"]["title"] if booking.get("properties") else "Unknown",
+                    "property_title": (
+                        booking["properties"]["title"]
+                        if booking.get("properties")
+                        else "Unknown"
+                    ),
                     "guest_name": booking["guest_name"],
                 }
             )
@@ -101,8 +107,7 @@ async def get_financial_summary(
         )
 
         total_platform_fees = sum(
-            float(b["total_amount"]) * platform_fee_rate
-            for b in fees_bookings.data
+            float(b["total_amount"]) * platform_fee_rate for b in fees_bookings.data
         )
 
         return FinancialSummary(

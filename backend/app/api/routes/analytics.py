@@ -153,7 +153,7 @@ async def get_market_comparison(
 async def get_analytics(
     period: str = "12months",
     refresh: bool = Query(False, description="Bypass cache and recalculate"),
-    current_user: dict = Depends(get_current_user)
+    current_user: dict = Depends(get_current_user),
 ):
     """Get comprehensive analytics for user's properties"""
     user_id = current_user["id"]

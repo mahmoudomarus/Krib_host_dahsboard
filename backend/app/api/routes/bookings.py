@@ -157,21 +157,29 @@ async def get_user_bookings(
         for booking in result.data:
             try:
                 booking_data = {**booking}
-                
+
                 # Check if properties join succeeded
                 if "properties" in booking and booking["properties"]:
-                    booking_data["property_title"] = booking["properties"].get("title", "")
-                    booking_data["property_address"] = booking["properties"].get("address", "")
+                    booking_data["property_title"] = booking["properties"].get(
+                        "title", ""
+                    )
+                    booking_data["property_address"] = booking["properties"].get(
+                        "address", ""
+                    )
                     # Remove nested properties object
                     del booking_data["properties"]
                 else:
-                    logger.warning(f"Booking {booking.get('id')} missing properties join data")
+                    logger.warning(
+                        f"Booking {booking.get('id')} missing properties join data"
+                    )
                     booking_data["property_title"] = None
                     booking_data["property_address"] = None
-                
+
                 bookings.append(BookingResponse(**booking_data))
             except Exception as booking_error:
-                logger.error(f"Failed to parse booking {booking.get('id', 'unknown')}: {str(booking_error)}")
+                logger.error(
+                    f"Failed to parse booking {booking.get('id', 'unknown')}: {str(booking_error)}"
+                )
                 logger.error(f"Booking data keys: {list(booking.keys())}")
                 logger.error(f"Full booking data: {booking}")
                 continue  # Skip this booking and continue with others
@@ -179,7 +187,10 @@ async def get_user_bookings(
         return bookings
 
     except Exception as e:
-        logger.error(f"Failed to fetch bookings for user {current_user['id']}: {str(e)}", exc_info=True)
+        logger.error(
+            f"Failed to fetch bookings for user {current_user['id']}: {str(e)}",
+            exc_info=True,
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch bookings: {str(e)}",

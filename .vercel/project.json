@@ -1,0 +1,15 @@
+{
+  "projectId": "prj_4DZJz1Yfgh5Ib4PiCzHm4UaEbxR9",
+  "orgId": "team_OxicVYI4dg02Xk4qm3ktxjXf",
+  "settings": {
+    "createdAt": 1755466274887,
+    "framework": null,
+    "devCommand": null,
+    "installCommand": "cd frontend && npm install",
+    "buildCommand": "cd frontend && npm run build",
+    "outputDirectory": "frontend/dist",
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "22.x"
+  }
+}

@@ -52,7 +52,7 @@ class NotificationResponse(BaseModel):
     expires_at: Optional[str] = None
     created_at: str
     updated_at: Optional[str] = None
-    
+
     class Config:
         extra = "ignore"
 
@@ -220,7 +220,9 @@ class NotificationService:
                 try:
                     notifications.append(NotificationResponse(**notification).dict())
                 except Exception as e:
-                    logger.error(f"Failed to parse notification {notification.get('id')}: {e}")
+                    logger.error(
+                        f"Failed to parse notification {notification.get('id')}: {e}"
+                    )
                     continue
 
             # Get unread count
