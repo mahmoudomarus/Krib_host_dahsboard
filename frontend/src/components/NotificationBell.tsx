@@ -21,7 +21,7 @@ interface Notification {
 }
 
 export function NotificationBell() {
-  const { user } = useApp()
+  const { user, apiCall } = useApp()
   const navigate = useNavigate()
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [unreadCount, setUnreadCount] = useState(0)
@@ -33,23 +33,11 @@ export function NotificationBell() {
     
     try {
       setLoading(true)
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.host.krib.ae'
-      const response = await fetch(
-        `${apiUrl}/v1/hosts/${user.id}/notifications?limit=20`,
-        {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      const data = await apiCall(`/v1/hosts/${user.id}/notifications?limit=20`)
       
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success && data.data.notifications) {
-          setNotifications(data.data.notifications)
-          setUnreadCount(data.data.unread_count || 0)
-        }
+      if (data.success && data.data.notifications) {
+        setNotifications(data.data.notifications)
+        setUnreadCount(data.data.unread_count || 0)
       }
     } catch (error) {
       console.error('Failed to load notifications:', error)
@@ -62,24 +50,12 @@ export function NotificationBell() {
     if (!user) return
     
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'https://api.host.krib.ae'
-      const response = await fetch(
-        `${apiUrl}/v1/hosts/${user.id}/notifications/${notificationId}/read`,
-        {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
-            'Content-Type': 'application/json'
-          }
-        }
-      )
+      await apiCall(`/v1/hosts/${user.id}/notifications/${notificationId}/read`, 'PUT')
       
-      if (response.ok) {
-        setNotifications(prev => 
-          prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
-        )
-        setUnreadCount(prev => Math.max(0, prev - 1))
-      }
+      setNotifications(prev => 
+        prev.map(n => n.id === notificationId ? { ...n, is_read: true } : n)
+      )
+      setUnreadCount(prev => Math.max(0, prev - 1))
     } catch (error) {
       console.error('Failed to mark notification as read:', error)
     }
