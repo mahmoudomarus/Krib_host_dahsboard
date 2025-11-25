@@ -30,7 +30,7 @@ export function NotificationBell() {
 
   const loadNotifications = async () => {
     if (!user) {
-      console.log('[NotificationBell] No user, skipping notification load')
+      console.log('[NotificationBell] No user, skipping load')
       return
     }
     
@@ -38,24 +38,25 @@ export function NotificationBell() {
     
     try {
       setLoading(true)
-      const url = `/v1/hosts/${user.id}/notifications?limit=20`
-      console.log('[NotificationBell] API call to:', url)
+      const data = await apiCall(`/v1/hosts/${user.id}/notifications?limit=20`)
       
-      const data = await apiCall(url)
       console.log('[NotificationBell] API response:', data)
       
       if (data.success && data.data.notifications) {
-        console.log('[NotificationBell] Setting notifications:', data.data.notifications.length, 'items')
         setNotifications(data.data.notifications)
         setUnreadCount(data.data.unread_count || 0)
+        console.log('[NotificationBell] Loaded notifications:', data.data.notifications.length, 'Unread:', data.data.unread_count)
       } else {
-        console.warn('[NotificationBell] Unexpected API response structure:', data)
+        console.warn('[NotificationBell] Unexpected response structure:', data)
       }
     } catch (error) {
       console.error('[NotificationBell] Failed to load notifications:', error)
+      console.error('[NotificationBell] Error details:', {
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined
+      })
     } finally {
       setLoading(false)
-      console.log('[NotificationBell] Finished loading notifications')
     }
   }
 
@@ -138,16 +139,10 @@ export function NotificationBell() {
   }
 
   useEffect(() => {
-    console.log('[NotificationBell] Mount effect triggered, user:', user?.id)
+    console.log('[NotificationBell] Initial mount, user:', user?.id)
     loadNotifications()
-    const interval = setInterval(() => {
-      console.log('[NotificationBell] Auto-refresh triggered')
-      loadNotifications()
-    }, 30000)
-    return () => {
-      console.log('[NotificationBell] Unmount, clearing interval')
-      clearInterval(interval)
-    }
+    const interval = setInterval(loadNotifications, 30000)
+    return () => clearInterval(interval)
   }, [user])
 
   useEffect(() => {
@@ -163,11 +158,6 @@ export function NotificationBell() {
     setIsOpen(open)
   }
 
-  const handleButtonClick = (e: React.MouseEvent) => {
-    console.log('[NotificationBell] Bell button clicked, current state:', isOpen)
-    console.log('[NotificationBell] Toggling to:', !isOpen)
-  }
-
   return (
     <Popover open={isOpen} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
@@ -175,7 +165,6 @@ export function NotificationBell() {
           variant="ghost" 
           size="icon" 
           className="relative"
-          onClick={handleButtonClick}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
