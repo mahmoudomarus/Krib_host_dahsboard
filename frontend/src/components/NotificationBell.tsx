@@ -153,18 +153,16 @@ export function NotificationBell() {
     }
   }, [isOpen])
 
-  const handleOpenChange = (open: boolean) => {
-    console.log('[NotificationBell] handleOpenChange called with:', open, 'Current stack:', new Error().stack)
-    setIsOpen(open)
-  }
-
   const handleButtonClick = (e: React.MouseEvent) => {
-    console.log('[NotificationBell] Button clicked, current isOpen:', isOpen)
+    console.log('[NotificationBell] Button clicked, preventing default and toggling. Current:', isOpen, 'Next:', !isOpen)
+    e.preventDefault()
     e.stopPropagation()
+    const nextState = !isOpen
+    setIsOpen(nextState)
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange} modal={false}>
+    <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
         <Button 
           variant="ghost" 
@@ -172,6 +170,7 @@ export function NotificationBell() {
           className="relative"
           type="button"
           onClick={handleButtonClick}
+          onPointerDown={(e) => e.preventDefault()}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -184,7 +183,12 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0 z-[100]" align="end" sideOffset={8}>
+      <PopoverContent 
+        className="w-96 p-0" 
+        align="end" 
+        sideOffset={8}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
           {unreadCount > 0 && (
