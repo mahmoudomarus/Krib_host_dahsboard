@@ -170,6 +170,7 @@ async def get_user_bookings(
         return bookings
 
     except Exception as e:
+        logger.error(f"Failed to fetch bookings for user {current_user['id']}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to fetch bookings: {str(e)}",
