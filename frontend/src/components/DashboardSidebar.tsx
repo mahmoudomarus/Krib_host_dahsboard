@@ -88,41 +88,48 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
   const { user, signOut } = useApp()
   
   return (
-    <Sidebar className="krib-sidebar w-[280px] fixed left-0 top-0 h-screen">
-      <SidebarHeader className="krib-sidebar-header border-b border-sidebar-border p-8">
+    <Sidebar className="krib-sidebar w-64 border-r border-border/50">
+      <SidebarHeader className="krib-sidebar-header border-b border-border/50 px-4 py-5">
         <button 
           onClick={() => onSectionChange('overview')}
-          className="flex items-center gap-4 w-full hover:opacity-80 transition-opacity cursor-pointer"
+          className="flex items-center gap-3 w-full hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl krib-logo-container">
-            <img src={KribLogo} alt="Krib" className="h-10 w-10" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-lg krib-logo-container bg-krib-lime/10">
+            <img src={KribLogo} alt="Krib" className="h-6 w-6" />
           </div>
           <div className="text-left">
-            <h2 className="text-2xl font-bold text-sidebar-foreground bg-gradient-to-r from-krib-gray-dark to-krib-black bg-clip-text">
+            <h2 className="text-lg font-bold text-foreground">
               Krib
             </h2>
-            <p className="text-base text-sidebar-foreground/70 font-medium">Property Dashboard</p>
+            <p className="text-xs text-muted-foreground font-medium">Property Dashboard</p>
           </div>
         </button>
       </SidebarHeader>
       
-      <SidebarContent>
+      <SidebarContent className="px-3 py-4">
         <SidebarGroup>
-          <SidebarGroupLabel className="krib-sidebar-group-label px-6 py-3 text-xs">Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="krib-sidebar-group-label text-xs font-semibold text-muted-foreground uppercase tracking-wider px-3 mb-2">
+            Navigation
+          </SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="krib-sidebar-menu px-3">
+            <SidebarMenu className="krib-sidebar-menu space-y-1">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.id)}
                     isActive={activeSection === item.id}
                     tooltip={item.description}
-                    className={`transition-all duration-300 krib-sidebar-item text-base py-3 px-4 ${
-                      activeSection === item.id ? 'krib-sidebar-active' : ''
-                    }`}
+                    className={`
+                      flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium
+                      transition-all duration-200 w-full
+                      ${activeSection === item.id 
+                        ? 'bg-krib-lime/10 text-foreground shadow-sm border border-krib-lime/20' 
+                        : 'text-muted-foreground hover:bg-accent hover:text-foreground'
+                      }
+                    `}
                   >
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.title}</span>
+                    <item.icon className="h-4 w-4 shrink-0" />
+                    <span className="truncate">{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -131,27 +138,27 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-sidebar-border p-6 krib-sidebar-header">
-        <div className="space-y-3">
+      <SidebarFooter className="border-t border-border/50 p-4 krib-sidebar-header mt-auto">
+        <div className="space-y-2">
           <button 
             onClick={() => onSectionChange('settings')}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/50 border border-krib-lime/10 w-full hover:bg-white/70 hover:border-krib-lime/20 transition-all cursor-pointer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-accent/50 border border-border/50 w-full hover:bg-accent hover:border-border transition-all cursor-pointer"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10">
-              <User className="h-5 w-5 text-krib-gray-dark" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-krib-lime/10">
+              <User className="h-4 w-4 text-foreground" />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-base font-semibold text-sidebar-foreground truncate">{user?.name || 'User'}</p>
-              <p className="text-sm text-sidebar-foreground/70 truncate">{user?.email}</p>
+              <p className="text-sm font-medium text-foreground truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
             </div>
           </button>
           <Button
             variant="ghost"
-            size="default"
+            size="sm"
             onClick={signOut}
-            className="w-full justify-start text-base text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-red-50 transition-all duration-200 py-3"
+            className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-red-50 dark:hover:bg-red-950 transition-all duration-200 h-9"
           >
-            <LogOut className="h-5 w-5 mr-2" />
+            <LogOut className="h-4 w-4 mr-2" />
             Sign Out
           </Button>
         </div>

@@ -106,28 +106,28 @@ function AppContent() {
           activeSection={activeSection} 
           onSectionChange={handleSectionChange} 
         />
-        <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '280px' }}>
-          {/* Enhanced Header with better spacing */}
-          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b shadow-sm">
-            <div className="flex items-center justify-end h-20 px-8">
+        <main className="flex-1 flex flex-col overflow-hidden">
+          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/50">
+            <div className="flex items-center justify-end h-14 px-6 lg:px-8">
               <NotificationBell />
             </div>
           </div>
-          {/* Main content with better padding */}
-          <div className="p-8 max-w-[1920px] mx-auto">
-            <Routes>
-              <Route path="/dashboard" element={<DashboardOverview />} />
-              <Route path="/dashboard/overview" element={<DashboardOverview />} />
-              <Route path="/dashboard/properties" element={<PropertyList />} />
-              <Route path="/dashboard/add-property" element={<AddPropertyWizard />} />
-              <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
-              <Route path="/dashboard/bookings" element={<BookingManagement />} />
-              <Route path="/dashboard/financials" element={<FinancialDashboard />} />
-              <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
-              <Route path="/dashboard/messages" element={<MessagingDashboard />} />
-              <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
-              <Route path="/dashboard/settings" element={<SettingsPage />} />
-            </Routes>
+          <div className="flex-1 overflow-auto krib-dashboard-background">
+            <div className="container-fluid mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 max-w-[1600px]">
+              <Routes>
+                <Route path="/dashboard" element={<DashboardOverview />} />
+                <Route path="/dashboard/overview" element={<DashboardOverview />} />
+                <Route path="/dashboard/properties" element={<PropertyList />} />
+                <Route path="/dashboard/add-property" element={<AddPropertyWizard />} />
+                <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
+                <Route path="/dashboard/bookings" element={<BookingManagement />} />
+                <Route path="/dashboard/financials" element={<FinancialDashboard />} />
+                <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
+                <Route path="/dashboard/messages" element={<MessagingDashboard />} />
+                <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
+                <Route path="/dashboard/settings" element={<SettingsPage />} />
+              </Routes>
+            </div>
           </div>
         </main>
       </div>
