@@ -188,9 +188,6 @@ class NotificationService:
             if type_filter:
                 query = query.eq("type", type_filter)
 
-            # Only show non-expired notifications
-            query = query.or_("expires_at.is.null,expires_at.gt.now()")
-
             # Get total count for pagination
             count_query = (
                 supabase_client.table("host_notifications")
@@ -205,7 +202,6 @@ class NotificationService:
             if type_filter:
                 count_query = count_query.eq("type", type_filter)
 
-            count_query = count_query.or_("expires_at.is.null,expires_at.gt.now()")
             count_result = count_query.execute()
             total_count = count_result.count or 0
 
