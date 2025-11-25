@@ -28,16 +28,17 @@ export function NotificationBell() {
   const [loading, setLoading] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     if (!user) {
       console.log('[NotificationBell] No user, skipping load')
+      setLoading(false)
       return
     }
     
     console.log('[NotificationBell] Loading notifications for user:', user.id)
+    setLoading(true)
     
     try {
-      setLoading(true)
       const data = await apiCall(`/v1/hosts/${user.id}/notifications?limit=20`)
       
       console.log('[NotificationBell] API response:', data)
@@ -48,17 +49,17 @@ export function NotificationBell() {
         console.log('[NotificationBell] Loaded notifications:', data.data.notifications.length, 'Unread:', data.data.unread_count)
       } else {
         console.warn('[NotificationBell] Unexpected response structure:', data)
+        setNotifications([])
+        setUnreadCount(0)
       }
     } catch (error) {
       console.error('[NotificationBell] Failed to load notifications:', error)
-      console.error('[NotificationBell] Error details:', {
-        message: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      })
+      // Keep existing notifications on error, don't clear them
     } finally {
+      // Always set loading to false, no matter what
       setLoading(false)
     }
-  }
+  }, [user, apiCall])
 
   const markAsRead = async (notificationId: string) => {
     if (!user) return
@@ -200,7 +201,7 @@ export function NotificationBell() {
       const interval = setInterval(loadNotifications, 60000)
       return () => clearInterval(interval)
     }
-  }, [user])
+  }, [user, loadNotifications])
 
   useEffect(() => {
     console.log('[NotificationBell] isOpen changed to:', isOpen)
@@ -285,7 +286,7 @@ export function NotificationBell() {
             )}
           </div>
           <ScrollArea className="h-[400px]">
-            {loading ? (
+            {loading && notifications.length === 0 ? (
               <div className="p-4 text-center text-muted-foreground">
                 Loading notifications...
               </div>
