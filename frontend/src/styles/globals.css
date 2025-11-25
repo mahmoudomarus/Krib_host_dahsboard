@@ -5,18 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Typography */
-  --font-size-base: 15px;
-  --font-size-sm: 14px;
-  --font-size-xs: 13px;
-  
-  /* Spacing Scale */
-  --spacing-xs: 0.25rem;
-  --spacing-sm: 0.5rem;
-  --spacing-md: 1rem;
-  --spacing-lg: 1.5rem;
-  --spacing-xl: 2rem;
-  --spacing-2xl: 3rem;
+  --font-size: 16px;
   
   /* Krib Brand Colors */
   --krib-lime: #B8FF00;
@@ -29,6 +18,14 @@
   --krib-gray-light: #F8F9FA;
   --krib-gray-medium: #F5F6F8;
   --krib-gray-dark: #2D3748;
+  
+  /* Spacing Scale */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
   
   /* Base Colors */
   --background: #ffffff;
@@ -67,9 +64,6 @@
   --chart-5: #98FB98;
   
   --radius: 0.625rem;
-  --radius-sm: 0.5rem;
-  --radius-md: 0.75rem;
-  --radius-lg: 1rem;
   
   /* Sidebar - Light Gray Theme */
   --sidebar: var(--krib-gray-light);
@@ -1443,101 +1437,4 @@ html {
     align-items: flex-start;
     gap: 0.5rem;
   }
-}
-
-/* ========================================
-   DESIGN COHESION & RESPONSIVE STYLES
-   ======================================== */
-
-/* Base Typography Scale */
-html {
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* Consistent Card Styling */
-.card {
-  @apply bg-card border border-border/50 rounded-lg shadow-sm transition-shadow duration-200;
-}
-
-.card:hover {
-  @apply shadow-md;
-}
-
-/* Consistent Spacing */
-.section-spacing {
-  @apply space-y-6;
-}
-
-/* Consistent Typography */
-h1, .heading-1 {
-  @apply text-2xl lg:text-3xl font-bold text-foreground;
-}
-
-h2, .heading-2 {
-  @apply text-xl lg:text-2xl font-semibold text-foreground;
-}
-
-h3, .heading-3 {
-  @apply text-lg lg:text-xl font-semibold text-foreground;
-}
-
-/* Dashboard Stats Grid - Responsive */
-.stats-grid {
-  @apply grid gap-4 lg:gap-6;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-@media (min-width: 640px) and (max-width: 1024px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-/* Chart Containers - Responsive Height */
-.chart-container {
-  @apply w-full;
-  height: 300px;
-}
-
-@media (min-width: 768px) {
-  .chart-container {
-    height: 350px;
-  }
-}
-
-@media (min-width: 1024px) {
-  .chart-container {
-    height: 400px;
-  }
-}
-
-/* Form Inputs - Consistent Sizing */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="number"],
-input[type="tel"],
-input[type="url"],
-select,
-textarea {
-  @apply transition-all duration-200;
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  @apply bg-muted/30;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-border rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-muted-foreground/50;
 }
