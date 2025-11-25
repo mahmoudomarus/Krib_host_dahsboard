@@ -17,6 +17,13 @@ env/
 .venv
 *.egg-info/
 
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+
 # Environment
 .env
 .env.local

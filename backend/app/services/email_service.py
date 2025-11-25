@@ -30,8 +30,13 @@ class EmailService:
     ) -> Dict[str, Any]:
         """Send email using Resend API"""
         if not self.resend_api_key:
-            logger.warning("Resend API key not configured, skipping email send")
+            logger.error(
+                f"Email send failed: RESEND_API_KEY not configured. "
+                f"Attempted to send '{subject}' to {to_email}"
+            )
             return {"status": "skipped", "reason": "no_api_key"}
+
+        logger.info(f"Sending email to {to_email}: {subject}")
 
         try:
             headers = {
