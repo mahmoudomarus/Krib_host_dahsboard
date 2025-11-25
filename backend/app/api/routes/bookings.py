@@ -143,12 +143,7 @@ async def get_user_bookings(
         # Build query for bookings
         query = (
             supabase_client.table("bookings")
-            .select(
-                """
-            *,
-            properties!inner(title, address)
-        """
-            )
+            .select("*, properties(title, address)")
             .in_("property_id", property_ids)
         )
 

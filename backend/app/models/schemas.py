@@ -49,8 +49,11 @@ class BookingStatus(str, Enum):
 
 class PaymentStatus(str, Enum):
     pending = "pending"
-    paid = "paid"
+    processing = "processing"
+    succeeded = "succeeded"
+    failed = "failed"
     refunded = "refunded"
+    partially_refunded = "partially_refunded"
 
 
 class TransactionType(str, Enum):

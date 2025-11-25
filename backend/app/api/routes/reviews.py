@@ -17,20 +17,23 @@ class ReviewResponse(BaseModel):
     id: str
     booking_id: str
     property_id: str
-    guest_id: str
-    guest_name: Optional[str]
+    guest_id: Optional[str] = None
+    guest_name: Optional[str] = None
+    guest_email: Optional[str] = None
     rating: float
-    cleanliness_rating: Optional[float]
-    communication_rating: Optional[float]
-    checkin_rating: Optional[float]
-    accuracy_rating: Optional[float]
-    location_rating: Optional[float]
-    value_rating: Optional[float]
-    comment: Optional[str]
-    host_response: Optional[str]
+    cleanliness_rating: Optional[float] = None
+    communication_rating: Optional[float] = None
+    accuracy_rating: Optional[float] = None
+    location_rating: Optional[float] = None
+    value_rating: Optional[float] = None
+    comment: Optional[str] = None
+    host_response: Optional[str] = None
     created_at: str
-    responded_at: Optional[str]
-    property_title: Optional[str]
+    responded_at: Optional[str] = None
+    property_title: Optional[str] = None
+    
+    class Config:
+        extra = "ignore"
 
 
 class ReviewsListResponse(BaseModel):
@@ -201,7 +204,6 @@ async def get_all_host_reviews(
             review_data = {
                 **review,
                 "property_title": property_titles.get(review["property_id"]),
-                "guest_id": review.get("guest_email", ""),
             }
             reviews.append(ReviewResponse(**review_data))
 
