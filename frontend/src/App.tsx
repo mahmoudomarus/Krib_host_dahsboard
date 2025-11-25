@@ -106,9 +106,9 @@ function AppContent() {
           activeSection={activeSection} 
           onSectionChange={handleSectionChange} 
         />
-        <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '18rem' }}>
+        <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '16rem' }}>
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-            <div className="flex items-center justify-end h-20 px-8">
+            <div className="flex items-center justify-end h-16 px-6">
               <NotificationBell />
             </div>
           </div>

@@ -29,10 +29,8 @@ class Settings(BaseSettings):
         os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
     )
 
-    # Supabase
-    supabase_url: str = os.getenv(
-        "SUPABASE_URL", "https://bpomacnqaqzgeuahhlka.supabase.co"
-    )
+    # Supabase (no defaults - must be configured)
+    supabase_url: str = os.getenv("SUPABASE_URL", "")
     supabase_anon_key: str = os.getenv("SUPABASE_ANON_KEY", "")
     supabase_service_role_key: str = os.getenv("SUPABASE_SERVICE_ROLE_KEY", "")
 
@@ -81,7 +79,7 @@ class Settings(BaseSettings):
     def validate_production_config(self):
         """Validate that all required config is set for production"""
         if not self.debug:
-            required = ["supabase_anon_key", "supabase_service_role_key"]
+            required = ["supabase_url", "supabase_anon_key", "supabase_service_role_key"]
             missing = [key for key in required if not getattr(self, key)]
             if missing:
                 raise ValueError(

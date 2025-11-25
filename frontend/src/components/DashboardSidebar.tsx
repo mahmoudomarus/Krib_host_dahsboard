@@ -89,40 +89,40 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
   
   return (
     <Sidebar className="krib-sidebar">
-      <SidebarHeader className="krib-sidebar-header border-b border-sidebar-border p-8">
+      <SidebarHeader className="krib-sidebar-header border-b border-sidebar-border p-6">
         <button 
           onClick={() => onSectionChange('overview')}
           className="flex items-center gap-4 w-full hover:opacity-80 transition-opacity cursor-pointer"
         >
-          <div className="flex h-14 w-14 items-center justify-center rounded-xl krib-logo-container">
-            <img src={KribLogo} alt="Krib" className="h-10 w-10" />
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl krib-logo-container">
+            <img src={KribLogo} alt="Krib" className="h-8 w-8" />
           </div>
           <div className="text-left">
-            <h2 className="text-2xl font-bold text-sidebar-foreground bg-gradient-to-r from-krib-gray-dark to-krib-black bg-clip-text">
+            <h2 className="text-xl font-bold text-sidebar-foreground bg-gradient-to-r from-krib-gray-dark to-krib-black bg-clip-text">
               Krib
             </h2>
-            <p className="text-base text-sidebar-foreground/70 font-medium">Property Dashboard</p>
+            <p className="text-sm text-sidebar-foreground/70 font-medium">Property Dashboard</p>
           </div>
         </button>
       </SidebarHeader>
       
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel className="krib-sidebar-group-label text-sm font-semibold uppercase tracking-wider px-3 py-2">Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="krib-sidebar-group-label">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu className="krib-sidebar-menu space-y-1 px-2">
+            <SidebarMenu className="krib-sidebar-menu">
               {navigationItems.map((item) => (
                 <SidebarMenuItem key={item.id}>
                   <SidebarMenuButton
                     onClick={() => onSectionChange(item.id)}
                     isActive={activeSection === item.id}
                     tooltip={item.description}
-                    className={`transition-all duration-300 krib-sidebar-item min-h-[44px] text-base px-4 py-3 ${
+                    className={`transition-all duration-300 krib-sidebar-item ${
                       activeSection === item.id ? 'krib-sidebar-active' : ''
                     }`}
                   >
-                    <item.icon className="h-5 w-5" />
-                    <span className="font-medium">{item.title}</span>
+                    <item.icon className="h-4 w-4" />
+                    <span>{item.title}</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -131,28 +131,28 @@ export function DashboardSidebar({ activeSection, onSectionChange }: DashboardSi
         </SidebarGroup>
       </SidebarContent>
       
-      <SidebarFooter className="border-t border-sidebar-border p-6 krib-sidebar-header">
+      <SidebarFooter className="border-t border-sidebar-border p-4 krib-sidebar-header">
         <div className="space-y-3">
           <button 
             onClick={() => onSectionChange('settings')}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg bg-white/50 border border-krib-lime/10 w-full hover:bg-white/70 hover:border-krib-lime/20 transition-all cursor-pointer"
+            className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white/50 border border-krib-lime/10 w-full hover:bg-white/70 hover:border-krib-lime/20 transition-all cursor-pointer"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10">
-              <User className="h-5 w-5 text-krib-gray-dark" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-krib-lime/20 to-krib-lime-light/10">
+              <User className="h-4 w-4 text-krib-gray-dark" />
             </div>
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-base font-semibold text-sidebar-foreground truncate">{user?.name || 'User'}</p>
-              <p className="text-sm text-sidebar-foreground/70 truncate">{user?.email}</p>
+              <p className="text-sm font-medium text-sidebar-foreground truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-sidebar-foreground/70 truncate">{user?.email}</p>
             </div>
           </button>
           <Button
             variant="ghost"
-            size="default"
+            size="sm"
             onClick={signOut}
-            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-red-50 transition-all duration-200 h-11"
+            className="w-full justify-start text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-red-50 transition-all duration-200"
           >
-            <LogOut className="h-5 w-5 mr-2" />
-            <span className="text-base">Sign Out</span>
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
           </Button>
         </div>
       </SidebarFooter>

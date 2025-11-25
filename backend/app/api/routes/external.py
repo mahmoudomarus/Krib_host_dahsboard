@@ -133,7 +133,6 @@ async def search_properties(
             query = query.eq("property_type", property_type)
 
         # Apply availability filters if dates provided
-        available_property_ids = None
         if check_in and check_out:
             # Find properties that are NOT booked for these dates
             conflicting_bookings = (
@@ -607,9 +606,8 @@ async def create_external_booking(
                 detail="Property not available for selected dates",
             )
 
-        # Calculate nights and validate amount
+        # Calculate nights
         nights = (booking_request.check_out - booking_request.check_in).days
-        expected_amount = nights * property_data["price_per_night"]
 
         # Create booking record
         booking_id = str(uuid.uuid4())

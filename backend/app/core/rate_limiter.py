@@ -25,7 +25,8 @@ def get_user_id_from_request(request: Request) -> str:
 
         # Fallback to IP address
         return get_remote_address(request)
-    except:
+    except Exception as e:
+        logger.error(f"Error extracting user ID for rate limiting: {e}")
         return get_remote_address(request)
 
 
@@ -235,7 +236,8 @@ async def rate_limit_middleware(request: Request, call_next):
             response.headers["X-RateLimit-Remaining"] = str(
                 max(0, max_requests - current_count)
             )
-        except:
+        except Exception as e:
+            logger.error(f"Error setting rate limit headers: {e}")
             pass
 
     return response

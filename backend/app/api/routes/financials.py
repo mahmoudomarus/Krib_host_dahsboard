@@ -496,7 +496,8 @@ def _calculate_next_payout_date(user_id: str) -> Optional[str]:
             return next_month.date().isoformat()
 
         return None
-    except:
+    except Exception as e:
+        logger.error(f"Error calculating next payout date: {e}")
         return None
 
 

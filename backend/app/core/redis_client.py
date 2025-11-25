@@ -127,7 +127,8 @@ class RedisClient:
                     try:
                         # Try pickle
                         return pickle.loads(value.encode())
-                    except:
+                    except Exception as e:
+                        logger.error(f"Error deserializing pickled value: {e}")
                         # Return as string
                         return value
 

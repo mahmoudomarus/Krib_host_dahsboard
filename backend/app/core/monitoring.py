@@ -248,16 +248,18 @@ async def health_check_with_metrics():
             from app.core.redis_client import redis_client
 
             health_data["redis_connected"] = redis_client.is_connected
-        except:
+        except Exception as e:
+            logger.error(f"Error checking Redis connection: {e}")
             health_data["redis_connected"] = False
 
         # Add database check
         try:
             from app.core.supabase_client import supabase_client
 
-            response = supabase_client.table("users").select("count").limit(1).execute()
+            supabase_client.table("users").select("count").limit(1).execute()
             health_data["database_connected"] = True
-        except:
+        except Exception as e:
+            logger.error(f"Error checking database connection: {e}")
             health_data["database_connected"] = False
 
         return health_data

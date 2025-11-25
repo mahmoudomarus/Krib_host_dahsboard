@@ -119,7 +119,7 @@ async def https_fix_middleware(request, call_next):
     return response
 
 
-# CORS
+# CORS - Restrict to known origins only (no wildcard for security)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -127,8 +127,6 @@ app.add_middleware(
         "http://localhost:5173",
         "https://host.krib.ae",
         "https://krib.ai",
-        "https://*.krib.ai",
-        "*",
     ],
     allow_credentials=True,
     allow_methods=["*"],

@@ -329,7 +329,6 @@ async def handle_payout_failed(payout_data: dict):
     """Handle failed payout to host's bank"""
     try:
         payout_id = payout_data.get("id")
-        failure_code = payout_data.get("failure_code")
         failure_message = payout_data.get("failure_message")
 
         logger.error(f"Stripe payout {payout_id} failed: {failure_message}")
