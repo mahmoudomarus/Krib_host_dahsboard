@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Bell } from "lucide-react"
 import { Button } from "./ui/button"
-import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover"
 import { ScrollArea } from "./ui/scroll-area"
 import { Badge } from "./ui/badge"
 import { useNavigate } from "react-router-dom"
@@ -27,6 +26,7 @@ export function NotificationBell() {
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
   const [loading, setLoading] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   const loadNotifications = async () => {
     if (!user) {
@@ -148,100 +148,108 @@ export function NotificationBell() {
   useEffect(() => {
     console.log('[NotificationBell] isOpen changed to:', isOpen)
     if (isOpen) {
-      console.log('[NotificationBell] Popover opened, reloading notifications')
+      console.log('[NotificationBell] Dropdown opened, reloading notifications')
       loadNotifications()
     }
   }, [isOpen])
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        console.log('[NotificationBell] Click outside detected, closing dropdown')
+        setIsOpen(false)
+      }
+    }
+
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isOpen])
+
   const handleButtonClick = (e: React.MouseEvent) => {
-    console.log('[NotificationBell] Button clicked, preventing default and toggling. Current:', isOpen, 'Next:', !isOpen)
+    console.log('[NotificationBell] Button clicked. Current:', isOpen, 'Next:', !isOpen)
     e.preventDefault()
     e.stopPropagation()
-    const nextState = !isOpen
-    setIsOpen(nextState)
+    setIsOpen(!isOpen)
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
-      <PopoverTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="relative"
-          type="button"
-          onClick={handleButtonClick}
-          onPointerDown={(e) => e.preventDefault()}
-        >
-          <Bell className="h-5 w-5" />
-          {unreadCount > 0 && (
-            <Badge 
-              className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 hover:bg-red-600 pointer-events-none"
-              variant="destructive"
-            >
-              {unreadCount > 9 ? '9+' : unreadCount}
-            </Badge>
-          )}
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent 
-        className="w-96 p-0" 
-        align="end" 
-        sideOffset={8}
-        onOpenAutoFocus={(e) => e.preventDefault()}
+    <div className="relative" ref={dropdownRef}>
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="relative"
+        type="button"
+        onClick={handleButtonClick}
       >
-        <div className="flex items-center justify-between p-4 border-b">
-          <h3 className="font-semibold">Notifications</h3>
-          {unreadCount > 0 && (
-            <Badge variant="secondary">{unreadCount} new</Badge>
-          )}
-        </div>
-        <ScrollArea className="h-[400px]">
-          {loading ? (
-            <div className="p-4 text-center text-muted-foreground">
-              Loading notifications...
-            </div>
-          ) : notifications.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
-              <p>No notifications</p>
-            </div>
-          ) : (
-            <div className="divide-y">
-              {notifications.map(notification => (
-                <button
-                  key={notification.id}
-                  onClick={() => handleNotificationClick(notification)}
-                  className={`w-full p-4 text-left hover:bg-accent transition-colors ${
-                    !notification.is_read ? 'bg-accent/50' : ''
-                  }`}
-                >
-                  <div className="flex gap-3">
-                    <div className="flex-shrink-0 mt-1">
-                      {getNotificationIcon(notification.type)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2 mb-1">
-                        <p className={`text-sm font-medium ${
-                          !notification.is_read ? 'text-foreground' : 'text-muted-foreground'
-                        }`}>
-                          {notification.title}
-                        </p>
-                        <span className="text-xs text-muted-foreground whitespace-nowrap">
-                          {formatTime(notification.created_at)}
-                        </span>
+        <Bell className="h-5 w-5" />
+        {unreadCount > 0 && (
+          <Badge 
+            className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 bg-red-500 hover:bg-red-600 pointer-events-none"
+            variant="destructive"
+          >
+            {unreadCount > 9 ? '9+' : unreadCount}
+          </Badge>
+        )}
+      </Button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full mt-2 w-96 bg-card border border-border rounded-lg shadow-lg z-50">
+          <div className="flex items-center justify-between p-4 border-b">
+            <h3 className="font-semibold">Notifications</h3>
+            {unreadCount > 0 && (
+              <Badge variant="secondary">{unreadCount} new</Badge>
+            )}
+          </div>
+          <ScrollArea className="h-[400px]">
+            {loading ? (
+              <div className="p-4 text-center text-muted-foreground">
+                Loading notifications...
+              </div>
+            ) : notifications.length === 0 ? (
+              <div className="p-8 text-center text-muted-foreground">
+                <Bell className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                <p>No notifications</p>
+              </div>
+            ) : (
+              <div className="divide-y">
+                {notifications.map(notification => (
+                  <button
+                    key={notification.id}
+                    onClick={() => handleNotificationClick(notification)}
+                    className={`w-full p-4 text-left hover:bg-accent transition-colors ${
+                      !notification.is_read ? 'bg-accent/50' : ''
+                    }`}
+                  >
+                    <div className="flex gap-3">
+                      <div className="flex-shrink-0 mt-1">
+                        {getNotificationIcon(notification.type)}
                       </div>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {notification.message}
-                      </p>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-start justify-between gap-2 mb-1">
+                          <p className={`text-sm font-medium ${
+                            !notification.is_read ? 'text-foreground' : 'text-muted-foreground'
+                          }`}>
+                            {notification.title}
+                          </p>
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">
+                            {formatTime(notification.created_at)}
+                          </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground line-clamp-2">
+                          {notification.message}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </ScrollArea>
-      </PopoverContent>
-    </Popover>
+                  </button>
+                ))}
+              </div>
+            )}
+          </ScrollArea>
+        </div>
+      )}
+    </div>
   )
 }
 
