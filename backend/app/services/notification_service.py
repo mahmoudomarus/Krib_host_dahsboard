@@ -330,7 +330,7 @@ class NotificationService:
         """Get count of unread notifications for host"""
         try:
             result = supabase_client.rpc(
-                "get_unread_notification_count", {"host_user_id": host_id}
+                "get_unread_notification_count", {"p_host_id": host_id}
             ).execute()
             return result.data or 0
 

@@ -171,25 +171,7 @@ async def get_all_host_reviews(
 
         query = (
             supabase_client.table("reviews")
-            .select(
-                """
-                id,
-                booking_id,
-                property_id,
-                guest_id,
-                rating,
-                cleanliness_rating,
-                communication_rating,
-                checkin_rating,
-                accuracy_rating,
-                location_rating,
-                value_rating,
-                comment,
-                host_response,
-                responded_at,
-                created_at
-            """
-            )
+            .select("*")
             .in_("property_id", property_ids)
         )
 
@@ -216,25 +198,12 @@ async def get_all_host_reviews(
 
         reviews = []
         for review in reviews_result.data:
-            guest_result = (
-                supabase_client.table("users")
-                .select("first_name, last_name")
-                .eq("id", review["guest_id"])
-                .single()
-                .execute()
-            )
-
-            guest_name = None
-            if guest_result.data:
-                guest_name = f"{guest_result.data.get('first_name', '')} {guest_result.data.get('last_name', '')}".strip()
-
-            reviews.append(
-                ReviewResponse(
-                    **review,
-                    guest_name=guest_name,
-                    property_title=property_titles.get(review["property_id"]),
-                )
-            )
+            review_data = {
+                **review,
+                "property_title": property_titles.get(review["property_id"]),
+                "guest_id": review.get("guest_email", ""),
+            }
+            reviews.append(ReviewResponse(**review_data))
 
         avg_rating = 0
         if reviews_result.data:
