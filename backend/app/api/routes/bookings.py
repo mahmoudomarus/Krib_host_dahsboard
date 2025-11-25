@@ -160,12 +160,17 @@ async def get_user_bookings(
         # Format response
         bookings = []
         for booking in result.data:
-            booking_data = {**booking}
-            booking_data["property_title"] = booking["properties"]["title"]
-            booking_data["property_address"] = booking["properties"]["address"]
-            # Remove nested properties object
-            del booking_data["properties"]
-            bookings.append(BookingResponse(**booking_data))
+            try:
+                booking_data = {**booking}
+                booking_data["property_title"] = booking["properties"]["title"]
+                booking_data["property_address"] = booking["properties"]["address"]
+                # Remove nested properties object
+                del booking_data["properties"]
+                bookings.append(BookingResponse(**booking_data))
+            except Exception as booking_error:
+                logger.error(f"Failed to parse booking {booking.get('id', 'unknown')}: {str(booking_error)}")
+                logger.error(f"Booking data: {booking}")
+                continue  # Skip this booking and continue with others
 
         return bookings
 
