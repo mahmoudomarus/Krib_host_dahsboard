@@ -525,46 +525,395 @@ Supported events:
 
 ### Overview
 
-For external platforms (e.g., customer booking platform) to integrate with host dashboard.
+External platforms (customer booking apps, marketplace platforms) can integrate with the Host Dashboard to enable:
+- Property discovery and booking
+- Guest-host messaging
+- Review submission
+- Real-time notifications
 
-### Flow
+### Authentication Approaches
 
-1. Customer platform has own auth system
-2. Customer platform makes API calls on behalf of hosts
-3. Use Supabase service role key for server-to-server auth
-4. OR: Use host's token if they've connected their account
+**Option 1: Shared Supabase Auth (Recommended)**
+- Customer and host both authenticate via same Supabase instance
+- Customer gets their own JWT token
+- RLS policies ensure data isolation
+- Enables real-time subscriptions
 
-### Example Integration
+**Option 2: Service Role Key (Admin Operations)**
+- Use for server-to-server operations
+- Admin access to all data
+- Bypass RLS policies (use carefully)
+- Required for super admin operations
+
+### Customer Platform Integration Patterns
+
+#### Pattern 1: Direct Database Access (Shared Supabase)
 
 ```javascript
-// Server-side only (service role key)
-const { createClient } = require('@supabase/supabase-js')
+// Customer Platform (Frontend)
+import { createClient } from '@supabase/supabase-js'
 
 const supabase = createClient(
   SUPABASE_URL,
-  SUPABASE_SERVICE_ROLE_KEY  // Server-side only!
+  SUPABASE_ANON_KEY  // Safe for frontend
 )
 
-// Get host's properties
+// Authenticate customer
+const { data: authData } = await supabase.auth.signUp({
+  email: 'customer@example.com',
+  password: 'secure_password'
+})
+
+// Customer browses active properties
 const { data: properties } = await supabase
   .from('properties')
   .select('*')
-  .eq('user_id', host_user_id)
+  .eq('status', 'active')
+  .order('created_at', { ascending: false });
 
-// Create booking via API
-const response = await fetch('https://api.host.krib.ae/api/bookings', {
-  method: 'POST',
-  headers: {
-    'Authorization': `Bearer ${service_role_key}`,
-    'Content-Type': 'application/json'
-  },
-  body: JSON.stringify({
-    property_id: property_id,
-    guest_name: 'Customer Name',
-    ...
+// Customer creates booking
+const { data: booking } = await supabase
+  .from('bookings')
+  .insert({
+    property_id: selectedProperty.id,
+    guest_id: authData.user.id,
+    check_in: '2025-12-01',
+    check_out: '2025-12-05',
+    guests: 2,
+    status: 'pending'
   })
-})
+  .select()
+  .single();
+
+// Customer sends message to host
+const { data: message } = await supabase
+  .from('messages')
+  .insert({
+    conversation_id: conversationId,
+    sender_type: 'guest',
+    sender_id: authData.user.id,
+    content: 'Is early check-in available?',
+    is_read: false
+  })
+  .select()
+  .single();
+
+// Customer submits review after stay
+const { data: review } = await supabase
+  .from('reviews')
+  .insert({
+    booking_id: completedBooking.id,
+    property_id: completedBooking.property_id,
+    guest_id: authData.user.id,
+    rating: 5,
+    comment: 'Amazing property!'
+  })
+  .select()
+  .single();
 ```
+
+#### Pattern 2: Host Dashboard API Proxy
+
+```javascript
+// Customer Platform (Backend) proxies to Host Dashboard API
+const customerBookProperty = async (req, res) => {
+  // Validate customer is authenticated
+  const customerId = req.user.id;
+  
+  // Map customer data to host API format
+  const bookingData = {
+    property_id: req.body.propertyId,
+    guest_name: req.user.name,
+    guest_email: req.user.email,
+    guest_phone: req.user.phone,
+    check_in: req.body.checkIn,
+    check_out: req.body.checkOut,
+    guests: req.body.guestCount
+  };
+
+  // Call Host Dashboard API
+  const response = await fetch('https://api.host.krib.ae/api/bookings', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${HOST_API_TOKEN}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(bookingData)
+  });
+
+  const booking = await response.json();
+  res.json(booking);
+};
+```
+
+#### Pattern 3: Real-time Updates (Supabase Subscriptions)
+
+```javascript
+// Customer Platform: Subscribe to booking updates
+supabase
+  .channel('customer-bookings')
+  .on('postgres_changes',
+    {
+      event: 'UPDATE',
+      schema: 'public',
+      table: 'bookings',
+      filter: `guest_id=eq.${customerId}`
+    },
+    (payload) => {
+      // Booking status changed (host confirmed, cancelled, etc.)
+      updateBookingUI(payload.new);
+      showNotification(`Booking ${payload.new.status}`);
+    }
+  )
+  .subscribe();
+
+// Subscribe to host messages
+supabase
+  .channel('customer-messages')
+  .on('postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'messages',
+      filter: `conversation_id=eq.${conversationId}`
+    },
+    (payload) => {
+      if (payload.new.sender_type === 'host') {
+        displayNewMessage(payload.new);
+        playNotificationSound();
+      }
+    }
+  )
+  .subscribe();
+```
+
+### Customer Platform Features Implementation
+
+#### 1. Property Browsing
+```javascript
+// Search and filter properties
+const searchProperties = async (filters) => {
+  let query = supabase
+    .from('properties')
+    .select('*')
+    .eq('status', 'active');
+
+  if (filters.city) {
+    query = query.eq('city', filters.city);
+  }
+  if (filters.minPrice && filters.maxPrice) {
+    query = query.gte('price_per_night', filters.minPrice)
+                 .lte('price_per_night', filters.maxPrice);
+  }
+  if (filters.guests) {
+    query = query.gte('max_guests', filters.guests);
+  }
+  if (filters.bedrooms) {
+    query = query.gte('bedrooms', filters.bedrooms);
+  }
+
+  const { data } = await query;
+  return data;
+};
+```
+
+#### 2. Guest-Host Messaging
+```javascript
+// Create conversation when customer inquires
+const startConversation = async (propertyId, guestId, initialMessage) => {
+  // Get host_id from property
+  const { data: property } = await supabase
+    .from('properties')
+    .select('user_id')
+    .eq('id', propertyId)
+    .single();
+
+  // Create conversation
+  const { data: conversation } = await supabase
+    .from('conversations')
+    .insert({
+      property_id: propertyId,
+      guest_id: guestId,
+      host_id: property.user_id
+    })
+    .select()
+    .single();
+
+  // Send first message
+  await supabase
+    .from('messages')
+    .insert({
+      conversation_id: conversation.id,
+      sender_type: 'guest',
+      sender_id: guestId,
+      content: initialMessage,
+      is_read: false
+    });
+
+  return conversation;
+};
+
+// Load conversation messages
+const getMessages = async (conversationId) => {
+  const { data } = await supabase
+    .from('messages')
+    .select('*')
+    .eq('conversation_id', conversationId)
+    .order('created_at', { ascending: true });
+
+  return data;
+};
+```
+
+#### 3. Review Submission
+```javascript
+// Check if customer can review
+const canReview = async (bookingId, guestId) => {
+  const { data: booking } = await supabase
+    .from('bookings')
+    .select('status, check_out, guest_id')
+    .eq('id', bookingId)
+    .single();
+
+  // Must be guest's booking, completed, and past check-out date
+  if (booking.guest_id !== guestId) return false;
+  if (booking.status !== 'completed') return false;
+  if (new Date(booking.check_out) > new Date()) return false;
+
+  // Check if not already reviewed
+  const { data: existing } = await supabase
+    .from('reviews')
+    .select('id')
+    .eq('booking_id', bookingId)
+    .limit(1);
+
+  return existing.length === 0;
+};
+
+// Submit review
+const submitReview = async (reviewData) => {
+  const { data: review } = await supabase
+    .from('reviews')
+    .insert({
+      booking_id: reviewData.bookingId,
+      property_id: reviewData.propertyId,
+      guest_id: reviewData.guestId,
+      guest_name: reviewData.guestName,
+      guest_email: reviewData.guestEmail,
+      rating: reviewData.overallRating,
+      cleanliness_rating: reviewData.cleanliness,
+      communication_rating: reviewData.communication,
+      accuracy_rating: reviewData.accuracy,
+      location_rating: reviewData.location,
+      value_rating: reviewData.value,
+      comment: reviewData.comment
+    })
+    .select()
+    .single();
+
+  // Property rating automatically updates via DB trigger
+  return review;
+};
+```
+
+#### 4. Customer Notifications
+```javascript
+// Create customer notification system
+const sendCustomerNotification = async (notification) => {
+  // Insert into customer_notifications table
+  const { data } = await supabase
+    .from('customer_notifications')
+    .insert({
+      guest_id: notification.guestId,
+      type: notification.type,
+      title: notification.title,
+      message: notification.message,
+      booking_id: notification.bookingId,
+      action_url: notification.actionUrl,
+      priority: notification.priority || 'medium'
+    })
+    .select()
+    .single();
+
+  return data;
+};
+
+// Subscribe to customer notifications
+supabase
+  .channel('guest-notifications')
+  .on('postgres_changes',
+    {
+      event: 'INSERT',
+      schema: 'public',
+      table: 'customer_notifications',
+      filter: `guest_id=eq.${guestId}`
+    },
+    (payload) => {
+      displayNotification(payload.new);
+    }
+  )
+  .subscribe();
+```
+
+### Security Best Practices
+
+#### Row-Level Security (RLS)
+
+The shared database uses RLS to ensure customers only access their data:
+
+```sql
+-- Customers see only their bookings
+CREATE POLICY "Guests view own bookings"
+ON bookings FOR SELECT
+USING (auth.uid() = guest_id);
+
+-- Customers see only their conversations
+CREATE POLICY "Guests view own conversations"
+ON conversations FOR SELECT
+USING (auth.uid() = guest_id);
+
+-- Customers see only their reviews
+CREATE POLICY "Guests view own reviews"
+ON reviews FOR SELECT
+USING (auth.uid() = guest_id);
+
+-- Everyone can view active properties
+CREATE POLICY "Public view active properties"
+ON properties FOR SELECT
+USING (status = 'active');
+```
+
+#### API Security Checklist
+
+- [ ] Never expose service role key to frontend
+- [ ] Validate all user inputs server-side
+- [ ] Use Supabase RLS policies for data access control
+- [ ] Implement rate limiting (60 req/min default)
+- [ ] Verify JWT tokens on every request
+- [ ] Sanitize user-generated content (messages, reviews)
+- [ ] Use HTTPS only for all API calls
+- [ ] Log all cross-platform interactions
+
+### Example Customer Platform Architecture
+
+```
+Customer Platform Frontend (React/Vue/Next.js)
+  ↓ (Supabase ANON_KEY auth)
+Supabase Database (Shared with Host Dashboard)
+  ↓ (RLS policies enforce access control)
+Supabase Realtime (subscriptions for live updates)
+  ↓
+Host Dashboard API (optional, for complex operations)
+  ↓
+Host Dashboard Frontend (receives notifications, messages)
+```
+
+### Testing Integration
+
+Use the provided SQL scripts and guides:
+- `test_booking_flow.sql` - Creates test bookings and reviews
+- `BOOKING_FLOW_TESTING.md` - Step-by-step testing guide
+- `API_TESTING_GUIDE.md` - API endpoint testing
 
 ### Security Notes
 
@@ -572,6 +921,7 @@ const response = await fetch('https://api.host.krib.ae/api/bookings', {
 - Validate all inputs on your server
 - Use RLS policies for data security
 - Rate limit your API calls
+- Customer Platform should have separate auth for admin operations
 
 ## Support
 

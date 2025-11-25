@@ -41,3 +41,6 @@ logs/
 # OS
 .DS_Store
 Thumbs.db
+
+# Platform blueprints (not part of this repo)
+REAL_ESTATE_AGENT_PLATFORM_BLUEPRINT.md
