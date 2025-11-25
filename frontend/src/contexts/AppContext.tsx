@@ -196,35 +196,87 @@ class APIError extends Error {
   }
 }
 
-async function makeAPIRequest(endpoint: string, options: RequestInit = {}) {
-  // Get the current Supabase session token
-  const { data: { session } } = await supabase.auth.getSession()
-  const token = session?.access_token
-  
-  const config: RequestInit = {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token && { Authorization: `Bearer ${token}` }),
-      ...options.headers,
-    },
-  }
+async function makeAPIRequest(endpoint: string, options: RequestInit = {}, retryCount = 0): Promise<any> {
+  try {
+    // Get the current Supabase session token
+    let { data: { session } } = await supabase.auth.getSession()
+    
+    // Check if session is expired and refresh if needed
+    if (session) {
+      const now = Date.now() / 1000
+      const expiresAt = session.expires_at || 0
+      
+      if (expiresAt < now + 60) {
+        console.log('[API] Token expiring soon, refreshing')
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+        
+        if (refreshError || !refreshData.session) {
+          console.error('[API] Token refresh failed:', refreshError)
+          throw new APIError(401, 'Session expired')
+        }
+        
+        session = refreshData.session
+        localStorage.setItem('auth_token', session.access_token)
+      }
+    }
+    
+    const token = session?.access_token
+    
+    if (!token && retryCount === 0) {
+      console.error('[API] No auth token available')
+      throw new APIError(401, 'Not authenticated')
+    }
+    
+    const config: RequestInit = {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { Authorization: `Bearer ${token}` }),
+        ...options.headers,
+      },
+    }
 
-  const fullUrl = `${API_BASE_URL}${endpoint}`
-  
-  // Only log API calls in development
-  if (process.env.NODE_ENV === 'development') {
-    console.log('[API Request]', endpoint)
-  }
-  
-  const response = await fetch(fullUrl, config)
-  
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
-    throw new APIError(response.status, errorData.message || `HTTP ${response.status}`)
-  }
+    const fullUrl = `${API_BASE_URL}${endpoint}`
+    
+    // Only log API calls in development
+    if (process.env.NODE_ENV === 'development') {
+      console.log('[API Request]', endpoint)
+    }
+    
+    const response = await fetch(fullUrl, config)
+    
+    // Handle 401 by refreshing token and retrying once
+    if (response.status === 401 && retryCount === 0) {
+      console.log('[API] 401 error, attempting token refresh')
+      
+      const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+      
+      if (refreshError || !refreshData.session) {
+        console.error('[API] Token refresh failed:', refreshError)
+        throw new APIError(401, 'Authentication failed')
+      }
+      
+      localStorage.setItem('auth_token', refreshData.session.access_token)
+      return makeAPIRequest(endpoint, options, retryCount + 1)
+    }
+    
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({ message: 'Unknown error' }))
+      throw new APIError(response.status, errorData.message || `HTTP ${response.status}`)
+    }
 
-  return response.json()
+    return response.json()
+  } catch (error) {
+    if (error instanceof APIError) {
+      throw error
+    }
+    
+    if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      throw new APIError(0, 'Network error - please check your connection')
+    }
+    
+    throw error
+  }
 }
 
 export function AppProvider({ children }: { children: ReactNode }) {
@@ -234,6 +286,11 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [bookings, setBookings] = useState<Booking[]>([])
   const [analytics, setAnalytics] = useState<Analytics | null>(null)
   
+  // Inactivity timeout configuration (30 minutes)
+  const INACTIVITY_TIMEOUT = 30 * 60 * 1000
+  let inactivityTimer: NodeJS.Timeout | null = null
+  let lastActivityTime = Date.now()
+  
   async function apiCall(endpoint: string, method: string = 'GET', body?: any): Promise<any> {
     return makeAPIRequest(endpoint, {
       method,
@@ -241,18 +298,127 @@ export function AppProvider({ children }: { children: ReactNode }) {
     })
   }
 
+  // Track user activity
+  const resetInactivityTimer = () => {
+    lastActivityTime = Date.now()
+    
+    if (inactivityTimer) {
+      clearTimeout(inactivityTimer)
+    }
+    
+    inactivityTimer = setTimeout(async () => {
+      console.log('[Auth] Inactivity timeout reached, signing out')
+      await signOut()
+    }, INACTIVITY_TIMEOUT)
+  }
+
   // Initialize auth state
   useEffect(() => {
     initializeAuth()
   }, [])
+
+  // Track user activity for inactivity timeout
+  useEffect(() => {
+    if (!user) return
+
+    const activityEvents = ['mousedown', 'keydown', 'scroll', 'touchstart', 'click']
+    
+    activityEvents.forEach(event => {
+      window.addEventListener(event, resetInactivityTimer)
+    })
+
+    resetInactivityTimer()
+
+    return () => {
+      if (inactivityTimer) {
+        clearTimeout(inactivityTimer)
+      }
+      activityEvents.forEach(event => {
+        window.removeEventListener(event, resetInactivityTimer)
+      })
+    }
+  }, [user])
+
+  // Handle page visibility changes to refresh session
+  useEffect(() => {
+    if (!user) return
+
+    const handleVisibilityChange = async () => {
+      if (document.visibilityState === 'visible') {
+        console.log('[Auth] Page visible, checking session')
+        
+        try {
+          const { data: { session }, error } = await supabase.auth.getSession()
+          
+          if (error) {
+            console.error('[Auth] Session check error:', error)
+            await signOut()
+            return
+          }
+
+          if (!session) {
+            console.log('[Auth] No valid session, signing out')
+            await signOut()
+            return
+          }
+
+          const now = Date.now() / 1000
+          const expiresAt = session.expires_at || 0
+          
+          if (expiresAt < now) {
+            console.log('[Auth] Session expired, refreshing')
+            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+            
+            if (refreshError || !refreshData.session) {
+              console.error('[Auth] Session refresh failed:', refreshError)
+              await signOut()
+              return
+            }
+            
+            console.log('[Auth] Session refreshed successfully')
+            localStorage.setItem('auth_token', refreshData.session.access_token)
+          }
+
+          resetInactivityTimer()
+        } catch (error) {
+          console.error('[Auth] Error checking session:', error)
+          await signOut()
+        }
+      }
+    }
+
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [user])
 
   async function initializeAuth() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session?.access_token) {
-        localStorage.setItem('auth_token', session.access_token)
-        await getCurrentUser()
+        const now = Date.now() / 1000
+        const expiresAt = session.expires_at || 0
+        
+        if (expiresAt < now) {
+          console.log('[Auth] Session expired on init, refreshing')
+          const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession()
+          
+          if (refreshError || !refreshData.session) {
+            console.error('[Auth] Session refresh failed on init:', refreshError)
+            await supabase.auth.signOut()
+            setIsLoading(false)
+            return
+          }
+          
+          localStorage.setItem('auth_token', refreshData.session.access_token)
+          await getCurrentUser()
+        } else {
+          localStorage.setItem('auth_token', session.access_token)
+          await getCurrentUser()
+        }
       }
     } catch (error) {
       console.error('Auth initialization error:', error)
@@ -262,15 +428,24 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[Auth] State change:', event)
+      
       if (event === 'SIGNED_IN' && session?.access_token) {
         localStorage.setItem('auth_token', session.access_token)
         await getCurrentUser()
+        resetInactivityTimer()
       } else if (event === 'SIGNED_OUT') {
         localStorage.removeItem('auth_token')
         setUser(null)
         setProperties([])
         setBookings([])
         setAnalytics(null)
+        if (inactivityTimer) {
+          clearTimeout(inactivityTimer)
+        }
+      } else if (event === 'TOKEN_REFRESHED' && session?.access_token) {
+        console.log('[Auth] Token refreshed automatically')
+        localStorage.setItem('auth_token', session.access_token)
       }
     })
   }
