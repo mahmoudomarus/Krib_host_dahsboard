@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
-@router.post("/", response_model=BookingResponse)
+@router.post("", response_model=BookingResponse)
 async def create_booking(
     booking_data: BookingCreate, current_user: dict = Depends(get_current_user)
 ):
@@ -122,7 +122,7 @@ async def create_booking(
         )
 
 
-@router.get("/", response_model=List[BookingResponse])
+@router.get("", response_model=List[BookingResponse])
 async def get_user_bookings(
     status_filter: Optional[str] = None, current_user: dict = Depends(get_current_user)
 ):

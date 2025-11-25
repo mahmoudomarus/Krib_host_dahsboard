@@ -142,8 +142,7 @@ export function NotificationBell() {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative z-50"
-          onClick={() => setIsOpen(!isOpen)}
+          className="relative"
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (

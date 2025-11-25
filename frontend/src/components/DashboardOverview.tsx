@@ -24,8 +24,10 @@ export function DashboardOverview() {
     loadDashboardData()
   }, [])
 
-  const totalRevenue = properties.reduce((sum, property) => sum + (property.total_revenue || 0), 0)
-  const totalBookings = properties.reduce((sum, property) => sum + (property.booking_count || 0), 0)
+  const totalRevenue = bookings
+    .filter(b => b.payment_status === 'succeeded' || b.payment_status === 'paid')
+    .reduce((sum, booking) => sum + (booking.total_amount || 0), 0)
+  const totalBookings = bookings.length
   const averageRating = properties.length > 0 
     ? properties.reduce((sum, property) => sum + (property.rating || 0), 0) / properties.length 
     : 0
