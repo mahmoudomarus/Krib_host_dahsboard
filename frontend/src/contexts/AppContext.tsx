@@ -88,7 +88,7 @@ interface Booking {
   guests: number
   total_amount: number
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed' | 'no_show'
-  payment_status: 'pending' | 'paid' | 'refunded' | 'partially_refunded'
+  payment_status: 'pending' | 'processing' | 'succeeded' | 'failed' | 'paid' | 'refunded' | 'partially_refunded'
   special_requests?: string
   booking_source?: string
   created_at: string
@@ -143,7 +143,7 @@ interface AppContextType {
   updateBooking: (id: string, bookingData: Partial<Booking>) => Promise<Booking>
   
   // Analytics methods
-  getAnalytics: () => Promise<any>
+  getAnalytics: (refresh?: boolean) => Promise<any>
   
   // Financial methods
   getFinancialSummary: (period?: string) => Promise<any>

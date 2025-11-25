@@ -154,17 +154,24 @@ export function NotificationBell() {
   }, [isOpen])
 
   const handleOpenChange = (open: boolean) => {
-    console.log('[NotificationBell] handleOpenChange called with:', open)
+    console.log('[NotificationBell] handleOpenChange called with:', open, 'Current stack:', new Error().stack)
     setIsOpen(open)
   }
 
+  const handleButtonClick = (e: React.MouseEvent) => {
+    console.log('[NotificationBell] Button clicked, current isOpen:', isOpen)
+    e.stopPropagation()
+  }
+
   return (
-    <Popover open={isOpen} onOpenChange={handleOpenChange}>
+    <Popover open={isOpen} onOpenChange={handleOpenChange} modal={false}>
       <PopoverTrigger asChild>
         <Button 
           variant="ghost" 
           size="icon" 
           className="relative"
+          type="button"
+          onClick={handleButtonClick}
         >
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
@@ -177,7 +184,7 @@ export function NotificationBell() {
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="end">
+      <PopoverContent className="w-96 p-0 z-[100]" align="end" sideOffset={8}>
         <div className="flex items-center justify-between p-4 border-b">
           <h3 className="font-semibold">Notifications</h3>
           {unreadCount > 0 && (
