@@ -101,30 +101,34 @@ function AppContent() {
 
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-full">
+      <div className="flex h-screen w-full overflow-hidden">
         <DashboardSidebar 
           activeSection={activeSection} 
           onSectionChange={handleSectionChange} 
         />
-        <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '16rem' }}>
-          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-            <div className="flex items-center justify-end h-16 px-6">
+        <main className="flex-1 overflow-auto krib-dashboard-background" style={{ marginLeft: '280px' }}>
+          {/* Enhanced Header with better spacing */}
+          <div className="sticky top-0 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b shadow-sm">
+            <div className="flex items-center justify-end h-20 px-8">
               <NotificationBell />
             </div>
           </div>
-          <Routes>
-            <Route path="/dashboard" element={<DashboardOverview />} />
-            <Route path="/dashboard/overview" element={<DashboardOverview />} />
-            <Route path="/dashboard/properties" element={<PropertyList />} />
-            <Route path="/dashboard/add-property" element={<AddPropertyWizard />} />
-            <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
-            <Route path="/dashboard/bookings" element={<BookingManagement />} />
-            <Route path="/dashboard/financials" element={<FinancialDashboard />} />
-            <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
-            <Route path="/dashboard/messages" element={<MessagingDashboard />} />
-            <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
-            <Route path="/dashboard/settings" element={<SettingsPage />} />
-          </Routes>
+          {/* Main content with better padding */}
+          <div className="p-8 max-w-[1920px] mx-auto">
+            <Routes>
+              <Route path="/dashboard" element={<DashboardOverview />} />
+              <Route path="/dashboard/overview" element={<DashboardOverview />} />
+              <Route path="/dashboard/properties" element={<PropertyList />} />
+              <Route path="/dashboard/add-property" element={<AddPropertyWizard />} />
+              <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
+              <Route path="/dashboard/bookings" element={<BookingManagement />} />
+              <Route path="/dashboard/financials" element={<FinancialDashboard />} />
+              <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
+              <Route path="/dashboard/messages" element={<MessagingDashboard />} />
+              <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
+              <Route path="/dashboard/settings" element={<SettingsPage />} />
+            </Routes>
+          </div>
         </main>
       </div>
     </SidebarProvider>
