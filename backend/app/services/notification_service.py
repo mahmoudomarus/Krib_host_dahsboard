@@ -43,15 +43,18 @@ class NotificationResponse(BaseModel):
     type: str
     title: str
     message: str
-    booking_id: Optional[str]
-    property_id: Optional[str]
-    priority: str
-    action_required: bool
-    action_url: Optional[str]
-    is_read: bool
-    expires_at: Optional[str]
+    booking_id: Optional[str] = None
+    property_id: Optional[str] = None
+    priority: str = "medium"
+    action_required: bool = False
+    action_url: Optional[str] = None
+    is_read: bool = False
+    expires_at: Optional[str] = None
     created_at: str
-    updated_at: str
+    updated_at: Optional[str] = None
+    
+    class Config:
+        extra = "ignore"
 
 
 class NotificationService:
@@ -214,7 +217,11 @@ class NotificationService:
 
             notifications = []
             for notification in result.data or []:
-                notifications.append(NotificationResponse(**notification).dict())
+                try:
+                    notifications.append(NotificationResponse(**notification).dict())
+                except Exception as e:
+                    logger.error(f"Failed to parse notification {notification.get('id')}: {e}")
+                    continue
 
             # Get unread count
             unread_count = await NotificationService.get_unread_count(host_id)

@@ -116,9 +116,13 @@ export function LocationPicker({
       } else {
         setError("Location not found. Please try a different search.")
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Search error:", err)
-      setError("Failed to search for location. Please try again.")
+      if (err?.message?.includes("REQUEST_DENIED") || err?.message?.includes("API")) {
+        setError("Google Maps API error. Check that Geocoding API is enabled and API key is valid.")
+      } else {
+        setError("Failed to search for location. Please try again.")
+      }
     } finally {
       setIsGeocoding(false)
     }
@@ -158,8 +162,9 @@ export function LocationPicker({
   if (loadError) {
     return (
       <Alert variant="destructive">
+        <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          Failed to load Google Maps. Please check your API key configuration.
+          Google Maps failed to load. Ensure VITE_GOOGLE_MAPS_API_KEY is set and has Maps JavaScript API + Geocoding API enabled in Google Cloud Console. Domain restrictions must allow host.krib.ae.
         </AlertDescription>
       </Alert>
     )
