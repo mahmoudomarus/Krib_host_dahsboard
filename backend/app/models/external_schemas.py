@@ -1,6 +1,15 @@
 """
 Pydantic models for external API integrations
 Schemas for third-party AI platforms and booking services
+
+This module provides comprehensive schemas for:
+- Property search and details
+- Availability checking
+- Pricing calculations
+- Booking creation and management
+- Host profiles (public info only)
+- Messaging between AI agents and hosts
+- Property reviews
 """
 
 from pydantic import BaseModel, Field, validator
@@ -9,7 +18,167 @@ from datetime import datetime, date
 from decimal import Decimal
 
 
+# =============================================================================
+# HOST PROFILE SCHEMAS (Public information only - NO email/phone)
+# =============================================================================
+
+class HostPublicProfile(BaseModel):
+    """Public host profile - safe to expose to external platforms"""
+    id: str = Field(..., description="Host unique identifier")
+    name: str = Field(..., description="Host display name")
+    avatar_url: Optional[str] = Field(None, description="Host profile picture URL")
+    is_superhost: bool = Field(False, description="Superhost verification status")
+    response_rate: int = Field(95, ge=0, le=100, description="Response rate percentage")
+    response_time: str = Field("within an hour", description="Typical response time")
+    member_since: str = Field(..., description="Date host joined platform")
+    total_listings: int = Field(0, ge=0, description="Number of active listings")
+    total_reviews: int = Field(0, ge=0, description="Total reviews received")
+    average_rating: float = Field(0.0, ge=0, le=5, description="Average rating from guests")
+    languages: List[str] = Field(["English"], description="Languages spoken")
+    about: Optional[str] = Field(None, description="Host bio/about section")
+    verified: bool = Field(False, description="Identity verified")
+
+
+class HostProfileResponse(BaseModel):
+    """Response for host profile endpoint"""
+    host: HostPublicProfile
+    properties_count: int = Field(0, description="Number of properties")
+    can_message: bool = Field(True, description="Whether messaging is available")
+
+
+# =============================================================================
+# MESSAGING SCHEMAS (For AI Agent <-> Host communication)
+# =============================================================================
+
+class ExternalMessageCreate(BaseModel):
+    """Create a message from external AI agent to host"""
+    property_id: str = Field(..., description="Property ID the inquiry is about")
+    guest_name: str = Field(..., min_length=1, max_length=100, description="Guest/User name")
+    guest_email: str = Field(..., description="Guest email for notifications")
+    message: str = Field(..., min_length=1, max_length=2000, description="Message content")
+    booking_id: Optional[str] = Field(None, description="Related booking ID if applicable")
+    inquiry_type: str = Field(
+        "general", 
+        description="Type: general, availability, pricing, amenities, booking_question"
+    )
+
+
+class ExternalMessageResponse(BaseModel):
+    """Response after sending a message"""
+    conversation_id: str = Field(..., description="Conversation ID for follow-ups")
+    message_id: str = Field(..., description="Unique message ID")
+    status: str = Field("sent", description="Message status")
+    host_id: str = Field(..., description="Host user ID")
+    host_name: str = Field(..., description="Host display name")
+    estimated_response_time: str = Field("within an hour", description="Expected response time")
+    created_at: str = Field(..., description="Message timestamp")
+
+
+class ConversationMessage(BaseModel):
+    """A single message in a conversation"""
+    id: str = Field(..., description="Message ID")
+    sender_type: str = Field(..., description="Sender: guest, host, or system")
+    sender_name: str = Field(..., description="Sender display name")
+    content: str = Field(..., description="Message content")
+    is_read: bool = Field(False, description="Read status")
+    is_ai_generated: bool = Field(False, description="If response was AI-generated")
+    created_at: str = Field(..., description="Message timestamp")
+
+
+class ConversationDetail(BaseModel):
+    """Full conversation with messages"""
+    conversation_id: str = Field(..., description="Conversation ID")
+    property_id: str = Field(..., description="Property ID")
+    property_title: str = Field(..., description="Property title")
+    host: HostPublicProfile = Field(..., description="Host public profile")
+    guest_name: str = Field(..., description="Guest name")
+    status: str = Field(..., description="Conversation status: active, archived")
+    messages: List[ConversationMessage] = Field([], description="Conversation messages")
+    unread_count: int = Field(0, description="Unread messages count")
+    created_at: str = Field(..., description="Conversation start time")
+    last_message_at: Optional[str] = Field(None, description="Last message timestamp")
+
+
+# =============================================================================
+# REVIEW SCHEMAS
+# =============================================================================
+
+class PropertyReview(BaseModel):
+    """A property review from a guest"""
+    id: str = Field(..., description="Review ID")
+    guest_name: str = Field(..., description="Guest display name (first name only)")
+    guest_avatar: Optional[str] = Field(None, description="Guest avatar URL")
+    rating: float = Field(..., ge=1, le=5, description="Overall rating")
+    comment: str = Field(..., description="Review text")
+    stay_date: str = Field(..., description="Month and year of stay")
+    
+    # Rating breakdown
+    cleanliness_rating: Optional[float] = Field(None, ge=1, le=5)
+    communication_rating: Optional[float] = Field(None, ge=1, le=5)
+    location_rating: Optional[float] = Field(None, ge=1, le=5)
+    value_rating: Optional[float] = Field(None, ge=1, le=5)
+    accuracy_rating: Optional[float] = Field(None, ge=1, le=5)
+    check_in_rating: Optional[float] = Field(None, ge=1, le=5)
+    
+    # Host response
+    host_response: Optional[str] = Field(None, description="Host's response to review")
+    host_response_date: Optional[str] = Field(None, description="When host responded")
+    
+    created_at: str = Field(..., description="Review submission date")
+
+
+class PropertyReviewsSummary(BaseModel):
+    """Summary of property reviews"""
+    property_id: str = Field(..., description="Property ID")
+    total_reviews: int = Field(0, description="Total number of reviews")
+    average_rating: float = Field(0.0, ge=0, le=5, description="Average overall rating")
+    
+    # Rating breakdown averages
+    cleanliness: float = Field(0.0, ge=0, le=5)
+    communication: float = Field(0.0, ge=0, le=5)
+    location: float = Field(0.0, ge=0, le=5)
+    value: float = Field(0.0, ge=0, le=5)
+    accuracy: float = Field(0.0, ge=0, le=5)
+    check_in: float = Field(0.0, ge=0, le=5)
+    
+    # Rating distribution
+    rating_distribution: Dict[str, int] = Field(
+        default_factory=lambda: {"5": 0, "4": 0, "3": 0, "2": 0, "1": 0},
+        description="Count of reviews per rating"
+    )
+    
+    reviews: List[PropertyReview] = Field([], description="List of reviews")
+
+
+# =============================================================================
+# PAYMENT SCHEMAS (Enhanced for external API)
+# =============================================================================
+
+class ExternalPaymentRequest(BaseModel):
+    """Payment request from external AI agent"""
+    booking_id: str = Field(..., description="Booking to pay for")
+    payment_method: str = Field(
+        "card", 
+        description="Payment method: card, bank_transfer, apple_pay, google_pay"
+    )
+    card_token: Optional[str] = Field(None, description="Stripe card token if using card")
+    return_url: Optional[str] = Field(None, description="URL to return after payment")
+    save_payment_method: bool = Field(False, description="Save for future use")
+
+
+class PaymentIntentResponse(BaseModel):
+    """Response with payment intent for client-side completion"""
+    payment_intent_id: str = Field(..., description="Stripe payment intent ID")
+    client_secret: str = Field(..., description="Client secret for frontend")
+    amount: float = Field(..., description="Amount in AED")
+    currency: str = Field("AED", description="Currency code")
+    status: str = Field(..., description="Payment intent status")
+    booking_id: str = Field(..., description="Associated booking ID")
+
+
+# =============================================================================
 # External Property Search Models
+# =============================================================================
 class PropertySearchFilters(BaseModel):
     # Location filters
     city: Optional[str] = Field(
@@ -296,93 +465,3 @@ class ExternalAPIError(BaseModel):
     error: str = Field(..., description="Error message")
     details: Optional[Dict[str, Any]] = Field(None, description="Error details")
     code: Optional[str] = Field(None, description="Error code")
-
-
-# Host Profile Models (Public Information Only)
-class HostPublicProfile(BaseModel):
-    """Public host profile - excludes sensitive info like email/phone"""
-    id: str = Field(..., description="Host user ID")
-    name: str = Field(..., description="Host display name")
-    avatar_url: Optional[str] = Field(None, description="Host profile picture URL")
-    is_superhost: bool = Field(False, description="Superhost verification status")
-    response_rate: Optional[int] = Field(None, ge=0, le=100, description="Response rate percentage")
-    response_time: Optional[str] = Field(None, description="Typical response time")
-    member_since: Optional[str] = Field(None, description="When host joined the platform")
-    total_properties: int = Field(0, ge=0, description="Number of active properties")
-    total_reviews: int = Field(0, ge=0, description="Total reviews received")
-    average_rating: float = Field(0.0, ge=0, le=5, description="Average rating across all properties")
-    languages: List[str] = Field(["English"], description="Languages spoken by host")
-    about: Optional[str] = Field(None, description="Host bio/about section")
-    verified: bool = Field(False, description="Identity verified status")
-
-
-class HostProfileResponse(BaseModel):
-    """Response model for host profile endpoint"""
-    host: HostPublicProfile
-    properties_preview: List[Dict[str, Any]] = Field([], description="Preview of host's properties")
-
-
-# External Messaging Models
-class ExternalMessageCreate(BaseModel):
-    """Message creation request from AI agent"""
-    booking_id: Optional[str] = Field(None, description="Related booking ID")
-    property_id: str = Field(..., description="Property ID for the conversation")
-    sender_name: str = Field(..., min_length=1, max_length=100, description="Guest/sender name")
-    sender_email: str = Field(..., description="Guest/sender email")
-    content: str = Field(..., min_length=1, max_length=2000, description="Message content")
-    message_type: str = Field("inquiry", description="Type: inquiry, booking_question, support")
-
-
-class ExternalMessageResponse(BaseModel):
-    """Response for message operations"""
-    message_id: str = Field(..., description="Unique message ID")
-    conversation_id: str = Field(..., description="Conversation thread ID")
-    status: str = Field(..., description="Message status: sent, delivered, read")
-    sent_at: str = Field(..., description="Timestamp when message was sent")
-    host_info: Dict[str, str] = Field(..., description="Host name and response time")
-
-
-class ConversationMessage(BaseModel):
-    """Single message in a conversation"""
-    id: str = Field(..., description="Message ID")
-    sender_type: str = Field(..., description="Sender type: guest, host, system")
-    sender_name: str = Field(..., description="Sender display name")
-    content: str = Field(..., description="Message content")
-    sent_at: str = Field(..., description="Timestamp")
-    is_read: bool = Field(False, description="Read status")
-    is_ai_generated: bool = Field(False, description="Whether response was AI-generated")
-
-
-class ConversationThread(BaseModel):
-    """Full conversation thread"""
-    conversation_id: str = Field(..., description="Conversation ID")
-    property_id: str = Field(..., description="Related property ID")
-    property_title: str = Field(..., description="Property title")
-    booking_id: Optional[str] = Field(None, description="Related booking ID if any")
-    host: HostPublicProfile = Field(..., description="Host public profile")
-    guest_name: str = Field(..., description="Guest name")
-    guest_email: str = Field(..., description="Guest email")
-    status: str = Field(..., description="Conversation status: active, archived")
-    messages: List[ConversationMessage] = Field([], description="Messages in thread")
-    unread_count: int = Field(0, description="Number of unread messages")
-    last_message_at: Optional[str] = Field(None, description="Last message timestamp")
-    created_at: str = Field(..., description="Conversation start time")
-
-
-# Payment Flow Models for AI Agent
-class PaymentIntentRequest(BaseModel):
-    """Request to create payment intent for booking"""
-    booking_id: str = Field(..., description="Booking ID to pay for")
-    payment_method: str = Field("card", description="Payment method type")
-    return_url: Optional[str] = Field(None, description="Return URL after payment")
-
-
-class PaymentIntentResponse(BaseModel):
-    """Response with payment details for completing payment"""
-    booking_id: str = Field(..., description="Booking ID")
-    payment_intent_id: str = Field(..., description="Stripe payment intent ID")
-    client_secret: str = Field(..., description="Client secret for frontend")
-    amount: float = Field(..., description="Amount to charge")
-    currency: str = Field("AED", description="Currency code")
-    status: str = Field(..., description="Payment intent status")
-    next_action: Optional[Dict[str, Any]] = Field(None, description="Required next action if any")

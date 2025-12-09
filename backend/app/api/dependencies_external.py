@@ -1,16 +1,16 @@
 """
 External API dependencies for third-party integrations
 Authentication for external AI platforms and service accounts
+
+API keys are validated against the database, not hardcoded values.
 """
 
 from fastapi import Depends, HTTPException, status, Header
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from typing import Optional
 import logging
-import os
-from app.core.config import settings
 from app.core.supabase_client import supabase_client
-from app.core.external_config import ExternalAPIConfig
+from app.services.api_key_service import api_key_service
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,19 @@ security = HTTPBearer()
 async def verify_external_api_key(authorization: str = Header(...)):
     """
     Verify external API key for third-party integrations
+    
+    Validates the API key against the database (hashed keys).
+    API keys are never stored in code - they're generated and stored
+    securely in the api_keys table.
 
     Args:
         authorization: Bearer token from Authorization header
 
     Returns:
-        Service account info
+        Service account info with permissions
 
     Raises:
-        HTTPException: If API key is invalid
+        HTTPException: If API key is invalid or expired
     """
     try:
         if not authorization.startswith("Bearer "):
@@ -40,23 +44,26 @@ async def verify_external_api_key(authorization: str = Header(...)):
 
         api_key = authorization[7:]  # Remove "Bearer " prefix
 
-        # Check against configured API keys
-        is_valid, service_name = ExternalAPIConfig.is_valid_api_key(api_key)
+        # Validate against database (checks hash, expiration, active status)
+        is_valid, key_info = api_key_service.validate_key(api_key)
 
-        if not is_valid:
+        if not is_valid or not key_info:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid API key",
+                detail="Invalid or expired API key",
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
         # Log the API access
-        logger.info(f"External API access granted to service: {service_name}")
+        logger.info(f"External API access granted: {key_info['key_prefix']}... ({key_info['name']})")
 
         return {
-            "service_name": service_name,
-            "api_key": api_key,
-            "permissions": ExternalAPIConfig.get_service_permissions(service_name),
+            "key_id": key_info["id"],
+            "service_name": key_info["name"],
+            "key_prefix": key_info["key_prefix"],
+            "permissions": key_info["permissions"],
+            "tier": key_info["tier"],
+            "rate_limit": key_info["rate_limit_per_minute"],
         }
 
     except HTTPException:

@@ -46,6 +46,7 @@ from app.api.routes import (
     superhost,
     messages,
     reviews,
+    api_keys,
 )
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
@@ -178,6 +179,9 @@ app.include_router(stripe_webhooks.router, prefix="/api", tags=["stripe-webhooks
 app.include_router(
     external_payments.router, prefix="/api/external", tags=["external-payments"]
 )
+
+# API Key management (admin only)
+app.include_router(api_keys.router, prefix="/api/admin/api-keys", tags=["api-keys"])
 
 
 @app.get("/")
