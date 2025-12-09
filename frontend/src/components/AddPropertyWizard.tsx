@@ -221,7 +221,7 @@ export function AddPropertyWizard() {
         if (propertyData.max_guests < 1) newErrors.max_guests = 'Must accommodate at least 1 guest'
         break
       case 'pricing':
-        if (propertyData.price_per_night < 1) newErrors.price_per_night = 'Price must be at least $1'
+        if (propertyData.price_per_night < 1) newErrors.price_per_night = 'Price must be at least 1 AED'
         if (!propertyData.description.trim()) newErrors.description = 'Description is required'
         break
     }

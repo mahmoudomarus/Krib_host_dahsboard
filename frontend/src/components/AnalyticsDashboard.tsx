@@ -125,7 +125,7 @@ export function AnalyticsDashboard() {
   const topMetrics = [
     {
       title: "Total Revenue",
-      value: `$${analyticsData?.totalRevenue?.toLocaleString() || '0'}`,
+      value: `AED ${analyticsData?.totalRevenue?.toLocaleString() || '0'}`,
       change: analyticsData?.monthly_growth ? `${analyticsData.monthly_growth > 0 ? '+' : ''}${analyticsData.monthly_growth.toFixed(1)}%` : "0%",
       trend: "up",
       icon: DollarSign,
@@ -254,7 +254,7 @@ export function AnalyticsDashboard() {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`$${value}`, 'Revenue']} />
+                    <Tooltip formatter={(value) => [`AED ${value}`, 'Revenue']} />
                     <Line 
                       type="monotone" 
                       dataKey="revenue" 
@@ -277,13 +277,13 @@ export function AnalyticsDashboard() {
                   <div className="flex justify-between">
                     <span className="text-sm">This Month</span>
                     <span className="font-medium">
-                      ${analyticsData?.current_month_revenue?.toLocaleString() || '0'}
+                      AED {analyticsData?.current_month_revenue?.toLocaleString() || '0'}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Last Month</span>
                     <span className="font-medium">
-                      ${analyticsData?.last_month_revenue?.toLocaleString() || '0'}
+                      AED {analyticsData?.last_month_revenue?.toLocaleString() || '0'}
                     </span>
                   </div>
                   <div className="flex justify-between text-green-600">

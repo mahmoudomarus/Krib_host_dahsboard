@@ -165,7 +165,7 @@ export function PropertyList() {
 
                     <div className="flex items-center gap-4">
                       <div className="flex items-baseline">
-                        <span className="font-bold text-lg text-green-600">${property.price_per_night}</span>
+                        <span className="font-bold text-lg text-green-600">AED {property.price_per_night}</span>
                         <span className="text-muted-foreground text-sm ml-1">/night</span>
                       </div>
                       {property.rating && (
@@ -265,7 +265,7 @@ export function PropertyList() {
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-white p-4 rounded-md border">
                   <Label className="font-semibold text-gray-700">Price per night</Label>
-                  <p className="text-green-600 font-bold text-lg mt-1">${selectedProperty.price_per_night}</p>
+                  <p className="text-green-600 font-bold text-lg mt-1">AED {selectedProperty.price_per_night}</p>
                 </div>
                 <div className="bg-white p-4 rounded-md border">
                   <Label className="font-semibold text-gray-700">Bedrooms</Label>
@@ -335,7 +335,7 @@ export function PropertyList() {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="bg-white p-4 rounded-md border">
-                <Label htmlFor="edit-price" className="font-semibold text-gray-700">Price per night ($)</Label>
+                <Label htmlFor="edit-price" className="font-semibold text-gray-700">Price per night (AED)</Label>
                 <Input
                   id="edit-price"
                   type="number"

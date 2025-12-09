@@ -20,7 +20,7 @@ security = HTTPBearer()
 async def verify_external_api_key(authorization: str = Header(...)):
     """
     Verify external API key for third-party integrations
-    
+
     Validates the API key against the database (hashed keys).
     API keys are never stored in code - they're generated and stored
     securely in the api_keys table.
@@ -55,7 +55,9 @@ async def verify_external_api_key(authorization: str = Header(...)):
             )
 
         # Log the API access
-        logger.info(f"External API access granted: {key_info['key_prefix']}... ({key_info['name']})")
+        logger.info(
+            f"External API access granted: {key_info['key_prefix']}... ({key_info['name']})"
+        )
 
         return {
             "key_id": key_info["id"],

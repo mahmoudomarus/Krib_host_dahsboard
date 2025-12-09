@@ -79,7 +79,11 @@ class Settings(BaseSettings):
     def validate_production_config(self):
         """Validate that all required config is set for production"""
         if not self.debug:
-            required = ["supabase_url", "supabase_anon_key", "supabase_service_role_key"]
+            required = [
+                "supabase_url",
+                "supabase_anon_key",
+                "supabase_service_role_key",
+            ]
             missing = [key for key in required if not getattr(self, key)]
             if missing:
                 raise ValueError(

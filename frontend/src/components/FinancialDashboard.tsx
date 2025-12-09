@@ -135,7 +135,7 @@ export function FinancialDashboard() {
             <DollarSign className="h-4 w-4 text-green-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${payouts?.total_pending.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">AED {payouts?.total_pending.toFixed(2) || '0.00'}</div>
             <p className="text-xs text-muted-foreground">Awaiting payout</p>
           </CardContent>
         </Card>
@@ -146,7 +146,7 @@ export function FinancialDashboard() {
             <TrendingUp className="h-4 w-4 text-krib-lime" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary?.total_earnings.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">AED {summary?.total_earnings.toFixed(2) || '0.00'}</div>
             <p className="text-xs text-muted-foreground">All time earnings</p>
           </CardContent>
         </Card>
@@ -157,7 +157,7 @@ export function FinancialDashboard() {
             <Banknote className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${payouts?.total_paid.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">AED {payouts?.total_paid.toFixed(2) || '0.00'}</div>
             <p className="text-xs text-muted-foreground">Money transferred</p>
           </CardContent>
         </Card>
@@ -168,7 +168,7 @@ export function FinancialDashboard() {
             <CreditCard className="h-4 w-4 text-orange-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">${summary?.platform_fees.toFixed(2) || '0.00'}</div>
+            <div className="text-2xl font-bold">AED {summary?.platform_fees.toFixed(2) || '0.00'}</div>
             <p className="text-xs text-muted-foreground">Fees paid</p>
           </CardContent>
         </Card>
@@ -204,7 +204,7 @@ export function FinancialDashboard() {
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
                           {getStatusIcon(payout.status)}
-                          <span className="font-medium">${payout.amount.toFixed(2)} AED</span>
+                          <span className="font-medium">AED {payout.amount.toFixed(2)}</span>
                           <Badge className={getStatusColor(payout.status)}>
                             {payout.status}
                           </Badge>
@@ -220,7 +220,7 @@ export function FinancialDashboard() {
                       </div>
                       <div className="text-right text-sm">
                         {payout.platform_fee && (
-                          <p className="text-muted-foreground">Platform fee: ${payout.platform_fee.toFixed(2)}</p>
+                          <p className="text-muted-foreground">Platform fee: AED {payout.platform_fee.toFixed(2)}</p>
                         )}
                       </div>
                     </div>
@@ -255,7 +255,7 @@ export function FinancialDashboard() {
                         </Badge>
                       </div>
                       <div className="text-right">
-                        <p className="font-medium text-green-600">+${transaction.amount.toFixed(2)}</p>
+                        <p className="font-medium text-green-600">+AED {transaction.amount.toFixed(2)}</p>
                         <p className="text-sm text-muted-foreground">{transaction.type}</p>
                       </div>
                     </div>

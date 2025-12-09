@@ -316,7 +316,7 @@ export function BookingManagement() {
                             <div>
                               <h4 className="font-medium mb-1">Booking Summary</h4>
                               <div className="space-y-1 text-muted-foreground">
-                                <div>Total: ${booking.total_amount}</div>
+                                <div>Total: AED {booking.total_amount}</div>
                                 <div>Booked: {new Date(booking.created_at).toLocaleDateString()}</div>
                                 {booking.special_requests && (
                                   <div className="text-xs">Special: {booking.special_requests}</div>

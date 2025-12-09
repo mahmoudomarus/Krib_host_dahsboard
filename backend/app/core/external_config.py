@@ -20,7 +20,7 @@ from typing import List
 class ExternalAPIConfig:
     """
     Configuration for external API integrations
-    
+
     NOTE: API keys are NOT stored in this config.
     They are stored in the database (api_keys table) and validated via APIKeyService.
     """
@@ -36,27 +36,22 @@ class ExternalAPIConfig:
     ALL_PERMISSIONS = [
         # Property operations
         "read_properties",
-        "read_property_details", 
+        "read_property_details",
         "read_availability",
         "calculate_pricing",
-        
         # Booking operations
         "create_bookings",
         "read_bookings",
         "update_booking_status",
         "process_payments",
-        
         # Host information (public only)
         "read_host_profile",
-        
         # Messaging operations
         "send_messages",
         "read_messages",
         "create_conversations",
-        
         # Reviews
         "read_reviews",
-        
         # Webhooks
         "receive_webhooks",
     ]
@@ -104,18 +99,20 @@ class ExternalAPIConfig:
     def get_rate_limit(cls, tier: str = "default") -> int:
         """Get rate limit for a specific tier"""
         return cls.RATE_LIMITS.get(tier, cls.RATE_LIMITS["default"])
-    
+
     @classmethod
     def get_all_permissions(cls) -> List[str]:
         """Get list of all available permissions"""
         return cls.ALL_PERMISSIONS
-    
+
     @classmethod
     def get_tier_permissions(cls, tier: str) -> List[str]:
         """Get permissions for a specific tier"""
         return cls.PERMISSION_TIERS.get(tier, cls.PERMISSION_TIERS["read_only"])
-    
+
     @classmethod
-    def validate_permission(cls, permissions: List[str], required_permission: str) -> bool:
+    def validate_permission(
+        cls, permissions: List[str], required_permission: str
+    ) -> bool:
         """Check if a permission list includes the required permission"""
         return required_permission in permissions

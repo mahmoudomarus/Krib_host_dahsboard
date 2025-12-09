@@ -22,8 +22,10 @@ from decimal import Decimal
 # HOST PROFILE SCHEMAS (Public information only - NO email/phone)
 # =============================================================================
 
+
 class HostPublicProfile(BaseModel):
     """Public host profile - safe to expose to external platforms"""
+
     id: str = Field(..., description="Host unique identifier")
     name: str = Field(..., description="Host display name")
     avatar_url: Optional[str] = Field(None, description="Host profile picture URL")
@@ -33,7 +35,9 @@ class HostPublicProfile(BaseModel):
     member_since: str = Field(..., description="Date host joined platform")
     total_listings: int = Field(0, ge=0, description="Number of active listings")
     total_reviews: int = Field(0, ge=0, description="Total reviews received")
-    average_rating: float = Field(0.0, ge=0, le=5, description="Average rating from guests")
+    average_rating: float = Field(
+        0.0, ge=0, le=5, description="Average rating from guests"
+    )
     languages: List[str] = Field(["English"], description="Languages spoken")
     about: Optional[str] = Field(None, description="Host bio/about section")
     verified: bool = Field(False, description="Identity verified")
@@ -41,6 +45,7 @@ class HostPublicProfile(BaseModel):
 
 class HostProfileResponse(BaseModel):
     """Response for host profile endpoint"""
+
     host: HostPublicProfile
     properties_count: int = Field(0, description="Number of properties")
     can_message: bool = Field(True, description="Whether messaging is available")
@@ -50,32 +55,44 @@ class HostProfileResponse(BaseModel):
 # MESSAGING SCHEMAS (For AI Agent <-> Host communication)
 # =============================================================================
 
+
 class ExternalMessageCreate(BaseModel):
     """Create a message from external AI agent to host"""
+
     property_id: str = Field(..., description="Property ID the inquiry is about")
-    guest_name: str = Field(..., min_length=1, max_length=100, description="Guest/User name")
+    guest_name: str = Field(
+        ..., min_length=1, max_length=100, description="Guest/User name"
+    )
     guest_email: str = Field(..., description="Guest email for notifications")
-    message: str = Field(..., min_length=1, max_length=2000, description="Message content")
-    booking_id: Optional[str] = Field(None, description="Related booking ID if applicable")
+    message: str = Field(
+        ..., min_length=1, max_length=2000, description="Message content"
+    )
+    booking_id: Optional[str] = Field(
+        None, description="Related booking ID if applicable"
+    )
     inquiry_type: str = Field(
-        "general", 
-        description="Type: general, availability, pricing, amenities, booking_question"
+        "general",
+        description="Type: general, availability, pricing, amenities, booking_question",
     )
 
 
 class ExternalMessageResponse(BaseModel):
     """Response after sending a message"""
+
     conversation_id: str = Field(..., description="Conversation ID for follow-ups")
     message_id: str = Field(..., description="Unique message ID")
     status: str = Field("sent", description="Message status")
     host_id: str = Field(..., description="Host user ID")
     host_name: str = Field(..., description="Host display name")
-    estimated_response_time: str = Field("within an hour", description="Expected response time")
+    estimated_response_time: str = Field(
+        "within an hour", description="Expected response time"
+    )
     created_at: str = Field(..., description="Message timestamp")
 
 
 class ConversationMessage(BaseModel):
     """A single message in a conversation"""
+
     id: str = Field(..., description="Message ID")
     sender_type: str = Field(..., description="Sender: guest, host, or system")
     sender_name: str = Field(..., description="Sender display name")
@@ -87,6 +104,7 @@ class ConversationMessage(BaseModel):
 
 class ConversationDetail(BaseModel):
     """Full conversation with messages"""
+
     conversation_id: str = Field(..., description="Conversation ID")
     property_id: str = Field(..., description="Property ID")
     property_title: str = Field(..., description="Property title")
@@ -103,15 +121,17 @@ class ConversationDetail(BaseModel):
 # REVIEW SCHEMAS
 # =============================================================================
 
+
 class PropertyReview(BaseModel):
     """A property review from a guest"""
+
     id: str = Field(..., description="Review ID")
     guest_name: str = Field(..., description="Guest display name (first name only)")
     guest_avatar: Optional[str] = Field(None, description="Guest avatar URL")
     rating: float = Field(..., ge=1, le=5, description="Overall rating")
     comment: str = Field(..., description="Review text")
     stay_date: str = Field(..., description="Month and year of stay")
-    
+
     # Rating breakdown
     cleanliness_rating: Optional[float] = Field(None, ge=1, le=5)
     communication_rating: Optional[float] = Field(None, ge=1, le=5)
@@ -119,20 +139,21 @@ class PropertyReview(BaseModel):
     value_rating: Optional[float] = Field(None, ge=1, le=5)
     accuracy_rating: Optional[float] = Field(None, ge=1, le=5)
     check_in_rating: Optional[float] = Field(None, ge=1, le=5)
-    
+
     # Host response
     host_response: Optional[str] = Field(None, description="Host's response to review")
     host_response_date: Optional[str] = Field(None, description="When host responded")
-    
+
     created_at: str = Field(..., description="Review submission date")
 
 
 class PropertyReviewsSummary(BaseModel):
     """Summary of property reviews"""
+
     property_id: str = Field(..., description="Property ID")
     total_reviews: int = Field(0, description="Total number of reviews")
     average_rating: float = Field(0.0, ge=0, le=5, description="Average overall rating")
-    
+
     # Rating breakdown averages
     cleanliness: float = Field(0.0, ge=0, le=5)
     communication: float = Field(0.0, ge=0, le=5)
@@ -140,13 +161,13 @@ class PropertyReviewsSummary(BaseModel):
     value: float = Field(0.0, ge=0, le=5)
     accuracy: float = Field(0.0, ge=0, le=5)
     check_in: float = Field(0.0, ge=0, le=5)
-    
+
     # Rating distribution
     rating_distribution: Dict[str, int] = Field(
         default_factory=lambda: {"5": 0, "4": 0, "3": 0, "2": 0, "1": 0},
-        description="Count of reviews per rating"
+        description="Count of reviews per rating",
     )
-    
+
     reviews: List[PropertyReview] = Field([], description="List of reviews")
 
 
@@ -154,20 +175,24 @@ class PropertyReviewsSummary(BaseModel):
 # PAYMENT SCHEMAS (Enhanced for external API)
 # =============================================================================
 
+
 class ExternalPaymentRequest(BaseModel):
     """Payment request from external AI agent"""
+
     booking_id: str = Field(..., description="Booking to pay for")
     payment_method: str = Field(
-        "card", 
-        description="Payment method: card, bank_transfer, apple_pay, google_pay"
+        "card", description="Payment method: card, bank_transfer, apple_pay, google_pay"
     )
-    card_token: Optional[str] = Field(None, description="Stripe card token if using card")
+    card_token: Optional[str] = Field(
+        None, description="Stripe card token if using card"
+    )
     return_url: Optional[str] = Field(None, description="URL to return after payment")
     save_payment_method: bool = Field(False, description="Save for future use")
 
 
 class PaymentIntentResponse(BaseModel):
     """Response with payment intent for client-side completion"""
+
     payment_intent_id: str = Field(..., description="Stripe payment intent ID")
     client_secret: str = Field(..., description="Client secret for frontend")
     amount: float = Field(..., description="Amount in AED")

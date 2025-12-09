@@ -1253,6 +1253,7 @@ async def external_api_health():
 # HOST PROFILE ENDPOINTS
 # =============================================================================
 
+
 @router.get("/v1/hosts/{host_id}/profile", response_model=ExternalAPIResponse)
 @limiter.limit("200/minute")
 async def get_host_public_profile(
@@ -1262,14 +1263,14 @@ async def get_host_public_profile(
 ):
     """
     Get public host profile information
-    
+
     Returns host's public information including:
     - Name and avatar
     - Superhost status
     - Response rate and time
     - Number of listings
     - Average rating
-    
+
     **Does NOT return**: email, phone, or other private information
     """
     try:
@@ -1280,15 +1281,14 @@ async def get_host_public_profile(
             .eq("id", host_id)
             .execute()
         )
-        
+
         if not host_result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Host not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Host not found"
             )
-        
+
         host = host_result.data[0]
-        
+
         # Get host's properties count
         properties_result = (
             supabase_client.table("properties")
@@ -1298,7 +1298,7 @@ async def get_host_public_profile(
             .execute()
         )
         properties_count = properties_result.count or 0
-        
+
         # Get superhost status
         superhost_result = (
             supabase_client.table("superhost_verifications")
@@ -1307,8 +1307,10 @@ async def get_host_public_profile(
             .eq("status", "approved")
             .execute()
         )
-        is_superhost = len(superhost_result.data) > 0 if superhost_result.data else False
-        
+        is_superhost = (
+            len(superhost_result.data) > 0 if superhost_result.data else False
+        )
+
         # Get average rating from all host's property reviews
         reviews_result = (
             supabase_client.table("reviews")
@@ -1316,13 +1318,13 @@ async def get_host_public_profile(
             .eq("properties.user_id", host_id)
             .execute()
         )
-        
+
         total_reviews = len(reviews_result.data) if reviews_result.data else 0
         average_rating = 0.0
         if total_reviews > 0:
             ratings = [r["rating"] for r in reviews_result.data if r.get("rating")]
             average_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0.0
-        
+
         # Build public profile
         host_profile = {
             "id": host["id"],
@@ -1331,7 +1333,9 @@ async def get_host_public_profile(
             "is_superhost": is_superhost,
             "response_rate": 95,  # Default, could be calculated from messages
             "response_time": "within an hour",
-            "member_since": host.get("created_at", "")[:10] if host.get("created_at") else "",
+            "member_since": (
+                host.get("created_at", "")[:10] if host.get("created_at") else ""
+            ),
             "total_listings": properties_count,
             "total_reviews": total_reviews,
             "average_rating": average_rating,
@@ -1339,7 +1343,7 @@ async def get_host_public_profile(
             "about": None,  # Could be added to user profile later
             "verified": True,  # All hosts are verified via Supabase auth
         }
-        
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1347,22 +1351,23 @@ async def get_host_public_profile(
                 "properties_count": properties_count,
                 "can_message": True,
             },
-            message="Host profile retrieved successfully"
+            message="Host profile retrieved successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get host profile for {host_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get host profile: {str(e)}"
+            detail=f"Failed to get host profile: {str(e)}",
         )
 
 
 # =============================================================================
 # MESSAGING ENDPOINTS (AI Agent <-> Host Communication)
 # =============================================================================
+
 
 @router.post("/v1/messages", response_model=ExternalAPIResponse)
 @limiter.limit("50/minute")
@@ -1373,16 +1378,16 @@ async def send_message_to_host(
 ):
     """
     Send a message to a host about a property
-    
+
     Creates a conversation if one doesn't exist, then sends the message.
     This is the primary way for AI agents to initiate communication with hosts.
-    
+
     Required fields in message_data:
     - property_id: Property the inquiry is about
     - guest_name: Name of the guest/user
     - guest_email: Email for notifications
     - message: The message content
-    
+
     Optional fields:
     - booking_id: Related booking if applicable
     - inquiry_type: general, availability, pricing, amenities, booking_question
@@ -1394,14 +1399,14 @@ async def send_message_to_host(
         message_content = message_data.get("message")
         booking_id = message_data.get("booking_id")
         inquiry_type = message_data.get("inquiry_type", "general")
-        
+
         # Validate required fields
         if not all([property_id, guest_name, guest_email, message_content]):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Missing required fields: property_id, guest_name, guest_email, message"
+                detail="Missing required fields: property_id, guest_name, guest_email, message",
             )
-        
+
         # Get property and host info
         property_result = (
             supabase_client.table("properties")
@@ -1410,17 +1415,19 @@ async def send_message_to_host(
             .eq("status", "active")
             .execute()
         )
-        
+
         if not property_result.data:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Property not found or not available"
+                detail="Property not found or not available",
             )
-        
+
         property_data = property_result.data[0]
         host_id = property_data["user_id"]
-        host_name = property_data["users"]["name"] if property_data.get("users") else "Host"
-        
+        host_name = (
+            property_data["users"]["name"] if property_data.get("users") else "Host"
+        )
+
         # Check for existing conversation
         existing_conversation = (
             supabase_client.table("conversations")
@@ -1430,7 +1437,7 @@ async def send_message_to_host(
             .eq("status", "active")
             .execute()
         )
-        
+
         conversation_id = None
         if existing_conversation.data:
             conversation_id = existing_conversation.data[0]["id"]
@@ -1438,57 +1445,64 @@ async def send_message_to_host(
             # Create new conversation
             conversation_result = (
                 supabase_client.table("conversations")
-                .insert({
-                    "property_id": property_id,
-                    "host_id": host_id,
-                    "guest_name": guest_name,
-                    "guest_email": guest_email,
-                    "booking_id": booking_id,
-                    "status": "active",
-                    "inquiry_type": inquiry_type,
-                })
+                .insert(
+                    {
+                        "property_id": property_id,
+                        "host_id": host_id,
+                        "guest_name": guest_name,
+                        "guest_email": guest_email,
+                        "booking_id": booking_id,
+                        "status": "active",
+                        "inquiry_type": inquiry_type,
+                    }
+                )
                 .execute()
             )
-            
+
             if not conversation_result.data:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to create conversation"
+                    detail="Failed to create conversation",
                 )
-            
+
             conversation_id = conversation_result.data[0]["id"]
-        
+
         # Send the message
         message_result = (
             supabase_client.table("messages")
-            .insert({
-                "conversation_id": conversation_id,
-                "sender_id": guest_email,  # Use email as guest identifier
-                "sender_type": "guest",
-                "content": message_content,
-                "is_read": False,
-                "is_ai_generated": False,
-            })
+            .insert(
+                {
+                    "conversation_id": conversation_id,
+                    "sender_id": guest_email,  # Use email as guest identifier
+                    "sender_type": "guest",
+                    "content": message_content,
+                    "is_read": False,
+                    "is_ai_generated": False,
+                }
+            )
             .execute()
         )
-        
+
         if not message_result.data:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to send message"
+                detail="Failed to send message",
             )
-        
+
         message_record = message_result.data[0]
-        
+
         # Update conversation last_message_at
-        supabase_client.table("conversations").update({
-            "last_message_at": datetime.utcnow().isoformat(),
-            "unread_host": True,
-        }).eq("id", conversation_id).execute()
-        
+        supabase_client.table("conversations").update(
+            {
+                "last_message_at": datetime.utcnow().isoformat(),
+                "unread_host": True,
+            }
+        ).eq("id", conversation_id).execute()
+
         # Create notification for host
         try:
             from app.services.notification_service import NotificationService
+
             await NotificationService.create_notification(
                 user_id=host_id,
                 notification_type="new_message",
@@ -1498,13 +1512,15 @@ async def send_message_to_host(
                     "conversation_id": conversation_id,
                     "property_id": property_id,
                     "guest_name": guest_name,
-                }
+                },
             )
         except Exception as notify_error:
             logger.warning(f"Failed to create notification: {notify_error}")
-        
-        logger.info(f"External message sent: conversation={conversation_id}, from={guest_name}")
-        
+
+        logger.info(
+            f"External message sent: conversation={conversation_id}, from={guest_name}"
+        )
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1517,16 +1533,16 @@ async def send_message_to_host(
                 "estimated_response_time": "within an hour",
                 "created_at": message_record["created_at"],
             },
-            message="Message sent successfully"
+            message="Message sent successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to send message: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to send message: {str(e)}"
+            detail=f"Failed to send message: {str(e)}",
         )
 
 
@@ -1540,7 +1556,7 @@ async def get_conversation(
 ):
     """
     Get conversation details and messages
-    
+
     Returns the full conversation including:
     - Conversation metadata
     - Host public profile
@@ -1550,25 +1566,26 @@ async def get_conversation(
         # Get conversation
         conversation_result = (
             supabase_client.table("conversations")
-            .select("""
+            .select(
+                """
                 *,
                 properties!inner(id, title, user_id),
                 users!conversations_host_id_fkey(id, name, avatar_url, created_at)
-            """)
+            """
+            )
             .eq("id", conversation_id)
             .execute()
         )
-        
+
         if not conversation_result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Conversation not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found"
             )
-        
+
         conversation = conversation_result.data[0]
         property_data = conversation.get("properties", {})
         host_data = conversation.get("users", {})
-        
+
         # Get messages
         messages_result = (
             supabase_client.table("messages")
@@ -1578,22 +1595,30 @@ async def get_conversation(
             .limit(limit)
             .execute()
         )
-        
+
         messages = []
-        for msg in (messages_result.data or []):
-            messages.append({
-                "id": msg["id"],
-                "sender_type": msg["sender_type"],
-                "sender_name": conversation["guest_name"] if msg["sender_type"] == "guest" else host_data.get("name", "Host"),
-                "content": msg["content"],
-                "is_read": msg.get("is_read", False),
-                "is_ai_generated": msg.get("is_ai_generated", False),
-                "created_at": msg["created_at"],
-            })
-        
+        for msg in messages_result.data or []:
+            messages.append(
+                {
+                    "id": msg["id"],
+                    "sender_type": msg["sender_type"],
+                    "sender_name": (
+                        conversation["guest_name"]
+                        if msg["sender_type"] == "guest"
+                        else host_data.get("name", "Host")
+                    ),
+                    "content": msg["content"],
+                    "is_read": msg.get("is_read", False),
+                    "is_ai_generated": msg.get("is_ai_generated", False),
+                    "created_at": msg["created_at"],
+                }
+            )
+
         # Count unread messages
-        unread_count = sum(1 for m in messages if not m["is_read"] and m["sender_type"] == "host")
-        
+        unread_count = sum(
+            1 for m in messages if not m["is_read"] and m["sender_type"] == "host"
+        )
+
         # Build host public profile
         host_profile = {
             "id": host_data.get("id", ""),
@@ -1602,7 +1627,11 @@ async def get_conversation(
             "is_superhost": False,  # Could check superhost table
             "response_rate": 95,
             "response_time": "within an hour",
-            "member_since": host_data.get("created_at", "")[:10] if host_data.get("created_at") else "",
+            "member_since": (
+                host_data.get("created_at", "")[:10]
+                if host_data.get("created_at")
+                else ""
+            ),
             "total_listings": 0,
             "total_reviews": 0,
             "average_rating": 0.0,
@@ -1610,7 +1639,7 @@ async def get_conversation(
             "about": None,
             "verified": True,
         }
-        
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1626,20 +1655,22 @@ async def get_conversation(
                 "created_at": conversation["created_at"],
                 "last_message_at": conversation.get("last_message_at"),
             },
-            message="Conversation retrieved successfully"
+            message="Conversation retrieved successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get conversation {conversation_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get conversation: {str(e)}"
+            detail=f"Failed to get conversation: {str(e)}",
         )
 
 
-@router.post("/v1/conversations/{conversation_id}/messages", response_model=ExternalAPIResponse)
+@router.post(
+    "/v1/conversations/{conversation_id}/messages", response_model=ExternalAPIResponse
+)
 @limiter.limit("50/minute")
 async def send_follow_up_message(
     request: Request,
@@ -1649,7 +1680,7 @@ async def send_follow_up_message(
 ):
     """
     Send a follow-up message in an existing conversation
-    
+
     Required fields in message_data:
     - message: The message content
     - guest_email: Must match the conversation's guest email for verification
@@ -1657,13 +1688,13 @@ async def send_follow_up_message(
     try:
         message_content = message_data.get("message")
         guest_email = message_data.get("guest_email")
-        
+
         if not message_content:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Message content is required"
+                detail="Message content is required",
             )
-        
+
         # Get conversation and verify guest
         conversation_result = (
             supabase_client.table("conversations")
@@ -1671,60 +1702,64 @@ async def send_follow_up_message(
             .eq("id", conversation_id)
             .execute()
         )
-        
+
         if not conversation_result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Conversation not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Conversation not found"
             )
-        
+
         conversation = conversation_result.data[0]
-        
+
         # Verify guest email matches
         if guest_email and conversation["guest_email"] != guest_email:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Guest email does not match conversation"
+                detail="Guest email does not match conversation",
             )
-        
+
         # Check conversation is active
         if conversation["status"] != "active":
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Conversation is not active"
+                detail="Conversation is not active",
             )
-        
+
         # Send message
         message_result = (
             supabase_client.table("messages")
-            .insert({
-                "conversation_id": conversation_id,
-                "sender_id": conversation["guest_email"],
-                "sender_type": "guest",
-                "content": message_content,
-                "is_read": False,
-                "is_ai_generated": False,
-            })
+            .insert(
+                {
+                    "conversation_id": conversation_id,
+                    "sender_id": conversation["guest_email"],
+                    "sender_type": "guest",
+                    "content": message_content,
+                    "is_read": False,
+                    "is_ai_generated": False,
+                }
+            )
             .execute()
         )
-        
+
         if not message_result.data:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to send message"
+                detail="Failed to send message",
             )
-        
+
         message_record = message_result.data[0]
-        
+
         # Update conversation
-        supabase_client.table("conversations").update({
-            "last_message_at": datetime.utcnow().isoformat(),
-            "unread_host": True,
-        }).eq("id", conversation_id).execute()
-        
+        supabase_client.table("conversations").update(
+            {
+                "last_message_at": datetime.utcnow().isoformat(),
+                "unread_host": True,
+            }
+        ).eq("id", conversation_id).execute()
+
         # Notify host
         try:
             from app.services.notification_service import NotificationService
+
             await NotificationService.create_notification(
                 user_id=conversation["host_id"],
                 notification_type="new_message",
@@ -1733,11 +1768,11 @@ async def send_follow_up_message(
                 data={
                     "conversation_id": conversation_id,
                     "property_id": conversation["property_id"],
-                }
+                },
             )
         except Exception as notify_error:
             logger.warning(f"Failed to create notification: {notify_error}")
-        
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1746,22 +1781,23 @@ async def send_follow_up_message(
                 "status": "sent",
                 "created_at": message_record["created_at"],
             },
-            message="Message sent successfully"
+            message="Message sent successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to send follow-up message: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to send message: {str(e)}"
+            detail=f"Failed to send message: {str(e)}",
         )
 
 
 # =============================================================================
 # PROPERTY REVIEWS ENDPOINTS
 # =============================================================================
+
 
 @router.get("/v1/properties/{property_id}/reviews", response_model=ExternalAPIResponse)
 @limiter.limit("100/minute")
@@ -1775,7 +1811,7 @@ async def get_property_reviews(
 ):
     """
     Get reviews for a property
-    
+
     Returns:
     - Review summary with average ratings
     - Rating distribution
@@ -1791,13 +1827,12 @@ async def get_property_reviews(
             .eq("status", "active")
             .execute()
         )
-        
+
         if not property_result.data:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Property not found"
+                status_code=status.HTTP_404_NOT_FOUND, detail="Property not found"
             )
-        
+
         # Get total count
         count_result = (
             supabase_client.table("reviews")
@@ -1806,28 +1841,26 @@ async def get_property_reviews(
             .execute()
         )
         total_reviews = count_result.count or 0
-        
+
         # Get reviews with sorting
         query = (
-            supabase_client.table("reviews")
-            .select("*")
-            .eq("property_id", property_id)
+            supabase_client.table("reviews").select("*").eq("property_id", property_id)
         )
-        
+
         if sort_by == "highest":
             query = query.order("rating", desc=True)
         elif sort_by == "lowest":
             query = query.order("rating", desc=False)
         else:  # recent
             query = query.order("created_at", desc=True)
-        
+
         query = query.range(offset, offset + limit - 1)
         reviews_result = query.execute()
-        
+
         reviews = []
         rating_sum = 0
         rating_distribution = {"5": 0, "4": 0, "3": 0, "2": 0, "1": 0}
-        
+
         # Rating breakdown sums
         cleanliness_sum = 0
         communication_sum = 0
@@ -1836,12 +1869,14 @@ async def get_property_reviews(
         accuracy_sum = 0
         check_in_sum = 0
         breakdown_count = 0
-        
-        for review in (reviews_result.data or []):
+
+        for review in reviews_result.data or []:
             rating = review.get("rating", 0)
             rating_sum += rating
-            rating_distribution[str(int(rating))] = rating_distribution.get(str(int(rating)), 0) + 1
-            
+            rating_distribution[str(int(rating))] = (
+                rating_distribution.get(str(int(rating)), 0) + 1
+            )
+
             # Sum breakdown ratings if present
             if review.get("cleanliness_rating"):
                 cleanliness_sum += review["cleanliness_rating"]
@@ -1851,50 +1886,78 @@ async def get_property_reviews(
                 accuracy_sum += review.get("accuracy_rating", 0)
                 check_in_sum += review.get("check_in_rating", 0)
                 breakdown_count += 1
-            
+
             # Get guest name (first name only for privacy)
             guest_name = review.get("guest_name", "Guest")
             if " " in guest_name:
                 guest_name = guest_name.split(" ")[0]
-            
+
             # Format stay date
             stay_date = ""
             if review.get("check_in"):
                 try:
-                    check_in_date = datetime.fromisoformat(review["check_in"].replace("Z", "+00:00"))
+                    check_in_date = datetime.fromisoformat(
+                        review["check_in"].replace("Z", "+00:00")
+                    )
                     stay_date = check_in_date.strftime("%B %Y")
                 except Exception:
                     stay_date = review.get("check_in", "")[:7]
-            
-            reviews.append({
-                "id": review["id"],
-                "guest_name": guest_name,
-                "guest_avatar": None,  # Could be added if we store guest avatars
-                "rating": rating,
-                "comment": review.get("comment", ""),
-                "stay_date": stay_date,
-                "cleanliness_rating": review.get("cleanliness_rating"),
-                "communication_rating": review.get("communication_rating"),
-                "location_rating": review.get("location_rating"),
-                "value_rating": review.get("value_rating"),
-                "accuracy_rating": review.get("accuracy_rating"),
-                "check_in_rating": review.get("check_in_rating"),
-                "host_response": review.get("host_response"),
-                "host_response_date": review.get("host_response_date"),
-                "created_at": review.get("created_at", ""),
-            })
-        
+
+            reviews.append(
+                {
+                    "id": review["id"],
+                    "guest_name": guest_name,
+                    "guest_avatar": None,  # Could be added if we store guest avatars
+                    "rating": rating,
+                    "comment": review.get("comment", ""),
+                    "stay_date": stay_date,
+                    "cleanliness_rating": review.get("cleanliness_rating"),
+                    "communication_rating": review.get("communication_rating"),
+                    "location_rating": review.get("location_rating"),
+                    "value_rating": review.get("value_rating"),
+                    "accuracy_rating": review.get("accuracy_rating"),
+                    "check_in_rating": review.get("check_in_rating"),
+                    "host_response": review.get("host_response"),
+                    "host_response_date": review.get("host_response_date"),
+                    "created_at": review.get("created_at", ""),
+                }
+            )
+
         # Calculate averages
         average_rating = round(rating_sum / len(reviews), 1) if reviews else 0.0
-        
+
         # Calculate breakdown averages
-        cleanliness_avg = round(cleanliness_sum / breakdown_count, 1) if breakdown_count > 0 else average_rating
-        communication_avg = round(communication_sum / breakdown_count, 1) if breakdown_count > 0 else average_rating
-        location_avg = round(location_sum / breakdown_count, 1) if breakdown_count > 0 else average_rating
-        value_avg = round(value_sum / breakdown_count, 1) if breakdown_count > 0 else average_rating
-        accuracy_avg = round(accuracy_sum / breakdown_count, 1) if breakdown_count > 0 else average_rating
-        check_in_avg = round(check_in_sum / breakdown_count, 1) if breakdown_count > 0 else average_rating
-        
+        cleanliness_avg = (
+            round(cleanliness_sum / breakdown_count, 1)
+            if breakdown_count > 0
+            else average_rating
+        )
+        communication_avg = (
+            round(communication_sum / breakdown_count, 1)
+            if breakdown_count > 0
+            else average_rating
+        )
+        location_avg = (
+            round(location_sum / breakdown_count, 1)
+            if breakdown_count > 0
+            else average_rating
+        )
+        value_avg = (
+            round(value_sum / breakdown_count, 1)
+            if breakdown_count > 0
+            else average_rating
+        )
+        accuracy_avg = (
+            round(accuracy_sum / breakdown_count, 1)
+            if breakdown_count > 0
+            else average_rating
+        )
+        check_in_avg = (
+            round(check_in_sum / breakdown_count, 1)
+            if breakdown_count > 0
+            else average_rating
+        )
+
         return ExternalAPIResponse(
             success=True,
             data={
@@ -1916,16 +1979,16 @@ async def get_property_reviews(
                     "limit": limit,
                     "offset": offset,
                     "total": total_reviews,
-                }
+                },
             },
-            message="Reviews retrieved successfully"
+            message="Reviews retrieved successfully",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"Failed to get reviews for property {property_id}: {e}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to get reviews: {str(e)}"
+            detail=f"Failed to get reviews: {str(e)}",
         )

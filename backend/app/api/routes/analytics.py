@@ -194,19 +194,17 @@ async def get_analytics(
         # Use consistent filtering: confirmed/completed status AND paid payment_status
         # This aligns with financials calculations
         total_properties = len(properties)
-        
+
         # Filter bookings that are both confirmed/completed AND have successful payment
         confirmed_bookings = [
-            b for b in bookings 
-            if b["status"] in ["confirmed", "completed"] 
+            b
+            for b in bookings
+            if b["status"] in ["confirmed", "completed"]
             and b.get("payment_status") in ["succeeded", "paid"]
         ]
-        
+
         total_bookings = len(confirmed_bookings)
-        total_revenue = sum(
-            float(b["total_amount"])
-            for b in confirmed_bookings
-        )
+        total_revenue = sum(float(b["total_amount"]) for b in confirmed_bookings)
 
         # Calculate occupancy rate
         occupancy_rate = _calculate_occupancy_rate(properties, bookings)
@@ -523,8 +521,9 @@ def _calculate_occupancy_rate(properties: List[Dict], bookings: List[Dict]) -> f
         return 0
 
     total_nights_booked = sum(
-        int(b["nights"]) for b in bookings 
-        if b["status"] in ["confirmed", "completed"] 
+        int(b["nights"])
+        for b in bookings
+        if b["status"] in ["confirmed", "completed"]
         and b.get("payment_status") in ["succeeded", "paid"]
     )
     total_available_nights = len(properties) * 365  # Simplified calculation

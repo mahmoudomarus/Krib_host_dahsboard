@@ -65,7 +65,7 @@ export function DashboardOverview() {
     },
     {
       title: "Total Revenue",
-      value: `$${totalRevenue.toLocaleString()}`,
+      value: `AED ${totalRevenue.toLocaleString()}`,
       change: totalRevenue > 0 ? "From confirmed bookings" : "No revenue yet",
       icon: DollarSign,
       color: "text-green-600"
@@ -138,7 +138,7 @@ export function DashboardOverview() {
                       </p>
                     </div>
                     <div className="text-right">
-                      <p className="font-medium">${booking.total_amount}</p>
+                      <p className="font-medium">AED {booking.total_amount}</p>
                       <Badge 
                         variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
                       >
@@ -182,7 +182,7 @@ export function DashboardOverview() {
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-medium">${property.total_revenue || 0}</p>
+                          <p className="font-medium">AED {property.total_revenue || 0}</p>
                           <p className="text-sm text-muted-foreground">{propertyOccupancy}% occupied</p>
                         </div>
                       </div>
