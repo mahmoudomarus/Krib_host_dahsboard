@@ -199,7 +199,7 @@ def generate_daily_analytics_report(date_str: str):
 
 
 @monitored_task()
-def update_market_intelligence_data():
+async def update_market_intelligence_data():
     """Update market intelligence data from external sources"""
     try:
         from app.services.dubai_market_service import DubaiMarketService
