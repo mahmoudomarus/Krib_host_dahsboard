@@ -40,7 +40,35 @@ async def create_property(
 ):
     """Create a new property listing"""
     try:
+        # Validate UAE-only - This is a UAE platform
+        valid_uae_countries = ["uae", "united arab emirates", "ae"]
+        valid_uae_emirates = [
+            "dubai",
+            "abu dhabi",
+            "sharjah",
+            "ajman",
+            "ras al khaimah",
+            "fujairah",
+            "umm al quwain",
+        ]
+
+        country_lower = (property_data.country or "").lower().strip()
+        state_lower = (property_data.state or "").lower().strip()
+
+        is_uae = (
+            country_lower in valid_uae_countries or state_lower in valid_uae_emirates
+        )
+
+        if not is_uae:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Krib is a UAE-only platform. Please select a location within the United Arab Emirates.",
+            )
+
         property_id = str(uuid.uuid4())
+
+        # Ensure country is set to UAE
+        normalized_country = "UAE" if is_uae else property_data.country
 
         property_record = {
             "id": property_id,
@@ -50,7 +78,7 @@ async def create_property(
             "address": property_data.address,
             "city": property_data.city,
             "state": property_data.state,
-            "country": property_data.country,
+            "country": normalized_country,
             "latitude": property_data.latitude,
             "longitude": property_data.longitude,
             "property_type": property_data.property_type,

@@ -56,6 +56,7 @@ async def create_booking(
             )
 
         # Create booking record
+        # Note: 'nights' is a generated column in the database (computed from check_out - check_in)
         booking_record = {
             "property_id": booking_data.property_id,
             "guest_name": booking_data.guest_name,
@@ -63,7 +64,7 @@ async def create_booking(
             "guest_phone": booking_data.guest_phone,
             "check_in": booking_data.check_in.isoformat(),
             "check_out": booking_data.check_out.isoformat(),
-            "nights": nights,
+            # nights is generated automatically by the database
             "guests": booking_data.guests,
             "total_amount": total_amount,
             "status": "pending",

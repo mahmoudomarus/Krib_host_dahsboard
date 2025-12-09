@@ -610,6 +610,8 @@ async def create_external_booking(
         nights = (booking_request.check_out - booking_request.check_in).days
 
         # Create booking record
+        # Note: 'nights' is a generated column in the database (computed from check_out - check_in)
+        # so we don't include it in the insert
         booking_id = str(uuid.uuid4())
         booking_record = {
             "id": booking_id,
@@ -619,7 +621,7 @@ async def create_external_booking(
             "guest_phone": f"{booking_request.guest_info.country_code}{booking_request.guest_info.phone}",
             "check_in": booking_request.check_in.isoformat(),
             "check_out": booking_request.check_out.isoformat(),
-            "nights": nights,
+            # nights is generated automatically by the database
             "guests": booking_request.guests,
             "total_amount": booking_request.total_amount,
             "status": "pending",  # Always pending for external bookings
