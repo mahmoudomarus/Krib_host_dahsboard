@@ -150,6 +150,19 @@ class PropertyCreate(BaseModel):
     )  # Increased for Dubai luxury market
     amenities: List[str] = []
     images: List[str] = []
+    # Availability settings
+    minimum_nights: int = Field(
+        default=1, ge=1, le=365, description="Minimum stay in nights"
+    )
+    maximum_nights: int = Field(
+        default=365, ge=1, le=365, description="Maximum stay in nights"
+    )
+    available_from: Optional[date] = Field(
+        None, description="Date from which property is available"
+    )
+    available_to: Optional[date] = Field(
+        None, description="Date until which property is available"
+    )
 
     @validator("bathrooms")
     def validate_bathrooms(cls, v):

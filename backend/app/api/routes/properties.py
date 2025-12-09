@@ -88,6 +88,19 @@ async def create_property(
             "price_per_night": property_data.price_per_night,
             "amenities": property_data.amenities,
             "images": property_data.images,
+            # Availability settings
+            "minimum_nights": property_data.minimum_nights,
+            "maximum_nights": property_data.maximum_nights,
+            "available_from": (
+                property_data.available_from.isoformat()
+                if property_data.available_from
+                else None
+            ),
+            "available_to": (
+                property_data.available_to.isoformat()
+                if property_data.available_to
+                else None
+            ),
             "status": "draft",
             "rating": 0,
             "review_count": 0,

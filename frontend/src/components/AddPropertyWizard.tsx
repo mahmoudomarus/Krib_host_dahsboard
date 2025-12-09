@@ -33,6 +33,11 @@ interface PropertyData {
   description: string
   images: string[]
   amenities: string[]
+  // Availability settings
+  minimum_nights: number
+  maximum_nights: number
+  available_from?: string
+  available_to?: string
 }
 
 // UAE-specific amenities and property types are loaded from the backend via useEffect
@@ -71,7 +76,12 @@ export function AddPropertyWizard() {
     price_per_night: 500, // Higher default for UAE market
     description: '',
     images: [],
-    amenities: []
+    amenities: [],
+    // Availability settings
+    minimum_nights: 1,
+    maximum_nights: 365,
+    available_from: undefined,
+    available_to: undefined
   })
 
   const steps = [
@@ -566,9 +576,67 @@ export function AddPropertyWizard() {
                   className={errors.max_guests ? 'border-red-500' : ''}
                 />
                 {errors.max_guests && <p className="text-red-500 text-sm mt-1">{errors.max_guests}</p>}
-                  </div>
-                  </div>
+              </div>
+            </div>
+
+            {/* Booking Rules */}
+            <div className="mt-8 pt-6 border-t">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Booking Rules</h3>
+              <div className="grid gap-6 md:grid-cols-2">
+                <div>
+                  <Label htmlFor="minimum_nights">Minimum Stay (nights)</Label>
+                  <Input 
+                    id="minimum_nights"
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={propertyData.minimum_nights}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, minimum_nights: parseInt(e.target.value) || 1 }))}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Guests must stay at least this many nights</p>
                 </div>
+                
+                <div>
+                  <Label htmlFor="maximum_nights">Maximum Stay (nights)</Label>
+                  <Input
+                    id="maximum_nights"
+                    type="number"
+                    min="1"
+                    max="365"
+                    value={propertyData.maximum_nights}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, maximum_nights: parseInt(e.target.value) || 365 }))}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Maximum length of stay allowed</p>
+                </div>
+              </div>
+
+              <div className="grid gap-6 md:grid-cols-2 mt-4">
+                <div>
+                  <Label htmlFor="available_from">Available From (optional)</Label>
+                  <Input 
+                    id="available_from"
+                    type="date"
+                    value={propertyData.available_from || ''}
+                    min={new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, available_from: e.target.value || undefined }))}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">When does your property become available?</p>
+                </div>
+                
+                <div>
+                  <Label htmlFor="available_to">Available Until (optional)</Label>
+                  <Input
+                    id="available_to"
+                    type="date"
+                    value={propertyData.available_to || ''}
+                    min={propertyData.available_from || new Date().toISOString().split('T')[0]}
+                    onChange={(e) => setPropertyData(prev => ({ ...prev, available_to: e.target.value || undefined }))}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Leave empty for no end date</p>
+                </div>
+              </div>
+            </div>
+          </div>
         )
 
       case 'images':

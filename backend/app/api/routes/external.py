@@ -393,7 +393,8 @@ async def check_availability(
     """
     Check if property is available for specific dates
 
-    Validates availability against existing bookings and property capacity.
+    Validates availability against existing bookings, property capacity,
+    minimum/maximum nights, and date restrictions.
     """
     try:
         # Verify property exists
@@ -401,17 +402,72 @@ async def check_availability(
             property_id, service_context
         )
 
-        # Validate dates
+        today = date.today()
+        nights = (check_out - check_in).days
+        reasons = []
+
+        # Validate dates - check_out must be after check_in
         if check_out <= check_in:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Check-out date must be after check-in date",
             )
 
+        # Smart date validation - cannot book past dates
+        if check_in < today:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Check-in date cannot be in the past. Today is {today.isoformat()}",
+            )
+
+        # Check minimum nights (default to 1 if not set)
+        min_nights = property_data.get("minimum_nights", 1) or 1
+        if nights < min_nights:
+            reasons.append(
+                f"Minimum stay is {min_nights} nights, you requested {nights}"
+            )
+
+        # Check maximum nights (default to 365 if not set)
+        max_nights = property_data.get("maximum_nights", 365) or 365
+        if nights > max_nights:
+            reasons.append(
+                f"Maximum stay is {max_nights} nights, you requested {nights}"
+            )
+
+        # Check property availability window
+        available_from = property_data.get("available_from")
+        available_to = property_data.get("available_to")
+
+        if available_from:
+            avail_from_date = (
+                date.fromisoformat(available_from)
+                if isinstance(available_from, str)
+                else available_from
+            )
+            if check_in < avail_from_date:
+                reasons.append(
+                    f"Property is available from {avail_from_date.isoformat()}"
+                )
+
+        if available_to:
+            avail_to_date = (
+                date.fromisoformat(available_to)
+                if isinstance(available_to, str)
+                else available_to
+            )
+            if check_out > avail_to_date:
+                reasons.append(
+                    f"Property is available until {avail_to_date.isoformat()}"
+                )
+
         # Check guest capacity
         capacity_ok = guests <= property_data["max_guests"]
+        if not capacity_ok:
+            reasons.append(
+                f"Property max guests is {property_data['max_guests']}, you requested {guests}"
+            )
 
-        # Check for existing bookings
+        # Check for existing bookings (conflicting reservations)
         existing_bookings = (
             supabase_client.table("bookings")
             .select("*")
@@ -423,16 +479,11 @@ async def check_availability(
         )
 
         has_conflicts = len(existing_bookings.data) > 0
-
-        is_available = capacity_ok and not has_conflicts
-
-        reasons = []
-        if not capacity_ok:
-            reasons.append(
-                f"Property max guests is {property_data['max_guests']}, you requested {guests}"
-            )
         if has_conflicts:
             reasons.append("Property is already booked for these dates")
+
+        # Property is available only if all checks pass
+        is_available = capacity_ok and not has_conflicts and len(reasons) == 0
 
         return ExternalAPIResponse(
             success=True,
@@ -575,12 +626,74 @@ async def create_external_booking(
     Create a new booking from external AI platform
 
     Creates a booking request that will be reviewed by the property host.
+    Smart date validation ensures bookings are valid and within property settings.
     """
     try:
         # Verify property exists and is available
         property_data = await verify_property_access_external(
             booking_request.property_id, service_context
         )
+
+        today = date.today()
+        nights = (booking_request.check_out - booking_request.check_in).days
+
+        # Smart date validation - cannot book past dates
+        if booking_request.check_in < today:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Check-in date cannot be in the past. Today is {today.isoformat()}",
+            )
+
+        # Validate check-out is after check-in
+        if booking_request.check_out <= booking_request.check_in:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Check-out date must be after check-in date",
+            )
+
+        # Check minimum nights (default to 1 if not set)
+        min_nights = property_data.get("minimum_nights", 1) or 1
+        if nights < min_nights:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Minimum stay is {min_nights} nights, you requested {nights} nights",
+            )
+
+        # Check maximum nights (default to 365 if not set)
+        max_nights = property_data.get("maximum_nights", 365) or 365
+        if nights > max_nights:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Maximum stay is {max_nights} nights, you requested {nights} nights",
+            )
+
+        # Check property availability window
+        available_from = property_data.get("available_from")
+        available_to = property_data.get("available_to")
+
+        if available_from:
+            avail_from_date = (
+                date.fromisoformat(available_from)
+                if isinstance(available_from, str)
+                else available_from
+            )
+            if booking_request.check_in < avail_from_date:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Property is available from {avail_from_date.isoformat()}",
+                )
+
+        if available_to:
+            avail_to_date = (
+                date.fromisoformat(available_to)
+                if isinstance(available_to, str)
+                else available_to
+            )
+            if booking_request.check_out > avail_to_date:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Property is available until {avail_to_date.isoformat()}",
+                )
 
         # Validate guest capacity
         if booking_request.guests > property_data["max_guests"]:
@@ -589,7 +702,7 @@ async def create_external_booking(
                 detail=f"Property can accommodate maximum {property_data['max_guests']} guests",
             )
 
-        # Check for date conflicts
+        # Check for date conflicts with existing bookings
         existing_bookings = (
             supabase_client.table("bookings")
             .select("*")
@@ -603,13 +716,10 @@ async def create_external_booking(
         if existing_bookings.data:
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Property not available for selected dates",
+                detail="Property is already booked for these dates",
             )
 
-        # Calculate nights
-        nights = (booking_request.check_out - booking_request.check_in).days
-
-        # Create booking record
+        # Create booking record (nights already calculated above)
         # Note: 'nights' is a generated column in the database (computed from check_out - check_in)
         # so we don't include it in the insert
         booking_id = str(uuid.uuid4())
@@ -642,53 +752,62 @@ async def create_external_booking(
 
         created_booking = result.data[0]
 
-        # Send webhook for booking created
-        from app.services.background_jobs import (
-            send_booking_webhook,
-            send_host_response_webhook,
-        )
+        # Send webhooks (non-blocking - booking succeeds even if webhooks fail)
+        try:
+            from app.services.background_jobs import (
+                send_booking_webhook,
+                send_host_response_webhook,
+            )
 
-        webhook_data = {
-            **created_booking,
-            "property_info": {
-                "id": property_data["id"],
-                "title": property_data["title"],
-            },
-            "guest_info": booking_request.guest_info.dict(),
-            "payment_info": {
-                "method": booking_request.payment_method,
-                "status": "pending",
-            },
-        }
-        send_booking_webhook.delay("booking.created", booking_id, webhook_data)
+            webhook_data = {
+                **created_booking,
+                "property_info": {
+                    "id": property_data["id"],
+                    "title": property_data["title"],
+                },
+                "guest_info": booking_request.guest_info.dict(),
+                "payment_info": {
+                    "method": booking_request.payment_method,
+                    "status": "pending",
+                },
+            }
+            send_booking_webhook.delay("booking.created", booking_id, webhook_data)
 
-        # Send host response needed webhook
-        send_host_response_webhook.delay(
-            booking_id,
-            property_data["user_id"],
-            {
-                "booking_id": booking_id,
-                "property_id": property_data["id"],
-                "guest_name": f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
-                "check_in": booking_request.check_in.isoformat(),
-                "check_out": booking_request.check_out.isoformat(),
-                "total_amount": booking_request.total_amount,
-                "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
-            },
-        )
+            # Send host response needed webhook
+            send_host_response_webhook.delay(
+                booking_id,
+                property_data["user_id"],
+                {
+                    "booking_id": booking_id,
+                    "property_id": property_data["id"],
+                    "guest_name": f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
+                    "check_in": booking_request.check_in.isoformat(),
+                    "check_out": booking_request.check_out.isoformat(),
+                    "total_amount": booking_request.total_amount,
+                    "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
+                },
+            )
+        except Exception as webhook_error:
+            # Log but don't fail booking - webhooks are non-critical
+            logger.warning(f"Webhook failed for booking {booking_id}: {webhook_error}")
 
-        # Send host notification
-        from app.services.notification_service import NotificationService
+        # Send host notification (non-blocking)
+        try:
+            from app.services.notification_service import NotificationService
 
-        await NotificationService.create_booking_notification(
-            host_id=property_data["user_id"],
-            booking_id=booking_id,
-            property_id=property_data["id"],
-            notification_type="new_booking",
-            guest_name=f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
-            property_title=property_data["title"],
-            booking_details=created_booking,
-        )
+            await NotificationService.create_booking_notification(
+                host_id=property_data["user_id"],
+                booking_id=booking_id,
+                property_id=property_data["id"],
+                notification_type="new_booking",
+                guest_name=f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
+                property_title=property_data["title"],
+                booking_details=created_booking,
+            )
+        except Exception as notification_error:
+            logger.warning(
+                f"Notification failed for booking {booking_id}: {notification_error}"
+            )
 
         # Format response
         booking_response = ExternalBookingResponse(
