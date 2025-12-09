@@ -296,3 +296,93 @@ class ExternalAPIError(BaseModel):
     error: str = Field(..., description="Error message")
     details: Optional[Dict[str, Any]] = Field(None, description="Error details")
     code: Optional[str] = Field(None, description="Error code")
+
+
+# Host Profile Models (Public Information Only)
+class HostPublicProfile(BaseModel):
+    """Public host profile - excludes sensitive info like email/phone"""
+    id: str = Field(..., description="Host user ID")
+    name: str = Field(..., description="Host display name")
+    avatar_url: Optional[str] = Field(None, description="Host profile picture URL")
+    is_superhost: bool = Field(False, description="Superhost verification status")
+    response_rate: Optional[int] = Field(None, ge=0, le=100, description="Response rate percentage")
+    response_time: Optional[str] = Field(None, description="Typical response time")
+    member_since: Optional[str] = Field(None, description="When host joined the platform")
+    total_properties: int = Field(0, ge=0, description="Number of active properties")
+    total_reviews: int = Field(0, ge=0, description="Total reviews received")
+    average_rating: float = Field(0.0, ge=0, le=5, description="Average rating across all properties")
+    languages: List[str] = Field(["English"], description="Languages spoken by host")
+    about: Optional[str] = Field(None, description="Host bio/about section")
+    verified: bool = Field(False, description="Identity verified status")
+
+
+class HostProfileResponse(BaseModel):
+    """Response model for host profile endpoint"""
+    host: HostPublicProfile
+    properties_preview: List[Dict[str, Any]] = Field([], description="Preview of host's properties")
+
+
+# External Messaging Models
+class ExternalMessageCreate(BaseModel):
+    """Message creation request from AI agent"""
+    booking_id: Optional[str] = Field(None, description="Related booking ID")
+    property_id: str = Field(..., description="Property ID for the conversation")
+    sender_name: str = Field(..., min_length=1, max_length=100, description="Guest/sender name")
+    sender_email: str = Field(..., description="Guest/sender email")
+    content: str = Field(..., min_length=1, max_length=2000, description="Message content")
+    message_type: str = Field("inquiry", description="Type: inquiry, booking_question, support")
+
+
+class ExternalMessageResponse(BaseModel):
+    """Response for message operations"""
+    message_id: str = Field(..., description="Unique message ID")
+    conversation_id: str = Field(..., description="Conversation thread ID")
+    status: str = Field(..., description="Message status: sent, delivered, read")
+    sent_at: str = Field(..., description="Timestamp when message was sent")
+    host_info: Dict[str, str] = Field(..., description="Host name and response time")
+
+
+class ConversationMessage(BaseModel):
+    """Single message in a conversation"""
+    id: str = Field(..., description="Message ID")
+    sender_type: str = Field(..., description="Sender type: guest, host, system")
+    sender_name: str = Field(..., description="Sender display name")
+    content: str = Field(..., description="Message content")
+    sent_at: str = Field(..., description="Timestamp")
+    is_read: bool = Field(False, description="Read status")
+    is_ai_generated: bool = Field(False, description="Whether response was AI-generated")
+
+
+class ConversationThread(BaseModel):
+    """Full conversation thread"""
+    conversation_id: str = Field(..., description="Conversation ID")
+    property_id: str = Field(..., description="Related property ID")
+    property_title: str = Field(..., description="Property title")
+    booking_id: Optional[str] = Field(None, description="Related booking ID if any")
+    host: HostPublicProfile = Field(..., description="Host public profile")
+    guest_name: str = Field(..., description="Guest name")
+    guest_email: str = Field(..., description="Guest email")
+    status: str = Field(..., description="Conversation status: active, archived")
+    messages: List[ConversationMessage] = Field([], description="Messages in thread")
+    unread_count: int = Field(0, description="Number of unread messages")
+    last_message_at: Optional[str] = Field(None, description="Last message timestamp")
+    created_at: str = Field(..., description="Conversation start time")
+
+
+# Payment Flow Models for AI Agent
+class PaymentIntentRequest(BaseModel):
+    """Request to create payment intent for booking"""
+    booking_id: str = Field(..., description="Booking ID to pay for")
+    payment_method: str = Field("card", description="Payment method type")
+    return_url: Optional[str] = Field(None, description="Return URL after payment")
+
+
+class PaymentIntentResponse(BaseModel):
+    """Response with payment details for completing payment"""
+    booking_id: str = Field(..., description="Booking ID")
+    payment_intent_id: str = Field(..., description="Stripe payment intent ID")
+    client_secret: str = Field(..., description="Client secret for frontend")
+    amount: float = Field(..., description="Amount to charge")
+    currency: str = Field("AED", description="Currency code")
+    status: str = Field(..., description="Payment intent status")
+    next_action: Optional[Dict[str, Any]] = Field(None, description="Required next action if any")

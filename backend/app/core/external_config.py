@@ -25,6 +25,10 @@ class ExternalAPIConfig:
             "read_availability",
             "calculate_pricing",
             "read_property_details",
+            "read_host_profile",
+            "send_messages",
+            "read_messages",
+            "process_payments",
         ]
     }
 

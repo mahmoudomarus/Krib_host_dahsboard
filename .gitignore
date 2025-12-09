@@ -44,3 +44,6 @@ Thumbs.db
 
 # Platform blueprints (not part of this repo)
 REAL_ESTATE_AGENT_PLATFORM_BLUEPRINT.md
+
+# API documentation with sensitive keys (keep local only)
+docs/AI_AGENT_API_GUIDE.md
