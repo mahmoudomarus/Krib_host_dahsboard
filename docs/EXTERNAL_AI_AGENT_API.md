@@ -11,7 +11,7 @@ The Krib External API enables AI agent platforms to interact with the Krib prope
 - **View host profiles** (public information only)
 - **Read property reviews**
 
-**Base URL:** `https://api.host.krib.ae/api/external`
+**Base URL:** `https://api.host.krib.ae/api`
 
 ---
 
