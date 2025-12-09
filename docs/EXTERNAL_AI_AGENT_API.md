@@ -15,6 +15,36 @@ The Krib External API enables AI agent platforms to interact with the Krib prope
 
 ---
 
+## Quick Start - AI Agent Platform Configuration
+
+Copy these environment variables for your AI Agent platform:
+
+```bash
+# Krib API Configuration
+HOST_DASHBOARD_API_KEY=krib_prod_568fdc2bc21234347083fb1f2848803f
+HOST_DASHBOARD_URL=https://api.host.krib.ae
+```
+
+### Quick Test
+
+```bash
+# Search for 2-bedroom apartments in Dubai
+curl -X GET "https://api.host.krib.ae/api/v1/properties/search?bedrooms=2&city=Dubai" \
+  -H "Authorization: Bearer krib_prod_568fdc2bc21234347083fb1f2848803f"
+
+# Check availability
+curl -X GET "https://api.host.krib.ae/api/v1/properties/{PROPERTY_ID}/availability?check_in=2025-01-12&check_out=2025-01-22&guests=2" \
+  -H "Authorization: Bearer krib_prod_568fdc2bc21234347083fb1f2848803f"
+
+# Calculate pricing
+curl -X POST "https://api.host.krib.ae/api/v1/properties/{PROPERTY_ID}/calculate-pricing" \
+  -H "Authorization: Bearer krib_prod_568fdc2bc21234347083fb1f2848803f" \
+  -H "Content-Type: application/json" \
+  -d '{"check_in": "2025-01-12", "check_out": "2025-01-22", "guests": 2}'
+```
+
+---
+
 ## Authentication
 
 All API requests require a Bearer token in the Authorization header:
@@ -53,8 +83,8 @@ curl -X POST "https://api.host.krib.ae/api/admin/api-keys/generate" \
 ### Example Request
 
 ```bash
-curl -X GET "https://api.host.krib.ae/api/external/v1/properties/search?bedrooms=2&city=Dubai" \
-  -H "Authorization: Bearer krib_prod_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+curl -X GET "https://api.host.krib.ae/api/v1/properties/search?bedrooms=2&city=Dubai" \
+  -H "Authorization: Bearer krib_prod_568fdc2bc21234347083fb1f2848803f"
 ```
 
 ---
@@ -105,7 +135,7 @@ Search for available properties with comprehensive filters.
 **Example - Find 2-bedroom apartments for 10 days:**
 
 ```bash
-curl -X GET "https://api.host.krib.ae/api/external/v1/properties/search?\
+curl -X GET "https://api.host.krib.ae/api/v1/properties/search?\
 bedrooms=2&\
 check_in=2025-01-12&\
 check_out=2025-01-22&\
@@ -218,7 +248,7 @@ Verify if a property is available for specific dates.
 **Example:**
 
 ```bash
-curl -X GET "https://api.host.krib.ae/api/external/v1/properties/prop_123/availability?\
+curl -X GET "https://api.host.krib.ae/api/v1/properties/prop_123/availability?\
 check_in=2025-01-12&\
 check_out=2025-01-22&\
 guests=4" \
