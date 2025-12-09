@@ -174,7 +174,7 @@ export function AnalyticsDashboard() {
       )}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="mb-2">Advanced Analytics</h1>
+          <h1 className="text-2xl font-bold">Advanced Analytics</h1>
           <p className="text-muted-foreground">
             AI-powered insights and market intelligence for your rental business.
           </p>

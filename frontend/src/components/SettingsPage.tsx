@@ -153,7 +153,7 @@ export function SettingsPage() {
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div>
-        <h1>Account Settings</h1>
+        <h1 className="text-2xl font-bold">Account Settings</h1>
         <p className="text-muted-foreground">
           Manage your account settings and preferences
         </p>

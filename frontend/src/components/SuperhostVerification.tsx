@@ -92,8 +92,8 @@ export function SuperhostVerification() {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Superhost Verification</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="text-2xl font-bold">Superhost Verification</h1>
+          <p className="text-muted-foreground">
             Become a verified superhost and stand out to guests
           </p>
         </div>

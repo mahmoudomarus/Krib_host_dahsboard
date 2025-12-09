@@ -20,6 +20,9 @@ from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
 from app.core.config import settings
 
+# Initialize standard logger
+logger = logging.getLogger(__name__)
+
 # Configure structured logging
 structlog.configure(
     processors=[

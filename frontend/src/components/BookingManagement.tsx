@@ -325,23 +325,36 @@ export function BookingManagement() {
                             </div>
                           </div>
                           
-                          <div className="flex gap-2 pt-2 border-t">
-                            <Button variant="outline" size="sm">
-                              <Mail className="h-4 w-4 mr-2" />
-                              Message Guest
-                            </Button>
-                            <Button variant="outline" size="sm">
-                              View Property
-                            </Button>
+                          <div className="flex items-center justify-between pt-3 border-t">
+                            {/* Communication Buttons */}
+                            <div className="flex gap-2">
+                              <Button variant="outline" size="sm">
+                                <Mail className="h-4 w-4 mr-2" />
+                                Message Guest
+                              </Button>
+                              <Button variant="outline" size="sm">
+                                View Property
+                              </Button>
+                            </div>
+                            
+                            {/* Action Buttons */}
                             {booking.status === 'pending' && (
-                              <>
-                                <Button size="sm" onClick={() => updateBookingStatus(booking.id, 'confirmed')}>
-                                  Confirm
-                                </Button>
-                                <Button variant="outline" size="sm" onClick={() => updateBookingStatus(booking.id, 'cancelled')}>
+                              <div className="flex gap-2">
+                                <Button 
+                                  variant="destructive" 
+                                  size="sm" 
+                                  onClick={() => updateBookingStatus(booking.id, 'cancelled')}
+                                >
                                   Decline
                                 </Button>
-                              </>
+                                <Button 
+                                  size="sm" 
+                                  className="bg-green-600 hover:bg-green-700"
+                                  onClick={() => updateBookingStatus(booking.id, 'confirmed')}
+                                >
+                                  Confirm
+                                </Button>
+                              </div>
                             )}
                           </div>
                         </div>

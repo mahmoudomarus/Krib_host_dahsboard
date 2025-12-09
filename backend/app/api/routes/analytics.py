@@ -191,14 +191,21 @@ async def get_analytics(
         bookings = bookings_result.data
 
         # Calculate basic metrics
+        # Use consistent filtering: confirmed/completed status AND paid payment_status
+        # This aligns with financials calculations
         total_properties = len(properties)
-        total_bookings = len(
-            [b for b in bookings if b["status"] in ["confirmed", "completed"]]
-        )
+        
+        # Filter bookings that are both confirmed/completed AND have successful payment
+        confirmed_bookings = [
+            b for b in bookings 
+            if b["status"] in ["confirmed", "completed"] 
+            and b.get("payment_status") in ["succeeded", "paid"]
+        ]
+        
+        total_bookings = len(confirmed_bookings)
         total_revenue = sum(
             float(b["total_amount"])
-            for b in bookings
-            if b["status"] in ["confirmed", "completed"]
+            for b in confirmed_bookings
         )
 
         # Calculate occupancy rate
@@ -456,7 +463,7 @@ def _calculate_growth_metrics(
         current_month = datetime.now().replace(day=1)
         previous_month = (current_month - timedelta(days=1)).replace(day=1)
 
-        # Current month bookings and revenue
+        # Current month bookings and revenue (consistent with financials: status + payment_status)
         current_bookings = [
             b
             for b in bookings
@@ -465,6 +472,7 @@ def _calculate_growth_metrics(
             )
             >= current_month
             and b["status"] in ["confirmed", "completed"]
+            and b.get("payment_status") in ["succeeded", "paid"]
         ]
         current_revenue = sum(float(b["total_amount"]) for b in current_bookings)
 
@@ -481,6 +489,7 @@ def _calculate_growth_metrics(
             )
             < current_month
             and b["status"] in ["confirmed", "completed"]
+            and b.get("payment_status") in ["succeeded", "paid"]
         ]
         previous_revenue = sum(float(b["total_amount"]) for b in previous_bookings)
 
@@ -514,7 +523,9 @@ def _calculate_occupancy_rate(properties: List[Dict], bookings: List[Dict]) -> f
         return 0
 
     total_nights_booked = sum(
-        int(b["nights"]) for b in bookings if b["status"] in ["confirmed", "completed"]
+        int(b["nights"]) for b in bookings 
+        if b["status"] in ["confirmed", "completed"] 
+        and b.get("payment_status") in ["succeeded", "paid"]
     )
     total_available_nights = len(properties) * 365  # Simplified calculation
 
@@ -556,11 +567,13 @@ def _generate_monthly_data(bookings: List[Dict], period: str) -> List[Dict[str, 
         month_date = datetime.now().replace(day=1) - timedelta(days=30 * i)
         month_str = month_date.strftime("%Y-%m")
 
+        # Consistent filtering with financials: status + payment_status
         month_bookings = [
             b
             for b in bookings
             if b["created_at"].startswith(month_str)
             and b["status"] in ["confirmed", "completed"]
+            and b.get("payment_status") in ["succeeded", "paid"]
         ]
 
         monthly_revenue = sum(float(b["total_amount"]) for b in month_bookings)
@@ -583,11 +596,13 @@ def _generate_property_performance(
     performance_data = []
 
     for property_data in properties:
+        # Consistent filtering with financials: status + payment_status
         property_bookings = [
             b
             for b in bookings
             if b["property_id"] == property_data["id"]
             and b["status"] in ["confirmed", "completed"]
+            and b.get("payment_status") in ["succeeded", "paid"]
         ]
 
         revenue = sum(float(b["total_amount"]) for b in property_bookings)
@@ -615,10 +630,12 @@ def _generate_dubai_market_insights(
     properties: List[Dict], bookings: List[Dict]
 ) -> Dict[str, Any]:
     """Generate real Dubai market insights"""
+    # Consistent filtering with financials: status + payment_status
     total_revenue = sum(
         float(b["total_amount"])
         for b in bookings
         if b["status"] in ["confirmed", "completed"]
+        and b.get("payment_status") in ["succeeded", "paid"]
     )
 
     # Get primary area for market analysis (use first property or default to JLT)

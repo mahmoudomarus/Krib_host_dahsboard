@@ -810,7 +810,7 @@ export function AddPropertyWizard() {
     <div className="p-6 max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Add New Property</h1>
+        <h1 className="text-2xl font-bold">Add New Property</h1>
         <p className="text-gray-600">Create a stunning listing for your rental property</p>
       </div>
 

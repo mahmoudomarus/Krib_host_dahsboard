@@ -2,6 +2,7 @@
 Financial and Payouts API routes
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from typing import Dict, Any, List, Optional
 from datetime import datetime, date, timedelta
@@ -19,6 +20,8 @@ from app.models.schemas import (
 )
 from app.core.supabase_client import supabase_client
 from app.api.dependencies import get_current_user
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
