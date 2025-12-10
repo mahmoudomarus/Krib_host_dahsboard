@@ -320,6 +320,43 @@ export function AddPropertyWizard() {
     }))
   }
 
+  // Rich client-side description generator (fallback if API fails)
+  const generateClientSideDescription = () => {
+    const type = propertyData.property_type?.toLowerCase() || 'property'
+    const city = propertyData.city || 'a prime location'
+    const state = propertyData.state || 'UAE'
+    const beds = propertyData.bedrooms || 1
+    const baths = propertyData.bathrooms || 1
+    const guests = propertyData.max_guests || 2
+    const amenityList = propertyData.amenities || []
+    const title = propertyData.title || `Beautiful ${type}`
+
+    const typeDescriptions: Record<string, string> = {
+      'apartment': 'modern and stylish apartment',
+      'villa': 'luxurious private villa',
+      'townhouse': 'elegant townhouse',
+      'penthouse': 'exclusive penthouse',
+      'studio': 'cozy and efficient studio',
+      'duplex': 'spacious duplex',
+      'private_room': 'comfortable private room',
+      'shared_room': 'welcoming shared space',
+      'hotel_room': 'well-appointed hotel room'
+    }
+
+    const propertyDesc = typeDescriptions[type] || `beautiful ${type}`
+    const amenityHighlights = amenityList.slice(0, 5).join(', ')
+
+    return `Welcome to this ${propertyDesc} in ${city}, ${state}!
+
+This stunning ${beds}-bedroom, ${baths}-bathroom property is perfect for up to ${guests} guests. Whether you're visiting for business or leisure, you'll find everything you need for a comfortable and memorable stay.
+
+${amenityHighlights ? `✨ Key Amenities: ${amenityHighlights}` : ''}
+
+Located in one of ${state}'s most desirable areas, you'll have easy access to local attractions, dining, and entertainment. The space has been thoughtfully designed to provide a home-away-from-home experience.
+
+Book now and experience the best of ${city}!`
+  }
+
   const generateDescription = async () => {
     setIsGeneratingDescription(true)
     try {
@@ -335,12 +372,15 @@ export function AddPropertyWizard() {
         address: propertyData.address
       })
       console.log('Generated description:', description)
-      setPropertyData(prev => ({ ...prev, description }))
+      if (description && description.trim()) {
+        setPropertyData(prev => ({ ...prev, description }))
+      } else {
+        throw new Error('Empty description returned')
+      }
     } catch (error: any) {
-      console.error('Failed to generate description:', error)
-      console.error('Error details:', error.message, error.status)
-      // Fallback to a simple description
-      const fallbackDescription = `Beautiful ${propertyData.property_type.toLowerCase()} in ${propertyData.city}, ${propertyData.state}. This ${propertyData.bedrooms}-bedroom property can accommodate up to ${propertyData.max_guests} guests. Perfect for your next getaway!`
+      console.error('Failed to generate AI description, using client-side fallback:', error)
+      // Generate rich client-side fallback description
+      const fallbackDescription = generateClientSideDescription()
       setPropertyData(prev => ({ ...prev, description: fallbackDescription }))
     } finally {
       setIsGeneratingDescription(false)
