@@ -6,6 +6,50 @@ export function AuthCallback() {
   const navigate = useNavigate()
   const [isProcessing, setIsProcessing] = useState(true)
 
+  // Helper function to ensure user profile exists
+  const ensureUserProfile = async (user: any) => {
+    try {
+      // Check if user profile exists
+      const { data: existingProfile, error: checkError } = await supabase
+        .from('users')
+        .select('id')
+        .eq('id', user.id)
+        .single()
+
+      if (checkError && checkError.code === 'PGRST116') {
+        // Profile doesn't exist, create one
+        const userName = user.user_metadata?.full_name || 
+                        user.user_metadata?.name || 
+                        user.email?.split('@')[0] || 
+                        'User'
+        
+        const { error: insertError } = await supabase
+          .from('users')
+          .insert({
+            id: user.id,
+            name: userName,
+            email: user.email,
+            avatar_url: user.user_metadata?.avatar_url || null,
+            settings: {
+              notifications: { bookings: true, marketing: false, system_updates: true },
+              preferences: { currency: 'AED', timezone: 'Asia/Dubai', language: 'English' }
+            },
+            total_revenue: 0
+          })
+
+        if (insertError) {
+          console.error('[Auth] Failed to create user profile:', insertError)
+        } else {
+          console.log('[Auth] Created user profile for:', userName)
+        }
+      } else if (!checkError && existingProfile) {
+        console.log('[Auth] User profile already exists')
+      }
+    } catch (err) {
+      console.error('[Auth] Error checking/creating user profile:', err)
+    }
+  }
+
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
@@ -27,6 +71,9 @@ export function AuthCallback() {
           if (process.env.NODE_ENV === 'development') {
             console.log('[Auth] Authentication successful:', data.session.user.email)
           }
+          
+          // Ensure user profile exists in users table
+          await ensureUserProfile(data.session.user)
           
           // Small delay to ensure everything is processed
           setTimeout(() => {

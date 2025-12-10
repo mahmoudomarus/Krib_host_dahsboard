@@ -62,6 +62,10 @@ def add_rate_limit_headers(
 async def search_properties(
     request: Request,
     response: Response,
+    # Text search
+    q: Optional[str] = Query(
+        None, description="Text search across title, description, city"
+    ),
     # Location parameters
     city: Optional[str] = Query(None, description="City or area name"),
     state: Optional[str] = Query(None, description="UAE Emirate"),
@@ -99,16 +103,24 @@ async def search_properties(
         logger.info(f"Property search requested by {service_context['service_name']}")
 
         # Start with base query for active properties only
+        # Use LEFT JOIN (users!left) so properties show even without user record
         query = (
             supabase_client.table("properties")
             .select(
                 """
             *,
-            users!inner(id, name, email, created_at)
+            users!left(id, name, email, created_at)
         """
             )
             .eq("status", "active")
         )
+
+        # Apply text search across title, description, city
+        if q:
+            # Use OR filter for text search across multiple fields
+            query = query.or_(
+                f"title.ilike.%{q}%,description.ilike.%{q}%,city.ilike.%{q}%,address.ilike.%{q}%"
+            )
 
         # Apply location filters
         if city:
@@ -169,6 +181,10 @@ async def search_properties(
         )
 
         # Apply same filters for count
+        if q:
+            count_result = count_result.or_(
+                f"title.ilike.%{q}%,description.ilike.%{q}%,city.ilike.%{q}%,address.ilike.%{q}%"
+            )
         if city:
             count_result = count_result.ilike("city", f"%{city}%")
         if state:

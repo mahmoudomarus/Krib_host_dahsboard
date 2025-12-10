@@ -456,10 +456,50 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const { data: { session } } = await supabase.auth.getSession()
       
       if (session?.user) {
+        const userName = session.user.user_metadata?.full_name || 
+                        session.user.user_metadata?.name || 
+                        session.user.email?.split('@')[0] || 
+                        'User'
+        
+        // Ensure user profile exists in users table
+        try {
+          const { data: existingProfile, error: checkError } = await supabase
+            .from('users')
+            .select('id, name')
+            .eq('id', session.user.id)
+            .single()
+
+          if (checkError && checkError.code === 'PGRST116') {
+            // Profile doesn't exist, create one
+            console.log('[Auth] Creating missing user profile...')
+            const { error: insertError } = await supabase
+              .from('users')
+              .insert({
+                id: session.user.id,
+                name: userName,
+                email: session.user.email,
+                avatar_url: session.user.user_metadata?.avatar_url || null,
+                settings: {
+                  notifications: { bookings: true, marketing: false, system_updates: true },
+                  preferences: { currency: 'AED', timezone: 'Asia/Dubai', language: 'English' }
+                },
+                total_revenue: 0
+              })
+
+            if (insertError) {
+              console.error('[Auth] Failed to create user profile:', insertError)
+            } else {
+              console.log('[Auth] User profile created successfully')
+            }
+          }
+        } catch (profileError) {
+          console.error('[Auth] Error ensuring user profile:', profileError)
+        }
+
         setUser({
           id: session.user.id,
           email: session.user.email || '',
-          name: session.user.user_metadata?.full_name || session.user.email || 'User',
+          name: userName,
           created_at: session.user.created_at
         })
         
