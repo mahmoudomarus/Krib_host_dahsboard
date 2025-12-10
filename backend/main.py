@@ -47,6 +47,7 @@ from app.api.routes import (
     messages,
     reviews,
     api_keys,
+    guest,
 )
 from app.core.supabase_client import supabase_client
 from slowapi.errors import RateLimitExceeded
@@ -182,6 +183,9 @@ app.include_router(
 
 # API Key management (admin only)
 app.include_router(api_keys.router, prefix="/api/admin/api-keys", tags=["api-keys"])
+
+# Guest payment routes (public, no auth)
+app.include_router(guest.router, prefix="/api/guest", tags=["guest-payments"])
 
 
 @app.get("/")

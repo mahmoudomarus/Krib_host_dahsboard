@@ -17,6 +17,7 @@ import { SuperhostVerification } from "./components/SuperhostVerification"
 import { MessagingDashboard } from "./components/MessagingDashboard"
 import { NotificationBell } from "./components/NotificationBell"
 import { ReviewsDashboard } from "./components/ReviewsDashboard"
+import { GuestPaymentPage } from "./components/GuestPaymentPage"
 
 export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'superhost' | 'messages' | 'reviews' | 'settings'
 
@@ -68,6 +69,11 @@ function AppContent() {
     return <AuthCallback />
   }
 
+  // Public payment page (no auth required)
+  if (location.pathname.startsWith('/pay/')) {
+    return <GuestPaymentPage />
+  }
+
   // Show homepage for non-authenticated users or when on homepage route
   if (!user && !location.pathname.startsWith('/auth')) {
     return (
@@ -75,6 +81,7 @@ function AppContent() {
         <Route path="/" element={<Homepage />} />
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/pay/:bookingId" element={<GuestPaymentPage />} />
         <Route path="*" element={<Homepage />} />
       </Routes>
     )
