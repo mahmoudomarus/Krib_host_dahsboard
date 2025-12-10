@@ -71,7 +71,12 @@ function AppContent() {
 
   // Public payment page (no auth required)
   if (location.pathname.startsWith('/pay/')) {
-    return <GuestPaymentPage />
+    return (
+      <Routes>
+        <Route path="/pay/:bookingId" element={<GuestPaymentPage />} />
+        <Route path="/pay/:bookingId/success" element={<GuestPaymentPage />} />
+      </Routes>
+    )
   }
 
   // Show homepage for non-authenticated users or when on homepage route

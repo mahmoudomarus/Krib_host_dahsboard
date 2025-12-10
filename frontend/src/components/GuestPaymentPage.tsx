@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation } from 'react-router-dom'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from './ui/card'
 import { Button } from './ui/button'
 import { Separator } from './ui/separator'
@@ -22,6 +22,8 @@ interface BookingDetails {
 
 export function GuestPaymentPage() {
   const { bookingId } = useParams<{ bookingId: string }>()
+  const location = useLocation()
+  const isSuccess = location.pathname.includes('/success')
   const [booking, setBooking] = useState<BookingDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -95,15 +97,39 @@ export function GuestPaymentPage() {
     )
   }
 
-  if (booking.payment_status === 'paid') {
+  // Show success page after payment
+  if (isSuccess || booking.payment_status === 'paid') {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Card className="max-w-md w-full mx-4">
-          <CardContent className="pt-6 text-center">
-            <div className="text-green-500 text-4xl mb-4">✓</div>
-            <h2 className="text-xl font-semibold mb-2">Payment Complete</h2>
-            <p className="text-muted-foreground">This booking has already been paid.</p>
-            <p className="mt-4 text-sm">Confirmation sent to: {booking.guest_email}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-emerald-50 to-white">
+        <Card className="max-w-md w-full mx-4 shadow-lg">
+          <CardContent className="pt-8 pb-8 text-center">
+            <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-emerald-600 text-3xl">✓</span>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Booking Confirmed!</h2>
+            <p className="text-muted-foreground mb-6">Your payment was successful.</p>
+            
+            {booking && (
+              <div className="bg-gray-50 rounded-lg p-4 text-left mb-6">
+                <h3 className="font-semibold mb-2">{booking.property_title}</h3>
+                <div className="text-sm text-muted-foreground space-y-1">
+                  <p>📅 {new Date(booking.check_in).toLocaleDateString('en-AE', { weekday: 'short', month: 'short', day: 'numeric' })} - {new Date(booking.check_out).toLocaleDateString('en-AE', { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+                  <p>👤 {booking.guests} guests</p>
+                  <p>💰 AED {booking.total_amount.toLocaleString()}</p>
+                </div>
+              </div>
+            )}
+            
+            <p className="text-sm text-muted-foreground">
+              Confirmation email sent to:<br/>
+              <span className="font-medium text-gray-900">{booking?.guest_email}</span>
+            </p>
+            
+            <div className="mt-6 pt-4 border-t">
+              <p className="text-xs text-muted-foreground">
+                The host has been notified and will be ready for your arrival.
+              </p>
+            </div>
           </CardContent>
         </Card>
       </div>

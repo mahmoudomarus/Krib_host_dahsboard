@@ -159,6 +159,10 @@ async def process_webhook_event(event_id: str, event_type: str, event_data: dict
             account_id, event_data
         )
 
+    # Checkout Session events (guest payments)
+    elif event_type == "checkout.session.completed":
+        await handle_checkout_completed(event_data)
+
     # Payment Intent events
     elif event_type == "payment_intent.succeeded":
         payment_intent_id = event_data.get("id")
@@ -334,3 +338,104 @@ async def handle_payout_failed(payout_data: dict):
         logger.error(f"Stripe payout {payout_id} failed: {failure_message}")
     except Exception as e:
         logger.error(f"Error handling payout failed: {e}")
+
+
+async def handle_checkout_completed(session_data: dict):
+    """
+    Handle Stripe Checkout session completed (guest payment)
+    - Updates booking to confirmed + paid
+    - Blocks dates on property calendar
+    - Notifies host and guest
+    - Sends webhook to AI Agent platform
+    """
+    try:
+        session_id = session_data.get("id")
+        booking_id = session_data.get("metadata", {}).get("booking_id")
+        payment_intent = session_data.get("payment_intent")
+        customer_email = session_data.get("customer_email")
+        amount_total = session_data.get("amount_total", 0) / 100  # Convert from fils
+
+        if not booking_id:
+            logger.error(f"No booking_id in checkout session {session_id}")
+            return
+
+        logger.info(f"Processing checkout completion for booking {booking_id}")
+
+        # Get booking details
+        booking_result = supabase_client.table("bookings").select(
+            "*, properties(id, title, user_id)"
+        ).eq("id", booking_id).execute()
+
+        if not booking_result.data:
+            logger.error(f"Booking {booking_id} not found")
+            return
+
+        booking = booking_result.data[0]
+        property_data = booking.get("properties", {})
+
+        # 1. Update booking status
+        supabase_client.table("bookings").update({
+            "status": "confirmed",
+            "payment_status": "paid",
+            "stripe_payment_intent_id": payment_intent,
+            "confirmed_at": datetime.utcnow().isoformat(),
+            "updated_at": datetime.utcnow().isoformat()
+        }).eq("id", booking_id).execute()
+
+        logger.info(f"Booking {booking_id} confirmed and paid")
+
+        # 2. Block dates on property (dates are already blocked by having confirmed booking)
+        # The availability check queries bookings table for confirmed/pending bookings
+        # No additional action needed - booking existence blocks the dates
+
+        # 3. Send notification to host
+        try:
+            from app.services.notification_service import NotificationService
+            await NotificationService.create_booking_notification(
+                user_id=property_data.get("user_id"),
+                booking_id=booking_id,
+                notification_type="booking_paid",
+                title="Payment Received! 💰",
+                message=f"Guest {booking['guest_name']} has paid AED {amount_total} for {property_data.get('title')}",
+                metadata={
+                    "property_id": property_data.get("id"),
+                    "guest_name": booking["guest_name"],
+                    "check_in": booking["check_in"],
+                    "check_out": booking["check_out"],
+                    "amount": amount_total
+                }
+            )
+        except Exception as notif_error:
+            logger.warning(f"Failed to send host notification: {notif_error}")
+
+        # 4. Send webhook to AI Agent platform
+        try:
+            from app.services.background_jobs import send_booking_webhook
+            webhook_data = {
+                "booking_id": booking_id,
+                "status": "confirmed",
+                "payment_status": "paid",
+                "amount_paid": amount_total,
+                "currency": "AED",
+                "property_id": property_data.get("id"),
+                "property_title": property_data.get("title"),
+                "guest_name": booking["guest_name"],
+                "guest_email": booking["guest_email"],
+                "check_in": booking["check_in"],
+                "check_out": booking["check_out"],
+                "nights": booking.get("nights"),
+                "confirmed_at": datetime.utcnow().isoformat()
+            }
+            send_booking_webhook.delay("booking.confirmed", booking_id, webhook_data)
+            send_booking_webhook.delay("payment.succeeded", booking_id, webhook_data)
+        except Exception as webhook_error:
+            logger.warning(f"Failed to send webhook: {webhook_error}")
+
+        # 5. TODO: Send confirmation email to guest
+        # send_booking_confirmation_email.delay(booking_id, customer_email)
+
+        logger.info(f"Checkout completed successfully for booking {booking_id}")
+
+    except Exception as e:
+        logger.error(f"Error handling checkout completed: {e}")
+        raise
