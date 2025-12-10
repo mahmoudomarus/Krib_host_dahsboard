@@ -822,6 +822,9 @@ async def create_external_booking(
                 f"Notification failed for booking {booking_id}: {notification_error}"
             )
 
+        # Generate payment URL for the AI platform to redirect guests
+        payment_url = f"https://host.krib.ae/pay/{booking_id}"
+        
         # Format response
         booking_response = ExternalBookingResponse(
             booking_id=booking_id,
@@ -843,12 +846,13 @@ async def create_external_booking(
                 "method": booking_request.payment_method,
                 "status": "pending",
                 "payment_intent_id": None,
+                "payment_url": payment_url,  # AI platform redirects guest here
             },
             next_steps=[
-                "Booking request submitted to host",
-                "Host will review and confirm within 24 hours",
-                "You will receive confirmation email once approved",
-                "Payment will be processed after confirmation",
+                f"Redirect guest to payment page: {payment_url}",
+                "Guest completes payment on Krib secure checkout",
+                "Webhook sent when payment confirmed",
+                "Host receives booking notification",
             ],
             cancellation_policy="moderate",
             host_contact={
