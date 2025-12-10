@@ -115,12 +115,11 @@ async def search_properties(
             .eq("status", "active")
         )
 
-        # Apply text search across title, description, city
+        # Apply text search - primarily searches title
+        # For more comprehensive search, we'd need PostgreSQL full-text search
         if q:
-            # Use OR filter for text search across multiple fields
-            query = query.or_(
-                f"title.ilike.%{q}%,description.ilike.%{q}%,city.ilike.%{q}%,address.ilike.%{q}%"
-            )
+            # Search in title (primary) - city search uses the city parameter
+            query = query.ilike("title", f"%{q}%")
 
         # Apply location filters
         if city:
@@ -182,9 +181,7 @@ async def search_properties(
 
         # Apply same filters for count
         if q:
-            count_result = count_result.or_(
-                f"title.ilike.%{q}%,description.ilike.%{q}%,city.ilike.%{q}%,address.ilike.%{q}%"
-            )
+            count_result = count_result.ilike("title", f"%{q}%")
         if city:
             count_result = count_result.ilike("city", f"%{city}%")
         if state:
