@@ -35,7 +35,9 @@ export function GuestPaymentPage() {
 
   const fetchBookingDetails = async () => {
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.host.krib.ae'}/api/guest/bookings/${bookingId}`)
+      // Use direct API URL without /api prefix since VITE_API_URL may include it
+      const baseUrl = 'https://api.host.krib.ae'
+      const response = await fetch(`${baseUrl}/api/guest/bookings/${bookingId}`)
       
       if (!response.ok) {
         throw new Error('Booking not found')
@@ -56,7 +58,8 @@ export function GuestPaymentPage() {
     setProcessing(true)
     try {
       // Create Stripe checkout session
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'https://api.host.krib.ae'}/api/guest/bookings/${bookingId}/checkout`, {
+      const baseUrl = 'https://api.host.krib.ae'
+      const response = await fetch(`${baseUrl}/api/guest/bookings/${bookingId}/checkout`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' }
       })
