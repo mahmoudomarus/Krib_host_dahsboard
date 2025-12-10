@@ -236,7 +236,7 @@ export function PropertyList() {
 
       {/* View Property Modal */}
       <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-        <DialogContent className="max-w-2xl bg-white border shadow-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border shadow-lg">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="text-xl font-semibold text-gray-900">Property Details</DialogTitle>
           </DialogHeader>
@@ -307,7 +307,7 @@ export function PropertyList() {
 
       {/* Edit Property Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="max-w-2xl bg-white border shadow-lg">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto bg-white border shadow-lg">
           <DialogHeader className="pb-4 border-b">
             <DialogTitle className="text-xl font-semibold text-gray-900">Edit Property</DialogTitle>
           </DialogHeader>
