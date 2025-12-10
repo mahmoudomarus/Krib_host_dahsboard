@@ -77,19 +77,15 @@ async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
         host_data = property_data.get("users", {})
         host_stripe_account = host_data.get("stripe_account_id")
 
-        if not host_stripe_account:
-            raise HTTPException(status_code=400, detail="Host payment setup incomplete")
-
-        # Calculate platform fee (15%)
+        # Calculate amounts
         total_amount = float(booking["total_amount"])
-        platform_fee = int(total_amount * 0.15 * 100)  # In fils
         amount_in_fils = int(total_amount * 100)
 
-        # Create Stripe Checkout Session
-        checkout_session = stripe.checkout.Session.create(
-            mode="payment",
-            payment_method_types=["card"],
-            line_items=[{
+        # Build checkout session config
+        checkout_config = {
+            "mode": "payment",
+            "payment_method_types": ["card"],
+            "line_items": [{
                 "price_data": {
                     "currency": "aed",
                     "unit_amount": amount_in_fils,
@@ -100,24 +96,43 @@ async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
                 },
                 "quantity": 1
             }],
-            payment_intent_data={
-                "application_fee_amount": platform_fee,
-                "transfer_data": {
-                    "destination": host_stripe_account
-                },
-                "metadata": {
-                    "booking_id": booking_id,
-                    "property_id": property_data.get("id"),
-                    "guest_email": booking["guest_email"]
-                }
-            },
-            customer_email=booking["guest_email"],
-            success_url=f"https://host.krib.ae/pay/{booking_id}/success",
-            cancel_url=f"https://host.krib.ae/pay/{booking_id}",
-            metadata={
+            "customer_email": booking["guest_email"],
+            "success_url": f"https://host.krib.ae/pay/{booking_id}/success",
+            "cancel_url": f"https://host.krib.ae/pay/{booking_id}",
+            "metadata": {
                 "booking_id": booking_id
             }
-        )
+        }
+
+        # Only add Connect transfer if host has verified account with transfers capability
+        if host_stripe_account:
+            try:
+                # Check if account can receive transfers
+                account = stripe.Account.retrieve(host_stripe_account)
+                capabilities = account.get("capabilities", {})
+                
+                if capabilities.get("transfers") == "active" or capabilities.get("card_payments") == "active":
+                    # Host can receive transfers - add Connect split
+                    platform_fee = int(total_amount * 0.15 * 100)  # 15% platform fee
+                    checkout_config["payment_intent_data"] = {
+                        "application_fee_amount": platform_fee,
+                        "transfer_data": {
+                            "destination": host_stripe_account
+                        },
+                        "metadata": {
+                            "booking_id": booking_id,
+                            "property_id": property_data.get("id"),
+                            "guest_email": booking["guest_email"]
+                        }
+                    }
+                    logger.info(f"Using Connect transfer to {host_stripe_account}")
+                else:
+                    logger.warning(f"Host account {host_stripe_account} missing transfer capability - payment goes to platform")
+            except Exception as e:
+                logger.warning(f"Could not verify host account: {e} - payment goes to platform")
+
+        # Create Stripe Checkout Session
+        checkout_session = stripe.checkout.Session.create(**checkout_config)
 
         # Update booking with checkout session
         supabase_client.table("bookings").update({
