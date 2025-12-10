@@ -242,6 +242,31 @@ export function PropertyList() {
           </DialogHeader>
           {selectedProperty && (
             <div className="space-y-6 p-6 bg-gray-50 rounded-lg">
+              {/* Property Images */}
+              {selectedProperty.images && selectedProperty.images.length > 0 && (
+                <div className="bg-white p-4 rounded-md border">
+                  <Label className="font-semibold text-gray-700 mb-3 block">Photos</Label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {selectedProperty.images.slice(0, 6).map((image, index) => (
+                      <div key={index} className="aspect-video rounded-lg overflow-hidden bg-gray-100">
+                        <img 
+                          src={image} 
+                          alt={`${selectedProperty.title} - Photo ${index + 1}`}
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          onError={(e) => {
+                            const target = e.target as HTMLImageElement;
+                            target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {selectedProperty.images.length > 6 && (
+                    <p className="text-sm text-gray-500 mt-2">+{selectedProperty.images.length - 6} more photos</p>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-white p-4 rounded-md border">
                   <Label className="font-semibold text-gray-700">Title</Label>
@@ -259,7 +284,7 @@ export function PropertyList() {
               
               <div className="bg-white p-4 rounded-md border">
                 <Label className="font-semibold text-gray-700">Description</Label>
-                <p className="text-gray-900 mt-2 leading-relaxed">{selectedProperty.description || 'No description provided'}</p>
+                <p className="text-gray-900 mt-2 leading-relaxed whitespace-pre-line">{selectedProperty.description || 'No description provided'}</p>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
