@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 import { Calendar, Search, Filter, MoreHorizontal, MapPin, User, Phone, Mail, CheckCircle, Clock, XCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Input } from "./ui/input"
@@ -51,6 +52,7 @@ const getStatusIcon = (status: string) => {
 
 export function BookingManagement() {
   const { bookings, loadBookings, properties, loadProperties } = useApp()
+  const navigate = useNavigate()
   const [searchTerm, setSearchTerm] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [activeTab, setActiveTab] = useState("all")
@@ -389,11 +391,24 @@ export function BookingManagement() {
                           <div className="flex items-center justify-between pt-3 border-t">
                             {/* Communication Buttons */}
                             <div className="flex gap-2">
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => {
+                                // Open email client with pre-filled guest email
+                                const subject = encodeURIComponent(`Regarding your booking at ${booking.property_title}`);
+                                const body = encodeURIComponent(`Hi ${booking.guest_name},\n\nRegarding your booking from ${new Date(booking.check_in).toLocaleDateString()} to ${new Date(booking.check_out).toLocaleDateString()}.\n\nBest regards`);
+                                window.open(`mailto:${booking.guest_email}?subject=${subject}&body=${body}`, '_blank');
+                              }}
+                            >
                               <Mail className="h-4 w-4 mr-2" />
                               Message Guest
                             </Button>
-                            <Button variant="outline" size="sm">
+                            <Button 
+                              variant="outline" 
+                              size="sm"
+                              onClick={() => navigate('/dashboard/properties')}
+                            >
                               View Property
                             </Button>
                             </div>

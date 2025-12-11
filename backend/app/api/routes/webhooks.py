@@ -569,3 +569,211 @@ async def get_webhook_statistics(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get webhook statistics: {str(e)}",
         )
+
+
+# ==========================================
+# INCOMING WEBHOOKS FROM AI AGENT PLATFORMS
+# ==========================================
+
+
+class IncomingMessageWebhook(BaseModel):
+    """Webhook payload for messages from AI agent platform"""
+
+    event: str = Field(..., description="Event type (e.g., message.received)")
+    data: Dict[str, Any] = Field(..., description="Event data")
+
+
+class IncomingHostResponseWebhook(BaseModel):
+    """Host response to guest via AI agent platform"""
+
+    conversation_id: str = Field(..., description="Conversation ID from booking")
+    message: str = Field(..., description="Host's message to guest")
+    sender_name: str = Field(..., description="Host's display name")
+    booking_id: Optional[str] = Field(None, description="Related booking ID")
+    property_id: Optional[str] = Field(None, description="Related property ID")
+
+
+@router.post("/host-dashboard")
+async def receive_host_dashboard_webhook(
+    payload: IncomingMessageWebhook,
+):
+    """
+    Receive webhooks from AI Agent platform (Krib AI)
+
+    Events handled:
+    - message.received: Guest message forwarded from AI platform
+    - host.response: Host responded via AI platform
+
+    Webhook URL: https://api.host.krib.ae/api/webhooks/host-dashboard
+    """
+    try:
+        event_type = payload.event
+        data = payload.data
+
+        logger.info(f"Received webhook from AI Agent: {event_type}")
+
+        if event_type == "message.received":
+            # Guest sent a message through AI agent
+            conversation_id = data.get("conversation_id")
+            message_content = data.get("message")
+            guest_email = data.get("guest_email")
+            property_id = data.get("property_id")
+            guest_name = data.get("sender_name", "Guest")
+
+            if not all([conversation_id, message_content]):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Missing required fields: conversation_id, message",
+                )
+
+            # Find or create conversation
+            conversation = None
+            if conversation_id:
+                conv_result = (
+                    supabase_client.table("conversations")
+                    .select("*")
+                    .eq("id", conversation_id)
+                    .execute()
+                )
+                if conv_result.data:
+                    conversation = conv_result.data[0]
+
+            # If no conversation found by ID, try to find by guest email and property
+            if not conversation and guest_email and property_id:
+                conv_result = (
+                    supabase_client.table("conversations")
+                    .select("*")
+                    .eq("guest_email", guest_email)
+                    .eq("property_id", property_id)
+                    .eq("status", "active")
+                    .execute()
+                )
+                if conv_result.data:
+                    conversation = conv_result.data[0]
+
+            # Create conversation if doesn't exist
+            if not conversation and property_id:
+                # Get property to find host
+                prop_result = (
+                    supabase_client.table("properties")
+                    .select("user_id, title")
+                    .eq("id", property_id)
+                    .execute()
+                )
+
+                if prop_result.data:
+                    property_info = prop_result.data[0]
+                    conv_result = (
+                        supabase_client.table("conversations")
+                        .insert(
+                            {
+                                "property_id": property_id,
+                                "host_id": property_info["user_id"],
+                                "guest_name": guest_name,
+                                "guest_email": guest_email or "",
+                                "status": "active",
+                                "last_message_at": datetime.utcnow().isoformat(),
+                                "source": "krib_ai_agent",
+                            }
+                        )
+                        .execute()
+                    )
+                    if conv_result.data:
+                        conversation = conv_result.data[0]
+
+            if conversation:
+                # Store message
+                supabase_client.table("messages").insert(
+                    {
+                        "conversation_id": conversation["id"],
+                        "sender_type": "guest",
+                        "content": message_content,
+                        "is_ai_generated": False,
+                        "is_read": False,
+                        "source": "krib_ai_agent",
+                    }
+                ).execute()
+
+                # Update conversation last_message_at
+                supabase_client.table("conversations").update(
+                    {
+                        "last_message_at": datetime.utcnow().isoformat(),
+                        "unread_count_host": conversation.get("unread_count_host", 0)
+                        + 1,
+                    }
+                ).eq("id", conversation["id"]).execute()
+
+                # Notify host
+                try:
+                    from app.services.notification_service import NotificationService
+
+                    await NotificationService.create_notification(
+                        user_id=conversation["host_id"],
+                        notification_type="new_message",
+                        title=f"New message from {guest_name}",
+                        message=f"{message_content[:100]}...",
+                        data={
+                            "conversation_id": conversation["id"],
+                            "property_id": property_id,
+                            "source": "krib_ai_agent",
+                        },
+                    )
+                except Exception as notif_error:
+                    logger.warning(f"Failed to send notification: {notif_error}")
+
+                return {
+                    "success": True,
+                    "conversation_id": conversation["id"],
+                    "message": "Message delivered to host",
+                }
+
+            return {"success": False, "error": "Could not find or create conversation"}
+
+        elif event_type == "host.response":
+            # Host responded through the messaging system
+            conversation_id = data.get("conversation_id")
+            message_content = data.get("message")
+            sender_name = data.get("sender_name", "Host")
+
+            if not all([conversation_id, message_content]):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Missing required fields: conversation_id, message",
+                )
+
+            # Store host's response
+            supabase_client.table("messages").insert(
+                {
+                    "conversation_id": conversation_id,
+                    "sender_type": "host",
+                    "content": message_content,
+                    "is_ai_generated": False,
+                    "is_read": True,
+                }
+            ).execute()
+
+            # Update conversation
+            supabase_client.table("conversations").update(
+                {
+                    "last_message_at": datetime.utcnow().isoformat(),
+                    "unread_count_guest": 1,  # Guest has unread message
+                }
+            ).eq("id", conversation_id).execute()
+
+            return {
+                "success": True,
+                "message": "Host response stored",
+            }
+
+        else:
+            logger.warning(f"Unknown webhook event type: {event_type}")
+            return {"success": False, "error": f"Unknown event type: {event_type}"}
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Webhook processing error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Webhook processing failed: {str(e)}",
+        )

@@ -804,23 +804,12 @@ async def create_external_booking(
             # Log but don't fail booking - webhooks are non-critical
             logger.warning(f"Webhook failed for booking {booking_id}: {webhook_error}")
 
-        # Send host notification (non-blocking)
-        try:
-            from app.services.notification_service import NotificationService
-
-            await NotificationService.create_booking_notification(
-                host_id=property_data["user_id"],
-                booking_id=booking_id,
-                property_id=property_data["id"],
-                notification_type="new_booking",
-                guest_name=f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
-                property_title=property_data["title"],
-                booking_details=created_booking,
-            )
-        except Exception as notification_error:
-            logger.warning(
-                f"Notification failed for booking {booking_id}: {notification_error}"
-            )
+        # NOTE: Host notification is NOT sent here at booking creation
+        # Notification is sent ONLY after payment succeeds (via Stripe webhook)
+        # This prevents hosts from seeing bookings that haven't been paid for
+        logger.info(
+            f"Booking {booking_id} created - awaiting payment before notifying host"
+        )
 
         # Generate payment URL for the AI platform to redirect guests
         payment_url = f"https://host.krib.ae/pay/{booking_id}"
