@@ -132,8 +132,8 @@ export function MessagingDashboard() {
         <p className="text-muted-foreground">Communicate with your guests</p>
       </div>
 
-      <div className="grid grid-cols-3 gap-6 h-[calc(100vh-200px)]">
-        <Card className="col-span-1">
+      <div className="grid grid-cols-12 gap-4 h-[calc(100vh-200px)]">
+        <Card className="col-span-4">
           <CardHeader>
             <CardTitle>Conversations</CardTitle>
             <CardDescription>
@@ -188,7 +188,7 @@ export function MessagingDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="col-span-2 flex flex-col">
+        <Card className="col-span-8 flex flex-col">
           {selectedConversation ? (
             <>
               <CardHeader className="border-b">
@@ -295,8 +295,18 @@ export function MessagingDashboard() {
           ) : (
             <CardContent className="flex items-center justify-center h-full">
               <div className="text-center text-muted-foreground">
-                <MessageSquare className="h-16 w-16 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">Select a conversation to start messaging</p>
+                <MessageSquare className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                {conversations.length === 0 ? (
+                  <>
+                    <p className="font-medium mb-1">No messages yet</p>
+                    <p className="text-sm">Guest inquiries will appear here when you receive them.</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="font-medium mb-1">No conversation selected</p>
+                    <p className="text-sm">Select a conversation from the list to view messages.</p>
+                  </>
+                )}
               </div>
             </CardContent>
           )}

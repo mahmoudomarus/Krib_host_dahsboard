@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from "react"
+import { useState, useEffect } from "react"
 import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { SidebarProvider } from "./components/ui/sidebar"
 import { AppProvider, useApp } from "./contexts/AppContext"
@@ -8,41 +8,20 @@ import { AuthCallback } from "./components/AuthCallback"
 import { DashboardSidebar } from "./components/DashboardSidebar"
 import { NotificationBell } from "./components/NotificationBell"
 
-// Lazy load heavy dashboard components for better performance
-const DashboardOverview = lazy(() => import("./components/DashboardOverview").then(m => ({ default: m.DashboardOverview })))
-const PropertyList = lazy(() => import("./components/PropertyList").then(m => ({ default: m.PropertyList })))
-const AddPropertyWizard = lazy(() => import("./components/AddPropertyWizard").then(m => ({ default: m.AddPropertyWizard })))
-const AnalyticsDashboard = lazy(() => import("./components/AnalyticsDashboard").then(m => ({ default: m.AnalyticsDashboard })))
-const BookingManagement = lazy(() => import("./components/BookingManagement").then(m => ({ default: m.BookingManagement })))
-const FinancialDashboard = lazy(() => import("./components/FinancialDashboard").then(m => ({ default: m.FinancialDashboard })))
-const SettingsPage = lazy(() => import("./components/SettingsPage").then(m => ({ default: m.SettingsPage })))
-const SuperhostVerification = lazy(() => import("./components/SuperhostVerification").then(m => ({ default: m.SuperhostVerification })))
-const MessagingDashboard = lazy(() => import("./components/MessagingDashboard").then(m => ({ default: m.MessagingDashboard })))
-const ReviewsDashboard = lazy(() => import("./components/ReviewsDashboard").then(m => ({ default: m.ReviewsDashboard })))
-const GuestPaymentPage = lazy(() => import("./components/GuestPaymentPage").then(m => ({ default: m.GuestPaymentPage })))
+// Direct imports for reliability (lazy loading was causing hanging issues)
+import { DashboardOverview } from "./components/DashboardOverview"
+import { PropertyList } from "./components/PropertyList"
+import { AddPropertyWizard } from "./components/AddPropertyWizard"
+import { AnalyticsDashboard } from "./components/AnalyticsDashboard"
+import { BookingManagement } from "./components/BookingManagement"
+import { FinancialDashboard } from "./components/FinancialDashboard"
+import { SettingsPage } from "./components/SettingsPage"
+import { SuperhostVerification } from "./components/SuperhostVerification"
+import { MessagingDashboard } from "./components/MessagingDashboard"
+import { ReviewsDashboard } from "./components/ReviewsDashboard"
+import { GuestPaymentPage } from "./components/GuestPaymentPage"
 
 export type NavigationItem = 'overview' | 'properties' | 'add-property' | 'analytics' | 'bookings' | 'financials' | 'superhost' | 'messages' | 'reviews' | 'settings'
-
-// Skeleton loader component for dashboard pages
-function PageSkeleton() {
-  return (
-    <div className="p-6 space-y-6 animate-in fade-in duration-300">
-      <div className="space-y-2">
-        <div className="h-8 bg-muted rounded-lg w-64 animate-pulse"></div>
-        <div className="h-4 bg-muted rounded w-96 animate-pulse"></div>
-      </div>
-      <div className="grid gap-4 md:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-28 bg-muted rounded-xl animate-pulse" style={{ animationDelay: `${i * 100}ms` }}></div>
-        ))}
-      </div>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="h-80 bg-muted rounded-xl animate-pulse"></div>
-        <div className="h-80 bg-muted rounded-xl animate-pulse" style={{ animationDelay: '100ms' }}></div>
-      </div>
-    </div>
-  )
-}
 
 function AppContent() {
   const { user, isLoading } = useApp()
@@ -98,16 +77,10 @@ function AppContent() {
   // Public payment page (no auth required)
   if (location.pathname.startsWith('/pay/')) {
     return (
-      <Suspense fallback={
-        <div className="min-h-screen flex items-center justify-center bg-background">
-          <div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div>
-        </div>
-      }>
-        <Routes>
-          <Route path="/pay/:bookingId" element={<GuestPaymentPage />} />
-          <Route path="/pay/:bookingId/success" element={<GuestPaymentPage />} />
-        </Routes>
-      </Suspense>
+      <Routes>
+        <Route path="/pay/:bookingId" element={<GuestPaymentPage />} />
+        <Route path="/pay/:bookingId/success" element={<GuestPaymentPage />} />
+      </Routes>
     )
   }
 
@@ -118,11 +91,7 @@ function AppContent() {
         <Route path="/" element={<Homepage />} />
         <Route path="/auth" element={<AuthForm />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route path="/pay/:bookingId" element={
-          <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full"></div></div>}>
-            <GuestPaymentPage />
-          </Suspense>
-        } />
+        <Route path="/pay/:bookingId" element={<GuestPaymentPage />} />
         <Route path="*" element={<Homepage />} />
       </Routes>
     )
@@ -145,8 +114,6 @@ function AppContent() {
     return null
   }
 
-
-
   return (
     <SidebarProvider>
       <div className="flex h-screen w-full">
@@ -161,7 +128,6 @@ function AppContent() {
             </div>
           </div>
           <div className="px-8 py-6">
-          <Suspense fallback={<PageSkeleton />}>
             <Routes>
               <Route path="/dashboard" element={<DashboardOverview />} />
               <Route path="/dashboard/overview" element={<DashboardOverview />} />
@@ -175,7 +141,6 @@ function AppContent() {
               <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
               <Route path="/dashboard/settings" element={<SettingsPage />} />
             </Routes>
-          </Suspense>
           </div>
         </main>
       </div>

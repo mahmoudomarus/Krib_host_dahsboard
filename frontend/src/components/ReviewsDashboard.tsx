@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Star, MessageSquare, TrendingUp, Filter, ChevronDown } from "lucide-react"
+import { Star, MessageSquare, Inbox, BarChart3, ChevronDown } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
 import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
@@ -208,52 +208,53 @@ export function ReviewsDashboard() {
 
       {stats && (
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
+          <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Reviews</CardTitle>
               <MessageSquare className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 flex flex-col justify-center">
               <div className="text-2xl font-bold">{stats.total_reviews}</div>
+              <p className="text-xs text-muted-foreground mt-1">All time reviews</p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Average Rating</CardTitle>
-              <Star className="h-4 w-4 text-yellow-400" />
+              <Star className="h-4 w-4 text-yellow-400 fill-yellow-400" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 flex flex-col justify-center">
               <div className="text-2xl font-bold">{stats.average_rating.toFixed(1)}</div>
-              <div className="flex mt-2">{renderStars(stats.average_rating)}</div>
+              <div className="flex mt-1">{renderStars(stats.average_rating)}</div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Pending Responses</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <Inbox className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1 flex flex-col justify-center">
               <div className="text-2xl font-bold">{stats.pending_responses}</div>
-              {stats.pending_responses > 0 && (
-                <p className="text-xs text-muted-foreground mt-1">Needs your attention</p>
-              )}
+              <p className="text-xs text-muted-foreground mt-1">
+                {stats.pending_responses > 0 ? 'Needs your attention' : 'All caught up'}
+              </p>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="flex flex-col">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Rating Distribution</CardTitle>
-              <Filter className="h-4 w-4 text-muted-foreground" />
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
-            <CardContent>
+            <CardContent className="flex-1">
               <div className="space-y-1">
                 {Object.entries(stats.ratings_breakdown).reverse().map(([rating, count]) => (
-                  <div key={rating} className="flex items-center gap-2 text-sm">
+                  <div key={rating} className="flex items-center gap-2 text-xs">
                     <span className="w-3">{rating}</span>
                     <Star className="w-3 h-3 fill-yellow-400 text-yellow-400" />
-                    <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
+                    <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                       <div 
                         className="h-full bg-yellow-400"
                         style={{ 
@@ -261,7 +262,7 @@ export function ReviewsDashboard() {
                         }}
                       />
                     </div>
-                    <span className="text-muted-foreground w-8 text-right">{count}</span>
+                    <span className="text-muted-foreground w-6 text-right">{count}</span>
                   </div>
                 ))}
               </div>

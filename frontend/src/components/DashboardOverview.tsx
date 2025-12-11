@@ -61,7 +61,7 @@ export function DashboardOverview() {
       value: properties.length.toString(),
       change: properties.length > 0 ? `${properties.length} active` : "No properties yet",
       icon: Building2,
-      color: "text-krib-lime"
+      color: "text-emerald-600"
     },
     {
       title: "Total Revenue",
@@ -198,92 +198,75 @@ export function DashboardOverview() {
         </Card>
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Consistent button styling */}
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks to manage your properties</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            <Button 
-              className="w-full justify-start h-auto p-4 text-left krib-button-primary group"
-              onClick={() => navigate('/add-property')}
+          <CardContent className="space-y-2">
+            <button 
+              className="w-full flex items-center p-3 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 transition-colors group"
+              onClick={() => navigate('/dashboard/add-property')}
             >
-              <div className="flex items-center w-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-black/10 mr-3 group-hover:bg-krib-black/20 transition-colors">
-                  <Plus className="h-5 w-5 text-krib-black" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold">Add New Property</div>
-                  <div className="text-sm opacity-80">List a new rental property</div>
-                </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500 mr-3">
+                <Plus className="h-4 w-4 text-white" />
               </div>
-            </Button>
+              <div className="text-left">
+                <div className="font-medium text-sm text-emerald-900">Add New Property</div>
+                <div className="text-xs text-emerald-700">List a new rental property</div>
+              </div>
+            </button>
             
-            <Button 
-              variant="outline" 
-              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft border-krib-lime/20 group"
-              onClick={() => navigate('/analytics')}
+            <button 
+              className="w-full flex items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors group"
+              onClick={() => navigate('/dashboard/analytics')}
             >
-              <div className="flex items-center w-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-lime/10 mr-3 group-hover:bg-krib-lime/20 transition-colors">
-                  <BarChart3 className="h-5 w-5 text-krib-lime" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold">View Analytics</div>
-                  <div className="text-sm text-muted-foreground">Performance insights</div>
-                </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted mr-3">
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </div>
-            </Button>
+              <div className="text-left">
+                <div className="font-medium text-sm">View Analytics</div>
+                <div className="text-xs text-muted-foreground">Performance insights</div>
+              </div>
+            </button>
             
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft group"
-              onClick={() => navigate('/bookings')}
+            <button 
+              className="w-full flex items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors group"
+              onClick={() => navigate('/dashboard/bookings')}
             >
-              <div className="flex items-center w-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-lime/5 mr-3 group-hover:bg-krib-lime/10 transition-colors">
-                  <BookOpen className="h-5 w-5 text-krib-lime" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold">Manage Bookings</div>
-                  <div className="text-sm text-muted-foreground">Reservations & guests</div>
-                </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted mr-3">
+                <BookOpen className="h-4 w-4 text-muted-foreground" />
               </div>
-            </Button>
+              <div className="text-left">
+                <div className="font-medium text-sm">Manage Bookings</div>
+                <div className="text-xs text-muted-foreground">Reservations & guests</div>
+              </div>
+            </button>
             
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft group"
-              onClick={() => navigate('/financials')}
+            <button 
+              className="w-full flex items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors group"
+              onClick={() => navigate('/dashboard/financials')}
             >
-              <div className="flex items-center w-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-lime-light/5 mr-3 group-hover:bg-krib-lime-light/10 transition-colors">
-                  <CreditCard className="h-5 w-5 text-krib-lime-light" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold">Financial Dashboard</div>
-                  <div className="text-sm text-muted-foreground">Earnings & payouts</div>
-                </div>
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted mr-3">
+                <CreditCard className="h-4 w-4 text-muted-foreground" />
               </div>
-            </Button>
+              <div className="text-left">
+                <div className="font-medium text-sm">Financial Dashboard</div>
+                <div className="text-xs text-muted-foreground">Earnings & payouts</div>
+              </div>
+            </button>
             
-            <Button 
-              variant="ghost" 
-              className="w-full justify-start h-auto p-4 text-left hover:bg-krib-lime-soft group"
-              onClick={() => navigate('/settings')}
+            <button 
+              className="w-full flex items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors group"
+              onClick={() => navigate('/dashboard/settings')}
             >
-              <div className="flex items-center w-full">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-krib-black/5 mr-3 group-hover:bg-krib-black/10 transition-colors">
-                  <Settings className="h-5 w-5 text-krib-black" />
-                </div>
-                <div className="text-left">
-                  <div className="font-semibold">Settings</div>
-                  <div className="text-sm text-muted-foreground">Account preferences</div>
-                </div>
+              <div className="text-left">
+                <div className="font-medium text-sm">Account Settings</div>
+                <div className="text-xs text-muted-foreground">Profile & preferences</div>
               </div>
-            </Button>
+            </button>
           </CardContent>
         </Card>
 
@@ -293,26 +276,29 @@ export function DashboardOverview() {
             <CardDescription>Overall portfolio metrics</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Portfolio Occupancy</span>
-                <span>{occupancyRate}%</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Portfolio Occupancy</span>
+                <span className="text-muted-foreground/30">·····</span>
+                <span className="font-medium">{occupancyRate}%</span>
               </div>
-              <Progress value={occupancyRate} />
+              <Progress value={occupancyRate} className="h-1.5" />
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Active Properties</span>
-                <span>{properties.filter(p => p.status === 'active').length}</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Active Properties</span>
+                <span className="text-muted-foreground/30">·····</span>
+                <span className="font-medium">{properties.filter(p => p.status === 'active').length}</span>
               </div>
-              <Progress value={properties.length > 0 ? (properties.filter(p => p.status === 'active').length / properties.length) * 100 : 0} />
+              <Progress value={properties.length > 0 ? (properties.filter(p => p.status === 'active').length / properties.length) * 100 : 0} className="h-1.5" />
             </div>
-            <div className="space-y-2">
-              <div className="flex items-center justify-between text-sm">
-                <span>Average Rating</span>
-                <span>{averageRating.toFixed(1)}/5.0</span>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Average Rating</span>
+                <span className="text-muted-foreground/30">·····</span>
+                <span className="font-medium">{averageRating.toFixed(1)}/5.0</span>
               </div>
-              <Progress value={(averageRating / 5) * 100} />
+              <Progress value={(averageRating / 5) * 100} className="h-1.5" />
             </div>
           </CardContent>
         </Card>

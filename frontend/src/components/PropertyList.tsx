@@ -121,92 +121,85 @@ export function PropertyList() {
         </Select>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         {filteredProperties.map((property) => (
-          <Card key={property.id} className="shadow-sm hover:shadow-md transition-shadow duration-200">
-            <div className="flex items-center gap-6">
-              {/* Property Image */}
-              <div className="w-32 h-24 relative flex-shrink-0">
+          <Card key={property.id} className="shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden">
+            <div className="flex p-4">
+              {/* Property Image - with consistent padding */}
+              <div className="w-28 h-20 relative flex-shrink-0 rounded-lg overflow-hidden">
                 <ImageWithFallback
                   src={property.images && property.images.length > 0 && !property.images[0].startsWith('blob:') 
                     ? property.images[0] 
                     : "/placeholder-property.jpg"}
                   alt={property.title}
-                  className="object-cover w-full h-full rounded-lg"
+                  className="object-cover w-full h-full"
                 />
-                {property.images && property.images[0] && property.images[0].startsWith('blob:') && (
-                  <div className="absolute bottom-1 left-1 bg-yellow-100 text-yellow-800 text-xs px-1 py-0.5 rounded text-[10px]">
-                    Image Issue
-                  </div>
-                )}
               </div>
 
-              {/* Property Info */}
-              <div className="flex-1 min-w-0">
-                <div className="flex items-start justify-between">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-lg truncate">{property.title}</h3>
-                      <Badge className={getStatusColor(property.status)}>
-                        {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-                      </Badge>
-                    </div>
-                    
-                    <div className="flex items-center text-muted-foreground mb-2">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      <span className="text-sm">{property.city}, {property.state}</span>
-                    </div>
-
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
-                      <span>{property.bedrooms} bed</span>
-                      <span>{property.bathrooms} bath</span>
-                      <span>{property.max_guests} guests</span>
-                    </div>
-
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-baseline">
-                        <span className="font-bold text-lg text-green-600">AED {property.price_per_night}</span>
-                        <span className="text-muted-foreground text-sm ml-1">/night</span>
-                      </div>
-                      {property.rating && (
-                        <div className="flex items-center">
-                          <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                          <span className="ml-1 text-sm font-medium">{property.rating}</span>
-                        </div>
-                      )}
-                    </div>
+              {/* Property Info - tighter layout */}
+              <div className="flex-1 min-w-0 ml-4 flex items-center">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold truncate">{property.title}</h3>
+                    <Badge className={`${getStatusColor(property.status)} text-xs`}>
+                      {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex items-center text-muted-foreground text-sm mb-1">
+                    <MapPin className="h-3.5 w-3.5 mr-1" />
+                    <span>{property.city}, {property.state}</span>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleViewProperty(property)}
-                      className="h-8"
-                    >
-                      <Eye className="h-4 w-4 mr-1" />
-                      View
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditProperty(property)}
-                      className="h-8"
-                    >
-                      <Edit className="h-4 w-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteProperty(property.id)}
-                      className="h-8 text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4 mr-1" />
-                      Delete
-                    </Button>
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground mb-1">
+                    <span>{property.bedrooms} bed</span>
+                    <span className="text-muted-foreground/50">•</span>
+                    <span>{property.bathrooms} bath</span>
+                    <span className="text-muted-foreground/50">•</span>
+                    <span>{property.max_guests} guests</span>
                   </div>
+
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-emerald-600">AED {property.price_per_night}<span className="font-normal text-muted-foreground text-sm">/night</span></span>
+                    {property.rating > 0 && (
+                      <span className="flex items-center text-sm">
+                        <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 mr-0.5" />
+                        {property.rating}
+                        {property.review_count > 0 && (
+                          <span className="text-muted-foreground ml-1">({property.review_count})</span>
+                        )}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Action Buttons - closer to content */}
+                <div className="flex items-center gap-2 ml-6">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewProperty(property)}
+                  >
+                    <Eye className="h-4 w-4 mr-1.5" />
+                    View
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleEditProperty(property)}
+                  >
+                    <Edit className="h-4 w-4 mr-1.5" />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeleteProperty(property.id)}
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-4 w-4 mr-1.5" />
+                    Delete
+                  </Button>
                 </div>
               </div>
             </div>

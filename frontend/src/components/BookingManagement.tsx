@@ -123,11 +123,11 @@ export function BookingManagement() {
           <div className="h-8 bg-muted rounded-lg w-64 animate-pulse"></div>
           <div className="h-4 bg-muted rounded w-96 animate-pulse"></div>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
+          <div className="grid gap-4 md:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
             <div key={i} className="h-32 bg-muted rounded-xl animate-pulse"></div>
-          ))}
-        </div>
+            ))}
+          </div>
         <div className="h-12 bg-muted rounded-xl w-full max-w-lg animate-pulse"></div>
         <div className="space-y-4">
           {[...Array(3)].map((_, i) => (
@@ -213,50 +213,70 @@ export function BookingManagement() {
         </Button>
       </div>
 
-      {/* Bookings Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="h-auto p-1.5 bg-muted/60 rounded-xl gap-1.5">
-          <TabsTrigger 
-            value="all" 
-            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-          >
-            <span>All Bookings</span>
-            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-background/80">
-              {enrichedBookings.length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="confirmed"
-            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-          >
-            <span>Confirmed</span>
-            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
-              {enrichedBookings.filter(b => b.status === 'confirmed').length}
-            </Badge>
-          </TabsTrigger>
-          <TabsTrigger 
-            value="pending"
-            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-          >
-            <span>Pending</span>
-            {enrichedBookings.filter(b => b.status === 'pending').length > 0 && (
-              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 animate-pulse">
-                {enrichedBookings.filter(b => b.status === 'pending').length}
-              </Badge>
-            )}
-          </TabsTrigger>
-          <TabsTrigger 
-            value="completed"
-            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
-          >
-            <span>Completed</span>
-            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-background/80">
-              {enrichedBookings.filter(b => b.status === 'completed').length}
-            </Badge>
-          </TabsTrigger>
-        </TabsList>
+      {/* Bookings Tabs - Using buttons for reliable click handling */}
+      <div className="flex gap-2 p-1 bg-muted/40 rounded-lg w-fit">
+        <button
+          onClick={() => setActiveTab("all")}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+            activeTab === "all" 
+              ? "bg-white shadow-sm text-foreground" 
+              : "text-muted-foreground hover:text-foreground hover:bg-white/50"
+          }`}
+        >
+          All Bookings
+          <span className={`px-1.5 py-0.5 rounded text-xs ${activeTab === "all" ? "bg-muted" : "bg-white/60"}`}>
+            {enrichedBookings.length}
+          </span>
+        </button>
+        <button
+          onClick={() => setActiveTab("confirmed")}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+            activeTab === "confirmed" 
+              ? "bg-white shadow-sm text-foreground" 
+              : "text-muted-foreground hover:text-foreground hover:bg-white/50"
+          }`}
+        >
+          Confirmed
+          <span className={`px-1.5 py-0.5 rounded text-xs ${
+            activeTab === "confirmed" 
+              ? "bg-emerald-100 text-emerald-700" 
+              : "bg-emerald-50 text-emerald-600"
+          }`}>
+            {enrichedBookings.filter(b => b.status === 'confirmed').length}
+          </span>
+        </button>
+        <button
+          onClick={() => setActiveTab("pending")}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+            activeTab === "pending" 
+              ? "bg-white shadow-sm text-foreground" 
+              : "text-muted-foreground hover:text-foreground hover:bg-white/50"
+          }`}
+        >
+          Pending
+          {enrichedBookings.filter(b => b.status === 'pending').length > 0 && (
+            <span className="px-1.5 py-0.5 rounded text-xs bg-amber-100 text-amber-700">
+              {enrichedBookings.filter(b => b.status === 'pending').length}
+            </span>
+          )}
+        </button>
+        <button
+          onClick={() => setActiveTab("completed")}
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2 ${
+            activeTab === "completed" 
+              ? "bg-white shadow-sm text-foreground" 
+              : "text-muted-foreground hover:text-foreground hover:bg-white/50"
+          }`}
+        >
+          Completed
+          <span className={`px-1.5 py-0.5 rounded text-xs ${activeTab === "completed" ? "bg-muted" : "bg-white/60"}`}>
+            {enrichedBookings.filter(b => b.status === 'completed').length}
+          </span>
+        </button>
+      </div>
 
-        <TabsContent value={activeTab} className="space-y-4">
+      {/* Booking content */}
+      <div className="space-y-4">
           {filteredBookings.length === 0 ? (
             <Card>
               <CardContent className="p-8 text-center">
@@ -369,13 +389,13 @@ export function BookingManagement() {
                           <div className="flex items-center justify-between pt-3 border-t">
                             {/* Communication Buttons */}
                             <div className="flex gap-2">
-                              <Button variant="outline" size="sm">
-                                <Mail className="h-4 w-4 mr-2" />
-                                Message Guest
-                              </Button>
-                              <Button variant="outline" size="sm">
-                                View Property
-                              </Button>
+                            <Button variant="outline" size="sm">
+                              <Mail className="h-4 w-4 mr-2" />
+                              Message Guest
+                            </Button>
+                            <Button variant="outline" size="sm">
+                              View Property
+                            </Button>
                             </div>
                             
                             {/* Action Buttons */}
@@ -406,8 +426,7 @@ export function BookingManagement() {
               })}
             </div>
           )}
-        </TabsContent>
-      </Tabs>
+      </div>
     </div>
   )
 }
