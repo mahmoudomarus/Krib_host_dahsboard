@@ -210,7 +210,7 @@ export function AnalyticsDashboard() {
       {/* Key Metrics */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {topMetrics.map((metric) => (
-          <Card key={metric.title} className="krib-card krib-glow-hover">
+          <Card key={metric.title} className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm">{metric.title}</CardTitle>
               <metric.icon className={`h-4 w-4 ${metric.color}`} />
@@ -243,7 +243,7 @@ export function AnalyticsDashboard() {
 
         <TabsContent value="revenue" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-7">
-            <Card className="md:col-span-4 krib-card">
+            <Card className="md:col-span-4 shadow-sm">
               <CardHeader>
                 <CardTitle>Revenue Trend Analysis</CardTitle>
                 <CardDescription>Revenue performance with trend analysis and predictions</CardDescription>
@@ -267,7 +267,7 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="md:col-span-3 krib-card">
+            <Card className="md:col-span-3 shadow-sm">
               <CardHeader>
                 <CardTitle>Performance Metrics</CardTitle>
                 <CardDescription>Key performance indicators</CardDescription>
@@ -316,7 +316,7 @@ export function AnalyticsDashboard() {
 
         <TabsContent value="forecast" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-3">
-            <Card className="md:col-span-2 krib-card">
+            <Card className="md:col-span-2 shadow-sm">
               <CardHeader>
                 <CardTitle>UAE Market Forecast</CardTitle>
                 <CardDescription>Real UAE seasonal patterns and revenue predictions</CardDescription>
@@ -346,7 +346,7 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Dubai Market Insights</CardTitle>
                 <CardDescription>Real market predictions and seasonal trends</CardDescription>
@@ -390,7 +390,7 @@ export function AnalyticsDashboard() {
 
         <TabsContent value="market" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                             <CardTitle>UAE Market Performance</CardTitle>
             <CardDescription>Your performance vs UAE market standards</CardDescription>
@@ -427,7 +427,7 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                             <CardTitle>UAE Seasonal Trends</CardTitle>
             <CardDescription>Real UAE seasonal demand patterns</CardDescription>
@@ -478,7 +478,7 @@ export function AnalyticsDashboard() {
         </TabsContent>
 
         <TabsContent value="pricing" className="space-y-4">
-          <Card className="krib-card">
+          <Card className="shadow-sm">
             <CardHeader>
               <CardTitle>UAE Dynamic Pricing</CardTitle>
               <CardDescription>Real-time pricing optimization based on UAE events, seasons, and demand</CardDescription>
@@ -596,7 +596,7 @@ export function AnalyticsDashboard() {
 
         <TabsContent value="competition" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>UAE Market Competition</CardTitle>
                 <CardDescription>Competitive analysis is being developed for UAE market</CardDescription>
@@ -638,7 +638,7 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Market Positioning</CardTitle>
                 <CardDescription>Your competitive advantage in UAE</CardDescription>
@@ -773,7 +773,7 @@ export function AnalyticsDashboard() {
               </Card>
             )}
 
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>UAE Demand Patterns</CardTitle>
                 <CardDescription>Real UAE seasonal and daily booking patterns</CardDescription>
@@ -833,7 +833,7 @@ export function AnalyticsDashboard() {
 
         <TabsContent value="occupancy" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Overall Occupancy</CardTitle>
                 <CardDescription>Current occupancy rate across all properties</CardDescription>
@@ -865,7 +865,7 @@ export function AnalyticsDashboard() {
               </CardContent>
             </Card>
 
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardHeader>
                 <CardTitle>Occupancy Insights</CardTitle>
                 <CardDescription>Performance metrics and optimization recommendations</CardDescription>

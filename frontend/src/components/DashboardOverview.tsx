@@ -106,7 +106,7 @@ export function DashboardOverview() {
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
-          <Card key={stat.title} className="krib-card krib-glow-hover">
+          <Card key={stat.title} className="shadow-sm">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm">{stat.title}</CardTitle>
               <stat.icon className={`h-4 w-4 ${stat.color}`} />
@@ -121,7 +121,7 @@ export function DashboardOverview() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Recent Bookings */}
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Recent Bookings</CardTitle>
             <CardDescription>Latest reservations for your properties</CardDescription>
@@ -155,7 +155,7 @@ export function DashboardOverview() {
         </Card>
 
         {/* Top Performing Properties */}
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Top Performing Properties</CardTitle>
             <CardDescription>Your best properties by revenue</CardDescription>
@@ -200,7 +200,7 @@ export function DashboardOverview() {
 
       {/* Quick Actions */}
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Quick Actions</CardTitle>
             <CardDescription>Common tasks to manage your properties</CardDescription>
@@ -287,7 +287,7 @@ export function DashboardOverview() {
           </CardContent>
         </Card>
 
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Property Performance</CardTitle>
             <CardDescription>Overall portfolio metrics</CardDescription>

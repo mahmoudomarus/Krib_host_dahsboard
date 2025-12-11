@@ -161,7 +161,7 @@ export function SettingsPage() {
 
       <div className="grid gap-6">
         {/* Profile Information */}
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Profile Information</CardTitle>
             <CardDescription>
@@ -288,7 +288,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Notifications */}
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Notifications</CardTitle>
             <CardDescription>
@@ -347,7 +347,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Preferences */}
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Preferences</CardTitle>
             <CardDescription>
@@ -415,7 +415,7 @@ export function SettingsPage() {
         </Card>
 
         {/* Account Actions */}
-        <Card className="krib-card">
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle>Account Actions</CardTitle>
             <CardDescription>
@@ -438,7 +438,7 @@ export function SettingsPage() {
                     Change Password
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="krib-card">
+                <DialogContent className="shadow-sm">
                   <DialogHeader>
                     <DialogTitle>{isOAuthUser ? 'Set Password' : 'Change Password'}</DialogTitle>
                     <DialogDescription>

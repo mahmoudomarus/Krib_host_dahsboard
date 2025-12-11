@@ -129,7 +129,7 @@ export function FinancialDashboard() {
 
       {/* Financial Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="krib-card krib-glow-hover">
+        <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Pending Earnings</CardTitle>
             <DollarSign className="h-4 w-4 text-green-600" />
@@ -140,7 +140,7 @@ export function FinancialDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="krib-card krib-glow-hover">
+        <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
             <TrendingUp className="h-4 w-4 text-krib-lime" />
@@ -151,7 +151,7 @@ export function FinancialDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="krib-card krib-glow-hover">
+        <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Payouts</CardTitle>
             <Banknote className="h-4 w-4 text-purple-600" />
@@ -162,7 +162,7 @@ export function FinancialDashboard() {
           </CardContent>
         </Card>
 
-        <Card className="krib-card krib-glow-hover">
+        <Card className="shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Platform Fees</CardTitle>
             <CreditCard className="h-4 w-4 text-orange-600" />

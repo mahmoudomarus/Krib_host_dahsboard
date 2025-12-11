@@ -393,35 +393,14 @@ html {
   background-attachment: scroll;
 }
 
-/* Clean Dashboard Background - Subtle and Professional */
+/* Clean Dashboard Background */
 .krib-dashboard-background {
-  background: 
-    /* Clean white base */
-    #fafbfc,
-    /* Very subtle geometric pattern */
-    repeating-linear-gradient(
-      45deg,
-      transparent 0%,
-      transparent 98%,
-      rgba(184, 255, 0, 0.008) 98%,
-      rgba(184, 255, 0, 0.008) 100%
-    );
-  background-size: 120px 120px;
-  background-repeat: repeat;
+  background: #fafbfc;
 }
 
-/* Alternative cleaner stripe background for pages that need subtlety */
+/* Clean stripe background */
 .krib-stripe-background {
-  background-image: 
-    linear-gradient(
-      45deg,
-      transparent 0%,
-      transparent 90%,
-      rgba(184, 255, 0, 0.02) 90%,
-      rgba(184, 255, 0, 0.02) 100%
-    );
-  background-size: 80px 80px;
-  background-repeat: repeat;
+  background: #fafbfc;
 }
 
 /* Krib Accent Elements */
@@ -429,66 +408,59 @@ html {
   border-left: 3px solid var(--krib-lime) !important;
 }
 
+/* Removed green glow effects - using subtle neutral shadows instead */
 .krib-glow {
-  box-shadow: 0 0 20px rgba(184, 255, 0, 0.08) !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
 }
 
 .krib-glow-hover:hover {
-  box-shadow: 0 0 25px rgba(184, 255, 0, 0.12) !important;
-  transform: translateY(-1px);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
+  transition: box-shadow 0.2s ease;
 }
 
-/* Krib Button System */
+/* Krib Button System - Clean design */
 .krib-button-primary {
-  background: linear-gradient(135deg, var(--krib-lime) 0%, var(--krib-lime-light) 100%) !important;
+  background: var(--krib-lime) !important;
   color: var(--krib-black) !important;
   border: none !important;
   font-weight: 600 !important;
-  transition: all 0.3s ease !important;
+  transition: background 0.2s ease !important;
 }
 
 .krib-button-primary:hover {
-  background: linear-gradient(135deg, var(--krib-lime-light) 0%, var(--krib-lime) 100%) !important;
-  box-shadow: 0 4px 15px rgba(184, 255, 0, 0.25) !important;
-  transform: translateY(-2px);
+  background: var(--krib-lime-dark) !important;
 }
 
-/* Krib Card System */
+/* Krib Card System - Clean, professional design */
 .krib-card {
   background: white !important;
   border: 1px solid rgba(0, 0, 0, 0.06) !important;
-  border-bottom: 3px solid var(--krib-lime) !important;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06) !important;
-  transition: all 0.3s ease !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+  border-radius: 12px !important;
+  transition: box-shadow 0.2s ease !important;
   position: relative !important;
   z-index: 1 !important;
 }
 
 .krib-card:hover {
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08), 0 0 25px rgba(184, 255, 0, 0.12) !important;
-  border-bottom-color: var(--krib-lime-light) !important;
-  transform: translateY(-2px) !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Krib Sidebar System - Enhanced Beauty */
+/* Krib Sidebar System - Clean design */
 .krib-sidebar {
-  background: linear-gradient(180deg, #FAFBFC 0%, #F5F6F8 100%) !important;
-  border-right: 1px solid rgba(184, 255, 0, 0.1) !important;
-  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.03) !important;
+  background: #ffffff !important;
+  border-right: 1px solid rgba(0, 0, 0, 0.06) !important;
 }
 
 .krib-sidebar-header {
-  background: rgba(255, 255, 255, 0.8) !important;
-  backdrop-filter: blur(10px) !important;
-  border-bottom: 1px solid rgba(184, 255, 0, 0.15) !important;
+  background: #ffffff !important;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
   margin-bottom: 8px !important;
 }
 
 .krib-logo-container {
-  background: linear-gradient(135deg, rgba(184, 255, 0, 0.1) 0%, rgba(203, 252, 80, 0.05) 100%) !important;
-  border: 1px solid rgba(184, 255, 0, 0.2) !important;
-  box-shadow: 0 2px 8px rgba(184, 255, 0, 0.1) !important;
+  background: transparent !important;
+  border: none !important;
 }
 
 .krib-sidebar-active {
@@ -507,16 +479,12 @@ html {
 .krib-sidebar-item {
   margin: 2px 6px !important;
   border-radius: 8px !important;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  border: 1px solid transparent !important;
+  transition: background 0.15s ease !important;
 }
 
 .krib-sidebar-item:hover {
-  background: linear-gradient(135deg, rgba(184, 255, 0, 0.08) 0%, rgba(203, 252, 80, 0.04) 100%) !important;
+  background: rgba(0, 0, 0, 0.04) !important;
   color: var(--krib-gray-dark) !important;
-  border-color: rgba(184, 255, 0, 0.2) !important;
-  transform: translateX(1px) !important;
-  box-shadow: 0 2px 8px rgba(184, 255, 0, 0.05) !important;
 }
 
 .krib-sidebar-group-label {
@@ -544,30 +512,22 @@ html {
 }
 
 .krib-sidebar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(184, 255, 0, 0.3) 50%, transparent 100%);
-  z-index: 1;
+  display: none;
 }
 
-/* Elegant separator between navigation groups */
+/* Sidebar section divider */
 .krib-sidebar-separator {
   height: 1px;
-  background: linear-gradient(90deg, transparent 0%, rgba(184, 255, 0, 0.1) 20%, rgba(184, 255, 0, 0.1) 80%, transparent 100%);
+  background: rgba(0, 0, 0, 0.06);
   margin: 12px 16px;
 }
 
-/* Enhanced menu item icons */
+/* Menu item icons */
 .krib-sidebar-item svg {
-  transition: all 0.3s ease !important;
+  transition: color 0.15s ease !important;
 }
 
 .krib-sidebar-item:hover svg {
-  transform: scale(1.1) !important;
   color: var(--krib-lime) !important;
 }
 
@@ -577,36 +537,9 @@ html {
 }
 }
 
-/* Paint Splash Background */
+/* Clean Background */
 .krib-paint-splash-background {
-  background: 
-    /* Lime green paint splashes */
-    radial-gradient(circle at 15% 25%, rgba(184, 255, 0, 0.06) 0%, transparent 45%),
-    radial-gradient(circle at 75% 15%, rgba(203, 252, 80, 0.08) 0%, transparent 50%),
-    radial-gradient(circle at 85% 65%, rgba(184, 255, 0, 0.10) 0%, transparent 55%),
-    radial-gradient(circle at 25% 80%, rgba(203, 252, 80, 0.12) 0%, transparent 60%),
-    
-    /* Black paint splashes */
-    radial-gradient(circle at 60% 35%, rgba(17, 17, 17, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 40% 75%, rgba(17, 17, 17, 0.06) 0%, transparent 45%),
-    radial-gradient(circle at 90% 85%, rgba(17, 17, 17, 0.10) 0%, transparent 50%),
-    radial-gradient(circle at 10% 60%, rgba(17, 17, 17, 0.15) 0%, transparent 35%),
-    
-    /* Additional lime splashes for richness */
-    radial-gradient(ellipse 600px 400px at 20% 10%, rgba(184, 255, 0, 0.08) 0%, transparent 70%),
-    radial-gradient(ellipse 800px 600px at 80% 90%, rgba(203, 252, 80, 0.06) 0%, transparent 75%),
-    
-    /* Subtle diagonal stripes */
-    repeating-linear-gradient(
-      45deg,
-      transparent,
-      transparent 100px,
-      rgba(184, 255, 0, 0.01) 100px,
-      rgba(184, 255, 0, 0.01) 102px
-    );
-  
-  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, no-repeat, repeat;
-  background-attachment: scroll;
+  background: #fafbfc;
 }
 
 /* Enhanced Auth Background with Realistic Ink Splashes */

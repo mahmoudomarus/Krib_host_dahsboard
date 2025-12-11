@@ -827,7 +827,7 @@ Book now and experience the best of ${city}!`
               </Alert>
             )}
             
-            <Card className="krib-card">
+            <Card className="shadow-sm">
               <CardContent className="">
                 <div className="space-y-4">
                   <div>
