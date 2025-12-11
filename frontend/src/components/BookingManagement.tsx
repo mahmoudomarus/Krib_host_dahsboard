@@ -7,6 +7,7 @@ import { Button } from "./ui/button"
 import { Badge } from "./ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "./ui/dropdown-menu"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import { useApp } from "../contexts/AppContext"
 
@@ -23,6 +24,7 @@ interface Booking {
   guests: number
   total_amount: number
   status: 'confirmed' | 'pending' | 'cancelled' | 'completed' | 'no_show'
+  payment_status?: string
   created_at: string
   special_requests?: string
   internal_notes?: string
@@ -57,6 +59,8 @@ export function BookingManagement() {
   const [statusFilter, setStatusFilter] = useState("all")
   const [activeTab, setActiveTab] = useState("all")
   const [loading, setLoading] = useState(true)
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
 
   useEffect(() => {
     async function loadData() {
@@ -323,9 +327,15 @@ export function BookingManagement() {
                                   </Button>
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
-                                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                                  <DropdownMenuItem>Contact Guest</DropdownMenuItem>
-                                  <DropdownMenuItem>Modify Booking</DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => {
+                                    setSelectedBooking(booking)
+                                    setShowDetailsModal(true)
+                                  }}>
+                                    View Details
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => navigate('/dashboard/messages')}>
+                                    Contact Guest
+                                  </DropdownMenuItem>
                                   {booking.status === 'pending' && (
                                     <>
                                       <DropdownMenuItem onClick={() => updateBookingStatus(booking.id, 'confirmed')}>
@@ -394,12 +404,7 @@ export function BookingManagement() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => {
-                                // Open email client with pre-filled guest email
-                                const subject = encodeURIComponent(`Regarding your booking at ${booking.property_title}`);
-                                const body = encodeURIComponent(`Hi ${booking.guest_name},\n\nRegarding your booking from ${new Date(booking.check_in).toLocaleDateString()} to ${new Date(booking.check_out).toLocaleDateString()}.\n\nBest regards`);
-                                window.open(`mailto:${booking.guest_email}?subject=${subject}&body=${body}`, '_blank');
-                              }}
+                              onClick={() => navigate('/dashboard/messages')}
                             >
                               <Mail className="h-4 w-4 mr-2" />
                               Message Guest
@@ -442,6 +447,98 @@ export function BookingManagement() {
             </div>
           )}
       </div>
+
+      {/* Booking Details Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Booking Details</DialogTitle>
+          </DialogHeader>
+          {selectedBooking && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-muted-foreground">Property</p>
+                  <p className="font-medium">{selectedBooking.property_title}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Status</p>
+                  <Badge variant={getStatusColor(selectedBooking.status)}>
+                    {selectedBooking.status}
+                  </Badge>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Guest Name</p>
+                  <p className="font-medium">{selectedBooking.guest_name}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Email</p>
+                  <p className="font-medium">{selectedBooking.guest_email}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Phone</p>
+                  <p className="font-medium">{selectedBooking.guest_phone || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Guests</p>
+                  <p className="font-medium">{selectedBooking.guests}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Check-in</p>
+                  <p className="font-medium">{new Date(selectedBooking.check_in).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Check-out</p>
+                  <p className="font-medium">{new Date(selectedBooking.check_out).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Nights</p>
+                  <p className="font-medium">{selectedBooking.nights}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Total</p>
+                  <p className="font-medium text-green-600">AED {selectedBooking.total_amount}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Booked On</p>
+                  <p className="font-medium">{new Date(selectedBooking.created_at).toLocaleDateString()}</p>
+                </div>
+                <div>
+                  <p className="text-muted-foreground">Payment Status</p>
+                  <p className="font-medium">{selectedBooking.payment_status || 'Pending'}</p>
+                </div>
+              </div>
+              {selectedBooking.special_requests && (
+                <div>
+                  <p className="text-muted-foreground text-sm">Special Requests</p>
+                  <p className="text-sm mt-1 p-2 bg-muted rounded">{selectedBooking.special_requests}</p>
+                </div>
+              )}
+              <div className="flex gap-2 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  className="flex-1"
+                  onClick={() => navigate('/dashboard/messages')}
+                >
+                  <Mail className="h-4 w-4 mr-2" />
+                  Message Guest
+                </Button>
+                {selectedBooking.status === 'pending' && (
+                  <Button 
+                    className="flex-1 bg-green-600 hover:bg-green-700"
+                    onClick={() => {
+                      updateBookingStatus(selectedBooking.id, 'confirmed')
+                      setShowDetailsModal(false)
+                    }}
+                  >
+                    Confirm Booking
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
