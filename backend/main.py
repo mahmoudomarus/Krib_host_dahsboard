@@ -121,6 +121,34 @@ async def https_fix_middleware(request, call_next):
     return response
 
 
+# Security Headers Middleware
+@app.middleware("http")
+async def security_headers_middleware(request, call_next):
+    """Add security headers to all responses"""
+    response = await call_next(request)
+    
+    # Prevent clickjacking
+    response.headers["X-Frame-Options"] = "DENY"
+    
+    # Prevent MIME type sniffing
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    
+    # Enable XSS filter
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    
+    # Referrer policy
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    
+    # Permissions policy (disable unnecessary features)
+    response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    
+    # Content Security Policy for API
+    if request.url.path.startswith("/api"):
+        response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
+    
+    return response
+
+
 # CORS - Restrict to known origins only (no wildcard for security)
 app.add_middleware(
     CORSMiddleware,
@@ -129,10 +157,12 @@ app.add_middleware(
         "http://localhost:5173",
         "https://host.krib.ae",
         "https://krib.ai",
+        "https://www.krib.ae",
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "X-API-Key", "X-Request-ID"],
+    expose_headers=["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"],
 )
 
 # Metrics and monitoring

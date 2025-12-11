@@ -7,20 +7,25 @@
 :root {
   --font-size: 15px;
   
-  /* Krib Brand Colors */
-  --krib-lime: #B8FF00;
-  --krib-lime-light: #CBFC50;
-  --krib-lime-dark: #8FCC00;
-  --krib-lime-muted: rgba(184, 255, 0, 0.08);
-  --krib-lime-soft: rgba(184, 255, 0, 0.1);
-  --krib-lime-medium: rgba(184, 255, 0, 0.15);
-  --krib-black: #111111;
-  --krib-gray-light: #F8F9FA;
-  --krib-gray-medium: #F5F6F8;
-  --krib-gray-dark: #2D3748;
+  /* Krib Brand Colors - Softened for better eye comfort */
+  --krib-lime: #9AE600;
+  --krib-lime-light: #B5F030;
+  --krib-lime-dark: #7AB800;
+  --krib-lime-muted: rgba(154, 230, 0, 0.06);
+  --krib-lime-soft: rgba(154, 230, 0, 0.08);
+  --krib-lime-medium: rgba(154, 230, 0, 0.12);
+  --krib-black: #1A1A1A;
+  --krib-gray-light: #F7F8FA;
+  --krib-gray-medium: #EEF0F4;
+  --krib-gray-dark: #374151;
   
-  /* Base Colors */
-  --background: #ffffff;
+  /* Accent colors for better visual hierarchy */
+  --krib-emerald: #10B981;
+  --krib-blue: #3B82F6;
+  --krib-amber: #F59E0B;
+  
+  /* Base Colors - Warmer background */
+  --background: #FAFBFC;
   --foreground: var(--krib-gray-dark);
   --card: #ffffff;
   --card-foreground: var(--krib-gray-dark);
@@ -30,42 +35,42 @@
   /* Primary Colors - Krib Lime */
   --primary: var(--krib-lime);
   --primary-foreground: var(--krib-black);
-  --secondary: var(--krib-gray-light);
+  --secondary: var(--krib-gray-medium);
   --secondary-foreground: var(--krib-gray-dark);
   
   /* UI Elements */
   --muted: var(--krib-gray-light);
-  --muted-foreground: #717182;
+  --muted-foreground: #6B7280;
   --accent: var(--krib-lime-soft);
   --accent-foreground: var(--krib-gray-dark);
-  --destructive: #d4183d;
+  --destructive: #DC2626;
   --destructive-foreground: #ffffff;
-  --border: rgba(0, 0, 0, 0.08);
-  --input: var(--krib-gray-light);
-  --input-background: var(--krib-gray-light);
-  --switch-background: #cbced4;
+  --border: rgba(0, 0, 0, 0.06);
+  --input: #ffffff;
+  --input-background: #ffffff;
+  --switch-background: #D1D5DB;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: var(--krib-lime);
+  --ring: var(--krib-emerald);
   
-  /* Charts - Krib Brand Palette */
-  --chart-1: var(--krib-lime);
-  --chart-2: var(--krib-lime-light);
-  --chart-3: #FFE135;
-  --chart-4: #87CEEB;
-  --chart-5: #98FB98;
+  /* Charts - Modern palette */
+  --chart-1: var(--krib-emerald);
+  --chart-2: var(--krib-blue);
+  --chart-3: var(--krib-amber);
+  --chart-4: #8B5CF6;
+  --chart-5: #EC4899;
   
-  --radius: 0.625rem;
+  --radius: 0.75rem;
   
-  /* Sidebar - Light Gray Theme */
-  --sidebar: var(--krib-gray-light);
+  /* Sidebar - Clean white theme */
+  --sidebar: #ffffff;
   --sidebar-foreground: var(--krib-gray-dark);
-  --sidebar-primary: var(--krib-lime);
-  --sidebar-primary-foreground: var(--krib-black);
-  --sidebar-accent: var(--krib-lime-soft);
+  --sidebar-primary: var(--krib-emerald);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(16, 185, 129, 0.08);
   --sidebar-accent-foreground: var(--krib-gray-dark);
-  --sidebar-border: rgba(184, 255, 0, 0.2);
-  --sidebar-ring: var(--krib-lime);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--krib-emerald);
 }
 
 .dark {
@@ -487,17 +492,15 @@ html {
 }
 
 .krib-sidebar-active {
-  background: linear-gradient(135deg, rgba(184, 255, 0, 0.15) 0%, rgba(203, 252, 80, 0.18) 100%) !important;
-  border-right: 3px solid var(--krib-lime) !important;
-  color: var(--krib-black) !important;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.12) 100%) !important;
+  border-right: 3px solid var(--krib-emerald) !important;
+  color: var(--krib-emerald) !important;
   font-weight: 600 !important;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(184, 255, 0, 0.1) !important;
-  transform: translateX(2px) !important;
-  margin-right: -2px !important;
+  box-shadow: none !important;
 }
 
 .krib-sidebar-active svg {
-  color: var(--krib-black) !important;
+  color: var(--krib-emerald) !important;
   filter: none !important;
 }
 
@@ -568,15 +571,9 @@ html {
   color: var(--krib-lime) !important;
 }
 
-/* Subtle animation for active state */
-@keyframes krib-sidebar-active-pulse {
-  0% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(184, 255, 0, 0.1); }
-  50% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.3), 0 2px 8px rgba(184, 255, 0, 0.15); }
-  100% { box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 2px 4px rgba(184, 255, 0, 0.1); }
-}
-
+/* No animation for active state - clean and professional */
 .krib-sidebar-active {
-  animation: krib-sidebar-active-pulse 3s ease-in-out infinite !important;
+  transition: all 0.2s ease !important;
 }
 }
 

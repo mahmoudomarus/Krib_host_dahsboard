@@ -384,6 +384,27 @@ async def confirm_booking(
             confirmed_booking["property_title"] = property_result.data[0]["title"]
             confirmed_booking["property_address"] = property_result.data[0]["address"]
 
+        # Send confirmation email to guest (non-blocking)
+        try:
+            booking_email_data = {
+                "booking_id": confirmed_booking["id"],
+                "property_title": confirmed_booking.get("property_title", "Your Property"),
+                "property_address": confirmed_booking.get("property_address", ""),
+                "check_in": confirmed_booking["check_in"],
+                "check_out": confirmed_booking["check_out"],
+                "guests": confirmed_booking.get("guests", 1),
+                "total_amount": confirmed_booking["total_amount"],
+            }
+            await email_service.send_guest_booking_confirmation(
+                guest_email=confirmed_booking["guest_email"],
+                guest_name=confirmed_booking["guest_name"],
+                booking_data=booking_email_data
+            )
+            logger.info(f"Sent confirmation email to guest {confirmed_booking['guest_email']}")
+        except Exception as email_error:
+            logger.error(f"Failed to send confirmation email: {email_error}")
+            # Don't fail the booking confirmation if email fails
+
         return BookingResponse(**confirmed_booking)
 
     except HTTPException:

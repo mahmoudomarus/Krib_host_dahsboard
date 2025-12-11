@@ -119,13 +119,20 @@ export function BookingManagement() {
   if (loading) {
     return (
       <div className="p-6 space-y-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="grid gap-4 md:grid-cols-3">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded"></div>
-            ))}
-          </div>
+        <div className="space-y-2">
+          <div className="h-8 bg-muted rounded-lg w-64 animate-pulse"></div>
+          <div className="h-4 bg-muted rounded w-96 animate-pulse"></div>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-32 bg-muted rounded-xl animate-pulse"></div>
+          ))}
+        </div>
+        <div className="h-12 bg-muted rounded-xl w-full max-w-lg animate-pulse"></div>
+        <div className="space-y-4">
+          {[...Array(3)].map((_, i) => (
+            <div key={i} className="h-48 bg-muted rounded-xl animate-pulse"></div>
+          ))}
         </div>
       </div>
     )
@@ -208,11 +215,45 @@ export function BookingManagement() {
 
       {/* Bookings Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="all">All Bookings</TabsTrigger>
-          <TabsTrigger value="confirmed">Confirmed</TabsTrigger>
-          <TabsTrigger value="pending">Pending</TabsTrigger>
-          <TabsTrigger value="completed">Completed</TabsTrigger>
+        <TabsList className="h-auto p-1.5 bg-muted/60 rounded-xl gap-1.5">
+          <TabsTrigger 
+            value="all" 
+            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+          >
+            <span>All Bookings</span>
+            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-background/80">
+              {enrichedBookings.length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="confirmed"
+            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+          >
+            <span>Confirmed</span>
+            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
+              {enrichedBookings.filter(b => b.status === 'confirmed').length}
+            </Badge>
+          </TabsTrigger>
+          <TabsTrigger 
+            value="pending"
+            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+          >
+            <span>Pending</span>
+            {enrichedBookings.filter(b => b.status === 'pending').length > 0 && (
+              <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 animate-pulse">
+                {enrichedBookings.filter(b => b.status === 'pending').length}
+              </Badge>
+            )}
+          </TabsTrigger>
+          <TabsTrigger 
+            value="completed"
+            className="px-4 py-2.5 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm transition-all"
+          >
+            <span>Completed</span>
+            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs bg-background/80">
+              {enrichedBookings.filter(b => b.status === 'completed').length}
+            </Badge>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value={activeTab} className="space-y-4">
