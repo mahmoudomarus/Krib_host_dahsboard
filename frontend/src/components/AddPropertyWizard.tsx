@@ -828,7 +828,7 @@ Book now and experience the best of ${city}!`
             )}
             
             <Card className="krib-card">
-              <CardContent className="p-6">
+              <CardContent className="">
                 <div className="space-y-4">
                   <div>
                     <h3 className="text-xl font-bold">{propertyData.title}</h3>
@@ -908,14 +908,14 @@ Book now and experience the best of ${city}!`
 
   if (currentStep === 'published') {
     return (
-      <div className="p-6 max-w-2xl mx-auto">
+      <div className=" max-w-2xl mx-auto">
         {renderStepContent()}
       </div>
     )
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className=" max-w-4xl mx-auto">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold">Add New Property</h1>

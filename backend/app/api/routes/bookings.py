@@ -388,7 +388,9 @@ async def confirm_booking(
         try:
             booking_email_data = {
                 "booking_id": confirmed_booking["id"],
-                "property_title": confirmed_booking.get("property_title", "Your Property"),
+                "property_title": confirmed_booking.get(
+                    "property_title", "Your Property"
+                ),
                 "property_address": confirmed_booking.get("property_address", ""),
                 "check_in": confirmed_booking["check_in"],
                 "check_out": confirmed_booking["check_out"],
@@ -398,9 +400,11 @@ async def confirm_booking(
             await email_service.send_guest_booking_confirmation(
                 guest_email=confirmed_booking["guest_email"],
                 guest_name=confirmed_booking["guest_name"],
-                booking_data=booking_email_data
+                booking_data=booking_email_data,
             )
-            logger.info(f"Sent confirmation email to guest {confirmed_booking['guest_email']}")
+            logger.info(
+                f"Sent confirmation email to guest {confirmed_booking['guest_email']}"
+            )
         except Exception as email_error:
             logger.error(f"Failed to send confirmation email: {email_error}")
             # Don't fail the booking confirmation if email fails

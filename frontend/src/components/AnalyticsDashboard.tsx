@@ -103,7 +103,7 @@ export function AnalyticsDashboard() {
 
   if (loading && !analyticsData) {
     return (
-      <div className="p-6 space-y-6">
+      <div className=" space-y-6">
         <div className="flex items-center justify-center min-h-[500px]">
           <div className="text-center space-y-4">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10">
@@ -163,7 +163,7 @@ export function AnalyticsDashboard() {
   ]
 
   return (
-    <div className="p-6 space-y-6 relative">
+    <div className=" space-y-6 relative">
       {loading && analyticsData && (
         <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
           <div className="flex flex-col items-center space-y-3">
@@ -682,7 +682,7 @@ export function AnalyticsDashboard() {
         <TabsContent value="insights" className="space-y-4">
           <div className="grid gap-4">
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="">
                 <div className="flex items-start gap-4">
                   <div className="p-2 rounded-full bg-green-100 text-green-600">
                     <TrendingUp className="h-4 w-4" />
@@ -704,7 +704,7 @@ export function AnalyticsDashboard() {
             </Card>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="">
                 <div className="flex items-start gap-4">
                   <div className="p-2 rounded-full bg-blue-100 text-blue-600">
                     <Calendar className="h-4 w-4" />
@@ -726,7 +726,7 @@ export function AnalyticsDashboard() {
             </Card>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="">
                 <div className="flex items-start gap-4">
                   <div className="p-2 rounded-full bg-yellow-100 text-yellow-600">
                     <AlertTriangle className="h-4 w-4" />
@@ -749,7 +749,7 @@ export function AnalyticsDashboard() {
 
             {marketInsights?.area_recommendations && (
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="">
                   <div className="flex items-start gap-4">
                     <div className="p-2 rounded-full bg-purple-100 text-purple-600">
                       <MapPin className="h-4 w-4" />

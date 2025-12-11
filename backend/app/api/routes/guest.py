@@ -20,11 +20,16 @@ router = APIRouter()
 async def get_guest_booking(booking_id: str) -> Dict[str, Any]:
     """Get booking details for guest payment page (public endpoint)"""
     try:
-        result = supabase_client.table("bookings").select(
-            "id, check_in, check_out, nights, guests, guest_name, guest_email, "
-            "total_amount, status, payment_status, "
-            "properties(title, address, city, state)"
-        ).eq("id", booking_id).execute()
+        result = (
+            supabase_client.table("bookings")
+            .select(
+                "id, check_in, check_out, nights, guests, guest_name, guest_email, "
+                "total_amount, status, payment_status, "
+                "properties(title, address, city, state)"
+            )
+            .eq("id", booking_id)
+            .execute()
+        )
 
         if not result.data:
             raise HTTPException(status_code=404, detail="Booking not found")
@@ -46,8 +51,8 @@ async def get_guest_booking(booking_id: str) -> Dict[str, Any]:
                 "guest_email": booking["guest_email"],
                 "total_amount": float(booking["total_amount"]),
                 "status": booking["status"],
-                "payment_status": booking["payment_status"]
-            }
+                "payment_status": booking["payment_status"],
+            },
         }
     except HTTPException:
         raise
@@ -61,15 +66,18 @@ async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
     """Create Stripe Checkout session for guest payment"""
     try:
         # Get booking with property and host info
-        result = supabase_client.table("bookings").select(
-            "*, properties(id, title, user_id, users(stripe_account_id))"
-        ).eq("id", booking_id).execute()
+        result = (
+            supabase_client.table("bookings")
+            .select("*, properties(id, title, user_id, users(stripe_account_id))")
+            .eq("id", booking_id)
+            .execute()
+        )
 
         if not result.data:
             raise HTTPException(status_code=404, detail="Booking not found")
 
         booking = result.data[0]
-        
+
         if booking["payment_status"] == "paid":
             raise HTTPException(status_code=400, detail="Booking already paid")
 
@@ -89,49 +97,51 @@ async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
         checkout_session = stripe.checkout.Session.create(
             mode="payment",
             payment_method_types=["card"],
-            line_items=[{
-                "price_data": {
-                    "currency": "aed",
-                    "unit_amount": amount_in_fils,
-                    "product_data": {
-                        "name": property_data.get("title", "Property Booking"),
-                        "description": f"{booking['nights']} nights • {booking['check_in']} to {booking['check_out']}"
-                    }
-                },
-                "quantity": 1
-            }],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "aed",
+                        "unit_amount": amount_in_fils,
+                        "product_data": {
+                            "name": property_data.get("title", "Property Booking"),
+                            "description": f"{booking['nights']} nights • {booking['check_in']} to {booking['check_out']}",
+                        },
+                    },
+                    "quantity": 1,
+                }
+            ],
             payment_intent_data={
                 "application_fee_amount": platform_fee,
-                "transfer_data": {
-                    "destination": host_stripe_account
-                },
+                "transfer_data": {"destination": host_stripe_account},
                 "metadata": {
                     "booking_id": booking_id,
                     "property_id": property_data.get("id"),
-                    "guest_email": booking["guest_email"]
-                }
+                    "guest_email": booking["guest_email"],
+                },
             },
             customer_email=booking["guest_email"],
             success_url=f"https://host.krib.ae/pay/{booking_id}/success",
             cancel_url=f"https://host.krib.ae/pay/{booking_id}",
-            metadata={
-                "booking_id": booking_id
-            }
+            metadata={"booking_id": booking_id},
         )
 
         # Update booking with checkout session
-        supabase_client.table("bookings").update({
-            "stripe_checkout_session_id": checkout_session.id,
-            "payment_status": "processing",
-            "updated_at": datetime.utcnow().isoformat()
-        }).eq("id", booking_id).execute()
+        supabase_client.table("bookings").update(
+            {
+                "stripe_checkout_session_id": checkout_session.id,
+                "payment_status": "processing",
+                "updated_at": datetime.utcnow().isoformat(),
+            }
+        ).eq("id", booking_id).execute()
 
-        logger.info(f"Created checkout session {checkout_session.id} for booking {booking_id}")
+        logger.info(
+            f"Created checkout session {checkout_session.id} for booking {booking_id}"
+        )
 
         return {
             "success": True,
             "checkout_url": checkout_session.url,
-            "session_id": checkout_session.id
+            "session_id": checkout_session.id,
         }
 
     except HTTPException:
@@ -142,4 +152,3 @@ async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
     except Exception as e:
         logger.error(f"Checkout error for booking {booking_id}: {e}")
         raise HTTPException(status_code=500, detail="Failed to create checkout")
-

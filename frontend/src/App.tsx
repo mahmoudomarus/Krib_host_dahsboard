@@ -156,10 +156,11 @@ function AppContent() {
         />
         <main className="flex-1 overflow-auto bg-background" style={{ marginLeft: '16rem' }}>
           <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-sm border-b">
-            <div className="flex items-center justify-end h-14 px-6">
+            <div className="flex items-center justify-end h-14 px-8">
               <NotificationBell />
             </div>
           </div>
+          <div className="px-8 py-6">
           <Suspense fallback={<PageSkeleton />}>
             <Routes>
               <Route path="/dashboard" element={<DashboardOverview />} />
@@ -175,6 +176,7 @@ function AppContent() {
               <Route path="/dashboard/settings" element={<SettingsPage />} />
             </Routes>
           </Suspense>
+          </div>
         </main>
       </div>
     </SidebarProvider>

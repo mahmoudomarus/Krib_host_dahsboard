@@ -118,7 +118,7 @@ export function BookingManagement() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className=" space-y-6">
         <div className="space-y-2">
           <div className="h-8 bg-muted rounded-lg w-64 animate-pulse"></div>
           <div className="h-4 bg-muted rounded w-96 animate-pulse"></div>
@@ -139,7 +139,7 @@ export function BookingManagement() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className=" space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Booking Management</h1>
         <p className="text-muted-foreground">
@@ -277,7 +277,7 @@ export function BookingManagement() {
                 
                 return (
                   <Card key={booking.id}>
-                    <CardContent className="p-6">
+                    <CardContent className="">
                       <div className="flex items-start gap-4">
                         <div className="w-20 h-20 rounded-lg bg-gray-200 flex items-center justify-center">
                           <MapPin className="h-8 w-8 text-gray-400" />

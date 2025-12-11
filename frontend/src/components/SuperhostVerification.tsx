@@ -106,7 +106,7 @@ export function SuperhostVerification() {
       </div>
 
       {status?.status === 'pending' && (
-        <Card className="p-6 bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
+        <Card className=" bg-yellow-50 dark:bg-yellow-950 border-yellow-200 dark:border-yellow-800">
           <div className="flex items-start gap-4">
             <Clock className="w-8 h-8 text-yellow-600 flex-shrink-0" />
             <div>
@@ -127,7 +127,7 @@ export function SuperhostVerification() {
       )}
 
       {status?.status === 'rejected' && status.pending_request?.rejection_reason && (
-        <Card className="p-6 bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
+        <Card className=" bg-red-50 dark:bg-red-950 border-red-200 dark:border-red-800">
           <div className="flex items-start gap-4">
             <XCircle className="w-8 h-8 text-red-600 flex-shrink-0" />
             <div>
@@ -146,7 +146,7 @@ export function SuperhostVerification() {
       )}
 
       <div className="grid md:grid-cols-3 gap-6">
-        <Card className="p-6">
+        <Card className="">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-blue-100 dark:bg-blue-900 rounded-lg">
               <Target className="w-6 h-6 text-blue-600 dark:text-blue-300" />
@@ -159,7 +159,7 @@ export function SuperhostVerification() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-green-100 dark:bg-green-900 rounded-lg">
               <Users className="w-6 h-6 text-green-600 dark:text-green-300" />
@@ -172,7 +172,7 @@ export function SuperhostVerification() {
           </div>
         </Card>
 
-        <Card className="p-6">
+        <Card className="">
           <div className="flex items-center gap-3">
             <div className="p-3 bg-yellow-100 dark:bg-yellow-900 rounded-lg">
               <Star className="w-6 h-6 text-yellow-600 dark:text-yellow-300" />
@@ -186,7 +186,7 @@ export function SuperhostVerification() {
         </Card>
       </div>
 
-      <Card className="p-6">
+      <Card className="">
         <h3 className="text-lg font-semibold mb-4">Performance Metrics</h3>
         <div className="space-y-4">
           <div>
@@ -220,7 +220,7 @@ export function SuperhostVerification() {
       </Card>
 
       {!status?.is_superhost && status?.status !== 'pending' && (
-        <Card className="p-6">
+        <Card className="">
           <h3 className="text-lg font-semibold mb-4">
             {eligibility?.eligible ? 'Request Verification' : 'Eligibility Requirements'}
           </h3>
@@ -296,7 +296,7 @@ export function SuperhostVerification() {
       )}
 
       {status?.is_superhost && (
-        <Card className="p-6 bg-gradient-to-r from-krib-lime/20 to-krib-lime/10">
+        <Card className=" bg-gradient-to-r from-krib-lime/20 to-krib-lime/10">
           <div className="flex items-start gap-4">
             <Award className="w-12 h-12 text-krib-lime flex-shrink-0" />
             <div>

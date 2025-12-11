@@ -126,7 +126,7 @@ export function MessagingDashboard() {
   )
 
   return (
-    <div className="p-6">
+    <div className="">
       <div className="mb-6">
         <h1 className="text-2xl font-bold">Messages</h1>
         <p className="text-muted-foreground">Communicate with your guests</p>

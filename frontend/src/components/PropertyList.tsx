@@ -88,7 +88,7 @@ export function PropertyList() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className=" space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Properties</h1>
         <p className="text-muted-foreground">
@@ -123,7 +123,7 @@ export function PropertyList() {
 
       <div className="space-y-4">
         {filteredProperties.map((property) => (
-          <Card key={property.id} className="p-6 krib-card krib-glow-hover">
+          <Card key={property.id} className=" krib-card krib-glow-hover">
             <div className="flex items-center gap-6">
               {/* Property Image */}
               <div className="w-32 h-24 relative flex-shrink-0">

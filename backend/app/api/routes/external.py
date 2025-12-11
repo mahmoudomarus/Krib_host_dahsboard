@@ -824,7 +824,7 @@ async def create_external_booking(
 
         # Generate payment URL for the AI platform to redirect guests
         payment_url = f"https://host.krib.ae/pay/{booking_id}"
-        
+
         # Format response
         booking_response = ExternalBookingResponse(
             booking_id=booking_id,

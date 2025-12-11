@@ -105,7 +105,7 @@ export function FinancialDashboard() {
 
   if (loading) {
     return (
-      <div className="p-6 space-y-6">
+      <div className=" space-y-6">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -119,7 +119,7 @@ export function FinancialDashboard() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className=" space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Financial Dashboard</h1>
         <p className="text-muted-foreground">

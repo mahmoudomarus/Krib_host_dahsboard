@@ -362,9 +362,12 @@ async def handle_checkout_completed(session_data: dict):
         logger.info(f"Processing checkout completion for booking {booking_id}")
 
         # Get booking details
-        booking_result = supabase_client.table("bookings").select(
-            "*, properties(id, title, user_id)"
-        ).eq("id", booking_id).execute()
+        booking_result = (
+            supabase_client.table("bookings")
+            .select("*, properties(id, title, user_id)")
+            .eq("id", booking_id)
+            .execute()
+        )
 
         if not booking_result.data:
             logger.error(f"Booking {booking_id} not found")
@@ -374,13 +377,15 @@ async def handle_checkout_completed(session_data: dict):
         property_data = booking.get("properties", {})
 
         # 1. Update booking status
-        supabase_client.table("bookings").update({
-            "status": "confirmed",
-            "payment_status": "paid",
-            "stripe_payment_intent_id": payment_intent,
-            "confirmed_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat()
-        }).eq("id", booking_id).execute()
+        supabase_client.table("bookings").update(
+            {
+                "status": "confirmed",
+                "payment_status": "paid",
+                "stripe_payment_intent_id": payment_intent,
+                "confirmed_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.utcnow().isoformat(),
+            }
+        ).eq("id", booking_id).execute()
 
         logger.info(f"Booking {booking_id} confirmed and paid")
 
@@ -391,6 +396,7 @@ async def handle_checkout_completed(session_data: dict):
         # 3. Send notification to host
         try:
             from app.services.notification_service import NotificationService
+
             await NotificationService.create_booking_notification(
                 user_id=property_data.get("user_id"),
                 booking_id=booking_id,
@@ -402,8 +408,8 @@ async def handle_checkout_completed(session_data: dict):
                     "guest_name": booking["guest_name"],
                     "check_in": booking["check_in"],
                     "check_out": booking["check_out"],
-                    "amount": amount_total
-                }
+                    "amount": amount_total,
+                },
             )
         except Exception as notif_error:
             logger.warning(f"Failed to send host notification: {notif_error}")
@@ -411,6 +417,7 @@ async def handle_checkout_completed(session_data: dict):
         # 4. Send webhook to AI Agent platform
         try:
             from app.services.background_jobs import send_booking_webhook
+
             webhook_data = {
                 "booking_id": booking_id,
                 "status": "confirmed",
@@ -424,7 +431,7 @@ async def handle_checkout_completed(session_data: dict):
                 "check_in": booking["check_in"],
                 "check_out": booking["check_out"],
                 "nights": booking.get("nights"),
-                "confirmed_at": datetime.utcnow().isoformat()
+                "confirmed_at": datetime.utcnow().isoformat(),
             }
             send_booking_webhook.delay("booking.confirmed", booking_id, webhook_data)
             send_booking_webhook.delay("payment.succeeded", booking_id, webhook_data)
