@@ -65,10 +65,10 @@ async def get_guest_booking(booking_id: str) -> Dict[str, Any]:
 async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
     """Create Stripe Checkout session for guest payment"""
     try:
-        # Get booking with property and host info
+        # Get booking with property info
         result = (
             supabase_client.table("bookings")
-            .select("*, properties(id, title, user_id, users(stripe_account_id))")
+            .select("*, properties(id, title, user_id)")
             .eq("id", booking_id)
             .execute()
         )
@@ -82,11 +82,32 @@ async def create_checkout_session(booking_id: str) -> Dict[str, Any]:
             raise HTTPException(status_code=400, detail="Booking already paid")
 
         property_data = booking.get("properties", {})
-        host_data = property_data.get("users", {})
-        host_stripe_account = host_data.get("stripe_account_id")
+        host_id = property_data.get("user_id")
+
+        if not host_id:
+            logger.error(f"No host_id found for booking {booking_id}")
+            raise HTTPException(status_code=400, detail="Property host not found")
+
+        # Get host's Stripe account separately
+        host_result = (
+            supabase_client.table("users")
+            .select("stripe_account_id")
+            .eq("id", host_id)
+            .execute()
+        )
+
+        host_stripe_account = None
+        if host_result.data:
+            host_stripe_account = host_result.data[0].get("stripe_account_id")
 
         if not host_stripe_account:
-            raise HTTPException(status_code=400, detail="Host payment setup incomplete")
+            logger.error(
+                f"Host {host_id} has no stripe_account_id for booking {booking_id}"
+            )
+            raise HTTPException(
+                status_code=400,
+                detail="Host has not connected their Stripe account for receiving payments. Please contact the host.",
+            )
 
         # Calculate platform fee (15%)
         total_amount = float(booking["total_amount"])
