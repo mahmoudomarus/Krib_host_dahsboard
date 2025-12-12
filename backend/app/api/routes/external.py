@@ -636,12 +636,21 @@ async def create_external_booking(
     service_context: dict = Depends(get_external_service_context),
 ):
     """
-    Create a new booking from external AI platform
+    Create a payment checkout for a booking from external AI platform
 
-    Creates a booking request that will be reviewed by the property host.
-    Smart date validation ensures bookings are valid and within property settings.
+    IMPORTANT: This does NOT create a booking. It creates a Stripe Checkout session.
+    The booking is only created AFTER successful payment via webhook.
+
+    Flow:
+    1. AI platform calls this endpoint with booking details
+    2. Returns a payment URL (Stripe Checkout)
+    3. Guest completes payment
+    4. Stripe webhook creates the booking
+    5. Host receives notification only after payment
     """
     try:
+        import stripe
+
         # Verify property exists and is available
         property_data = await verify_property_access_external(
             booking_request.property_id, service_context
@@ -715,12 +724,12 @@ async def create_external_booking(
                 detail=f"Property can accommodate maximum {property_data['max_guests']} guests",
             )
 
-        # Check for date conflicts with existing bookings
+        # Check for date conflicts with existing confirmed bookings only
         existing_bookings = (
             supabase_client.table("bookings")
             .select("*")
             .eq("property_id", booking_request.property_id)
-            .in_("status", ["confirmed", "pending"])
+            .eq("status", "confirmed")  # Only check confirmed bookings
             .lt("check_in", booking_request.check_out.isoformat())
             .gt("check_out", booking_request.check_in.isoformat())
             .execute()
@@ -732,131 +741,124 @@ async def create_external_booking(
                 detail="Property is already booked for these dates",
             )
 
-        # Create booking record (nights already calculated above)
-        # Note: 'nights' is a generated column in the database (computed from check_out - check_in)
-        # so we don't include it in the insert
-        booking_id = str(uuid.uuid4())
-        booking_record = {
-            "id": booking_id,
-            "property_id": booking_request.property_id,
-            "guest_name": f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
-            "guest_email": booking_request.guest_info.email,
-            "guest_phone": f"{booking_request.guest_info.country_code}{booking_request.guest_info.phone}",
-            "check_in": booking_request.check_in.isoformat(),
-            "check_out": booking_request.check_out.isoformat(),
-            # nights is generated automatically by the database
-            "guests": booking_request.guests,
-            "total_amount": booking_request.total_amount,
-            "status": "pending",  # Always pending for external bookings
-            "payment_status": "pending",
-            "special_requests": booking_request.special_requests,
-            "created_at": datetime.utcnow().isoformat(),
-            "updated_at": datetime.utcnow().isoformat(),
-        }
-
-        # Insert booking
-        result = supabase_client.table("bookings").insert(booking_record).execute()
-
-        if not result.data:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to create booking",
-            )
-
-        created_booking = result.data[0]
-
-        # Send webhooks (non-blocking - booking succeeds even if webhooks fail)
-        try:
-            from app.services.background_jobs import (
-                send_booking_webhook,
-                send_host_response_webhook,
-            )
-
-            webhook_data = {
-                **created_booking,
-                "property_info": {
-                    "id": property_data["id"],
-                    "title": property_data["title"],
-                },
-                "guest_info": booking_request.guest_info.dict(),
-                "payment_info": {
-                    "method": booking_request.payment_method,
-                    "status": "pending",
-                },
-            }
-            send_booking_webhook.delay("booking.created", booking_id, webhook_data)
-
-            # Send host response needed webhook
-            send_host_response_webhook.delay(
-                booking_id,
-                property_data["user_id"],
-                {
-                    "booking_id": booking_id,
-                    "property_id": property_data["id"],
-                    "guest_name": f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}",
-                    "check_in": booking_request.check_in.isoformat(),
-                    "check_out": booking_request.check_out.isoformat(),
-                    "total_amount": booking_request.total_amount,
-                    "expires_at": (datetime.utcnow() + timedelta(hours=24)).isoformat(),
-                },
-            )
-        except Exception as webhook_error:
-            # Log but don't fail booking - webhooks are non-critical
-            logger.warning(f"Webhook failed for booking {booking_id}: {webhook_error}")
-
-        # NOTE: Host notification is NOT sent here at booking creation
-        # Notification is sent ONLY after payment succeeds (via Stripe webhook)
-        # This prevents hosts from seeing bookings that haven't been paid for
-        logger.info(
-            f"Booking {booking_id} created - awaiting payment before notifying host"
+        # Get host's Stripe account
+        host_stripe_account = property_data.get("host_info", {}).get(
+            "stripe_account_id"
         )
+        if not host_stripe_account:
+            # Try to get from users table
+            host_result = (
+                supabase_client.table("users")
+                .select("stripe_account_id")
+                .eq("id", property_data["user_id"])
+                .execute()
+            )
+            if host_result.data:
+                host_stripe_account = host_result.data[0].get("stripe_account_id")
 
-        # Generate payment URL for the AI platform to redirect guests
-        payment_url = f"https://host.krib.ae/pay/{booking_id}"
+        if not host_stripe_account:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Host has not set up payment receiving. Please contact support.",
+            )
 
-        # Format response
-        booking_response = ExternalBookingResponse(
-            booking_id=booking_id,
-            status="pending",
-            property={
-                "id": property_data["id"],
-                "title": property_data["title"],
-                "address": f"{property_data['address']}, {property_data['city']}, {property_data['state']}",
+        # Calculate amounts
+        total_amount = float(booking_request.total_amount)
+        platform_fee = int(total_amount * 0.15 * 100)  # 15% platform fee in fils
+        amount_in_fils = int(total_amount * 100)
+
+        # Generate a temporary checkout ID for tracking
+        checkout_id = str(uuid.uuid4())
+        guest_name = f"{booking_request.guest_info.first_name} {booking_request.guest_info.last_name}"
+
+        # Create Stripe Checkout Session with ALL booking data in metadata
+        # NO booking is created yet - only after payment succeeds
+        checkout_session = stripe.checkout.Session.create(
+            mode="payment",
+            payment_method_types=["card"],
+            line_items=[
+                {
+                    "price_data": {
+                        "currency": "aed",
+                        "unit_amount": amount_in_fils,
+                        "product_data": {
+                            "name": property_data.get("title", "Property Booking"),
+                            "description": f"{nights} nights • {booking_request.check_in.isoformat()} to {booking_request.check_out.isoformat()}",
+                        },
+                    },
+                    "quantity": 1,
+                }
+            ],
+            payment_intent_data={
+                "application_fee_amount": platform_fee,
+                "transfer_data": {"destination": host_stripe_account},
+                "metadata": {
+                    "checkout_id": checkout_id,
+                    "property_id": booking_request.property_id,
+                    "guest_email": booking_request.guest_info.email,
+                },
             },
-            dates={
+            customer_email=booking_request.guest_info.email,
+            success_url=f"https://host.krib.ae/booking-confirmed?session_id={{CHECKOUT_SESSION_ID}}",
+            cancel_url=f"https://host.krib.ae/booking-cancelled",
+            # Store ALL booking data in metadata for booking creation after payment
+            metadata={
+                "checkout_id": checkout_id,
+                "property_id": booking_request.property_id,
+                "property_title": property_data.get("title"),
+                "host_id": property_data["user_id"],
+                "guest_name": guest_name,
+                "guest_email": booking_request.guest_info.email,
+                "guest_phone": f"{booking_request.guest_info.country_code}{booking_request.guest_info.phone}",
                 "check_in": booking_request.check_in.isoformat(),
                 "check_out": booking_request.check_out.isoformat(),
-                "nights": nights,
-            },
-            guest_info=booking_request.guest_info,
-            total_amount=booking_request.total_amount,
-            currency="AED",
-            payment={
-                "method": booking_request.payment_method,
-                "status": "pending",
-                "payment_intent_id": None,
-                "payment_url": payment_url,  # AI platform redirects guest here
-            },
-            next_steps=[
-                f"Redirect guest to payment page: {payment_url}",
-                "Guest completes payment on Krib secure checkout",
-                "Webhook sent when payment confirmed",
-                "Host receives booking notification",
-            ],
-            cancellation_policy="moderate",
-            host_contact={
-                "name": property_data.get("host_info", {}).get("name", "Host"),
-                "response_time": "within an hour",
+                "nights": str(nights),
+                "guests": str(booking_request.guests),
+                "total_amount": str(booking_request.total_amount),
+                "special_requests": booking_request.special_requests or "",
+                "source": "external_api",
+                "service_name": service_context.get("service_name", "unknown"),
             },
         )
 
         logger.info(
-            f"External booking created: {booking_id} by {service_context['service_name']}"
+            f"Created checkout session {checkout_session.id} for property {booking_request.property_id}"
         )
 
+        # Return checkout URL - NO booking created yet
+        # Booking will be created by webhook after payment succeeds
         return ExternalAPIResponse(
             success=True,
-            data=booking_response.dict(),
+            data={
+                "checkout_id": checkout_id,
+                "checkout_url": checkout_session.url,
+                "checkout_session_id": checkout_session.id,
+                "status": "awaiting_payment",
+                "property": {
+                    "id": property_data["id"],
+                    "title": property_data["title"],
+                    "address": f"{property_data['address']}, {property_data['city']}, {property_data['state']}",
+                },
+                "dates": {
+                    "check_in": booking_request.check_in.isoformat(),
+                    "check_out": booking_request.check_out.isoformat(),
+                    "nights": nights,
+                },
+                "guest_info": booking_request.guest_info.dict(),
+                "total_amount": booking_request.total_amount,
+                "currency": "AED",
+                "payment": {
+                    "status": "awaiting_payment",
+                    "checkout_url": checkout_session.url,
+                },
+                "next_steps": [
+                    f"Redirect guest to: {checkout_session.url}",
+                    "Guest completes secure payment on Stripe",
+                    "Booking created automatically after payment",
+                    "Both guest and host receive confirmation",
+                ],
+                "important": "Booking is NOT created until payment succeeds. No booking ID yet.",
+            },
             message="Booking request created successfully",
         )
 

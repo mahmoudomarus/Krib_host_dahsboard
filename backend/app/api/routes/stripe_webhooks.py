@@ -343,49 +343,111 @@ async def handle_payout_failed(payout_data: dict):
 async def handle_checkout_completed(session_data: dict):
     """
     Handle Stripe Checkout session completed (guest payment)
-    - Updates booking to confirmed + paid
-    - Blocks dates on property calendar
+    - Creates booking from checkout metadata (booking is NOT created until payment succeeds)
+    - Sets status to confirmed + paid
     - Notifies host and guest
     - Sends webhook to AI Agent platform
     """
     try:
+        import uuid
+
         session_id = session_data.get("id")
-        booking_id = session_data.get("metadata", {}).get("booking_id")
+        metadata = session_data.get("metadata", {})
         payment_intent = session_data.get("payment_intent")
         customer_email = session_data.get("customer_email")
         amount_total = session_data.get("amount_total", 0) / 100  # Convert from fils
 
-        if not booking_id:
-            logger.error(f"No booking_id in checkout session {session_id}")
-            return
+        # Check if this is from external API (has checkout_id) or guest payment page (has booking_id)
+        checkout_id = metadata.get("checkout_id")
+        booking_id = metadata.get("booking_id")
 
-        logger.info(f"Processing checkout completion for booking {booking_id}")
-
-        # Get booking details
-        booking_result = (
-            supabase_client.table("bookings")
-            .select("*, properties(id, title, user_id)")
-            .eq("id", booking_id)
-            .execute()
+        logger.info(
+            f"Checkout completed: session={session_id}, checkout_id={checkout_id}, booking_id={booking_id}"
         )
 
-        if not booking_result.data:
-            logger.error(f"Booking {booking_id} not found")
-            return
+        if checkout_id and not booking_id:
+            # External API flow - CREATE booking from metadata
+            logger.info(f"Creating booking from checkout metadata for {checkout_id}")
 
-        booking = booking_result.data[0]
-        property_data = booking.get("properties", {})
+            property_id = metadata.get("property_id")
+            host_id = metadata.get("host_id")
 
-        # 1. Update booking status
-        supabase_client.table("bookings").update(
-            {
-                "status": "confirmed",
+            if not property_id:
+                logger.error(f"No property_id in checkout session {session_id}")
+                return
+
+            # Create the booking now that payment is complete
+            booking_id = str(uuid.uuid4())
+            booking_record = {
+                "id": booking_id,
+                "property_id": property_id,
+                "guest_name": metadata.get("guest_name", "Guest"),
+                "guest_email": metadata.get("guest_email", customer_email),
+                "guest_phone": metadata.get("guest_phone", ""),
+                "check_in": metadata.get("check_in"),
+                "check_out": metadata.get("check_out"),
+                "guests": int(metadata.get("guests", 1)),
+                "total_amount": float(metadata.get("total_amount", amount_total)),
+                "status": "confirmed",  # Already confirmed since paid
                 "payment_status": "paid",
                 "stripe_payment_intent_id": payment_intent,
+                "stripe_checkout_session_id": session_id,
+                "special_requests": metadata.get("special_requests", ""),
                 "confirmed_at": datetime.utcnow().isoformat(),
+                "created_at": datetime.utcnow().isoformat(),
                 "updated_at": datetime.utcnow().isoformat(),
             }
-        ).eq("id", booking_id).execute()
+
+            result = supabase_client.table("bookings").insert(booking_record).execute()
+
+            if not result.data:
+                logger.error(f"Failed to create booking from checkout {checkout_id}")
+                return
+
+            logger.info(f"Created booking {booking_id} from checkout {checkout_id}")
+
+            # Get property details for notification
+            property_result = (
+                supabase_client.table("properties")
+                .select("id, title, user_id")
+                .eq("id", property_id)
+                .execute()
+            )
+            property_data = property_result.data[0] if property_result.data else {}
+            booking = booking_record
+
+        elif booking_id:
+            # Guest payment page flow - UPDATE existing booking
+            logger.info(f"Updating existing booking {booking_id}")
+
+            # Get booking details
+            booking_result = (
+                supabase_client.table("bookings")
+                .select("*, properties(id, title, user_id)")
+                .eq("id", booking_id)
+                .execute()
+            )
+
+            if not booking_result.data:
+                logger.error(f"Booking {booking_id} not found")
+                return
+
+            booking = booking_result.data[0]
+            property_data = booking.get("properties", {})
+
+            # Update booking status
+            supabase_client.table("bookings").update(
+                {
+                    "status": "confirmed",
+                    "payment_status": "paid",
+                    "stripe_payment_intent_id": payment_intent,
+                    "confirmed_at": datetime.utcnow().isoformat(),
+                    "updated_at": datetime.utcnow().isoformat(),
+                }
+            ).eq("id", booking_id).execute()
+        else:
+            logger.error(f"No checkout_id or booking_id in session {session_id}")
+            return
 
         logger.info(f"Booking {booking_id} confirmed and paid")
 
