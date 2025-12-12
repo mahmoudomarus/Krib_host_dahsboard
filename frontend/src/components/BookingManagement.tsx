@@ -333,8 +333,18 @@ export function BookingManagement() {
                                   }}>
                                     View Details
                                   </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => navigate('/dashboard/messages')}>
-                                    Contact Guest
+                                  <DropdownMenuItem onClick={() => {
+                                    const subject = encodeURIComponent(`Your Booking at ${booking.property_title} - Krib`);
+                                    const body = encodeURIComponent(
+                                      `Hi ${booking.guest_name},\n\n` +
+                                      `Regarding your booking:\n` +
+                                      `Check-in: ${new Date(booking.check_in).toLocaleDateString()}\n` +
+                                      `Check-out: ${new Date(booking.check_out).toLocaleDateString()}\n\n` +
+                                      `Best regards`
+                                    );
+                                    window.location.href = `mailto:${booking.guest_email}?subject=${subject}&body=${body}`;
+                                  }}>
+                                    Email Guest
                                   </DropdownMenuItem>
                                   {booking.status === 'pending' && (
                                     <>
@@ -404,10 +414,23 @@ export function BookingManagement() {
                             <Button 
                               variant="outline" 
                               size="sm"
-                              onClick={() => navigate('/dashboard/messages')}
+                              onClick={() => {
+                                // Open email to guest with booking info
+                                const subject = encodeURIComponent(`Your Booking at ${booking.property_title} - Krib`);
+                                const body = encodeURIComponent(
+                                  `Hi ${booking.guest_name},\n\n` +
+                                  `Regarding your booking:\n` +
+                                  `Property: ${booking.property_title}\n` +
+                                  `Check-in: ${new Date(booking.check_in).toLocaleDateString()}\n` +
+                                  `Check-out: ${new Date(booking.check_out).toLocaleDateString()}\n` +
+                                  `Total: AED ${booking.total_amount}\n\n` +
+                                  `Best regards`
+                                );
+                                window.location.href = `mailto:${booking.guest_email}?subject=${subject}&body=${body}`;
+                              }}
                             >
                               <Mail className="h-4 w-4 mr-2" />
-                              Message Guest
+                              Email Guest
                             </Button>
                             <Button 
                               variant="outline" 
@@ -518,10 +541,22 @@ export function BookingManagement() {
                 <Button 
                   variant="outline" 
                   className="flex-1"
-                  onClick={() => navigate('/dashboard/messages')}
+                  onClick={() => {
+                    const subject = encodeURIComponent(`Your Booking at ${selectedBooking.property_title} - Krib`);
+                    const body = encodeURIComponent(
+                      `Hi ${selectedBooking.guest_name},\n\n` +
+                      `Regarding your booking:\n` +
+                      `Property: ${selectedBooking.property_title}\n` +
+                      `Check-in: ${new Date(selectedBooking.check_in).toLocaleDateString()}\n` +
+                      `Check-out: ${new Date(selectedBooking.check_out).toLocaleDateString()}\n` +
+                      `Total: AED ${selectedBooking.total_amount}\n\n` +
+                      `Best regards`
+                    );
+                    window.location.href = `mailto:${selectedBooking.guest_email}?subject=${subject}&body=${body}`;
+                  }}
                 >
                   <Mail className="h-4 w-4 mr-2" />
-                  Message Guest
+                  Email Guest
                 </Button>
                 {selectedBooking.status === 'pending' && (
                   <Button 

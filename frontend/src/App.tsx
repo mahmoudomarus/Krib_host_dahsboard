@@ -128,19 +128,19 @@ function AppContent() {
             </div>
           </div>
           <div className="px-8 py-6">
-            <Routes>
-              <Route path="/dashboard" element={<DashboardOverview />} />
-              <Route path="/dashboard/overview" element={<DashboardOverview />} />
-              <Route path="/dashboard/properties" element={<PropertyList />} />
-              <Route path="/dashboard/add-property" element={<AddPropertyWizard />} />
-              <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
-              <Route path="/dashboard/bookings" element={<BookingManagement />} />
-              <Route path="/dashboard/financials" element={<FinancialDashboard />} />
-              <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
-              <Route path="/dashboard/messages" element={<MessagingDashboard />} />
-              <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
-              <Route path="/dashboard/settings" element={<SettingsPage />} />
-            </Routes>
+          <Routes>
+            <Route path="/dashboard" element={<DashboardOverview />} />
+            <Route path="/dashboard/overview" element={<DashboardOverview />} />
+            <Route path="/dashboard/properties" element={<PropertyList />} />
+            <Route path="/dashboard/add-property" element={<AddPropertyWizard />} />
+            <Route path="/dashboard/analytics" element={<AnalyticsDashboard />} />
+            <Route path="/dashboard/bookings" element={<BookingManagement />} />
+            <Route path="/dashboard/financials" element={<FinancialDashboard />} />
+            <Route path="/dashboard/superhost" element={<SuperhostVerification />} />
+            <Route path="/dashboard/messages" element={<MessagingDashboard />} />
+            <Route path="/dashboard/reviews" element={<ReviewsDashboard />} />
+            <Route path="/dashboard/settings" element={<SettingsPage />} />
+          </Routes>
           </div>
         </main>
       </div>

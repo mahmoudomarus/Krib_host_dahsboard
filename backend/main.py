@@ -145,7 +145,7 @@ async def security_headers_middleware(request, call_next):
     # Content Security Policy for API
     if request.url.path.startswith("/api"):
         response.headers["Content-Security-Policy"] = "default-src 'none'; frame-ancestors 'none'"
-    
+
     return response
 
 

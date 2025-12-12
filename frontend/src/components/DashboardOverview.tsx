@@ -212,8 +212,8 @@ export function DashboardOverview() {
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-500 mr-3">
                 <Plus className="h-4 w-4 text-white" />
-              </div>
-              <div className="text-left">
+                </div>
+                <div className="text-left">
                 <div className="font-medium text-sm text-emerald-900">Add New Property</div>
                 <div className="text-xs text-emerald-700">List a new rental property</div>
               </div>
@@ -225,8 +225,8 @@ export function DashboardOverview() {
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted mr-3">
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="text-left">
+                </div>
+                <div className="text-left">
                 <div className="font-medium text-sm">View Analytics</div>
                 <div className="text-xs text-muted-foreground">Performance insights</div>
               </div>
@@ -238,8 +238,8 @@ export function DashboardOverview() {
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted mr-3">
                 <BookOpen className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="text-left">
+                </div>
+                <div className="text-left">
                 <div className="font-medium text-sm">Manage Bookings</div>
                 <div className="text-xs text-muted-foreground">Reservations & guests</div>
               </div>
@@ -251,8 +251,8 @@ export function DashboardOverview() {
             >
               <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-muted mr-3">
                 <CreditCard className="h-4 w-4 text-muted-foreground" />
-              </div>
-              <div className="text-left">
+                </div>
+                <div className="text-left">
                 <div className="font-medium text-sm">Financial Dashboard</div>
                 <div className="text-xs text-muted-foreground">Earnings & payouts</div>
               </div>
@@ -262,7 +262,7 @@ export function DashboardOverview() {
               className="w-full flex items-center p-3 rounded-lg border hover:bg-muted/50 transition-colors group"
               onClick={() => navigate('/dashboard/settings')}
             >
-              <div className="text-left">
+                <div className="text-left">
                 <div className="font-medium text-sm">Account Settings</div>
                 <div className="text-xs text-muted-foreground">Profile & preferences</div>
               </div>

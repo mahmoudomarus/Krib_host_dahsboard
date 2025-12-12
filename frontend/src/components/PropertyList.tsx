@@ -138,26 +138,26 @@ export function PropertyList() {
 
               {/* Property Info - tighter layout */}
               <div className="flex-1 min-w-0 ml-4 flex items-center">
-                <div className="flex-1 min-w-0">
+              <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <h3 className="font-semibold truncate">{property.title}</h3>
                     <Badge className={`${getStatusColor(property.status)} text-xs`}>
-                      {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
-                    </Badge>
-                  </div>
-                  
+                        {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                      </Badge>
+                    </div>
+                    
                   <div className="flex items-center text-muted-foreground text-sm mb-1">
                     <MapPin className="h-3.5 w-3.5 mr-1" />
                     <span>{property.city}, {property.state}</span>
-                  </div>
+                    </div>
 
                   <div className="flex items-center gap-3 text-sm text-muted-foreground mb-1">
-                    <span>{property.bedrooms} bed</span>
+                      <span>{property.bedrooms} bed</span>
                     <span className="text-muted-foreground/50">•</span>
-                    <span>{property.bathrooms} bath</span>
+                      <span>{property.bathrooms} bath</span>
                     <span className="text-muted-foreground/50">•</span>
-                    <span>{property.max_guests} guests</span>
-                  </div>
+                      <span>{property.max_guests} guests</span>
+                    </div>
 
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-emerald-600">AED {property.price_per_night}<span className="font-normal text-muted-foreground text-sm">/night</span></span>
@@ -169,37 +169,37 @@ export function PropertyList() {
                           <span className="text-muted-foreground ml-1">({property.review_count})</span>
                         )}
                       </span>
-                    )}
+                      )}
+                    </div>
                   </div>
-                </div>
 
                 {/* Action Buttons - closer to content */}
                 <div className="flex items-center gap-2 ml-6">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewProperty(property)}
-                  >
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewProperty(property)}
+                    >
                     <Eye className="h-4 w-4 mr-1.5" />
-                    View
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditProperty(property)}
-                  >
+                      View
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditProperty(property)}
+                    >
                     <Edit className="h-4 w-4 mr-1.5" />
-                    Edit
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteProperty(property.id)}
+                      Edit
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDeleteProperty(property.id)}
                     className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  >
+                    >
                     <Trash2 className="h-4 w-4 mr-1.5" />
-                    Delete
-                  </Button>
+                      Delete
+                    </Button>
                 </div>
               </div>
             </div>

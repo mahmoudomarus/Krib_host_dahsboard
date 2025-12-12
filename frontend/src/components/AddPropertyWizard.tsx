@@ -373,7 +373,7 @@ Book now and experience the best of ${city}!`
       })
       console.log('Generated description:', description)
       if (description && description.trim()) {
-        setPropertyData(prev => ({ ...prev, description }))
+      setPropertyData(prev => ({ ...prev, description }))
       } else {
         throw new Error('Empty description returned')
       }
@@ -616,8 +616,8 @@ Book now and experience the best of ${city}!`
                   className={errors.max_guests ? 'border-red-500' : ''}
                 />
                 {errors.max_guests && <p className="text-red-500 text-sm mt-1">{errors.max_guests}</p>}
-              </div>
-            </div>
+                  </div>
+                  </div>
 
             {/* Booking Rules */}
             <div className="mt-8 pt-6 border-t">
@@ -676,7 +676,7 @@ Book now and experience the best of ${city}!`
                 </div>
               </div>
             </div>
-          </div>
+                </div>
         )
 
       case 'images':

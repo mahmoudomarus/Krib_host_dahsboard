@@ -157,11 +157,11 @@ export function SuperhostVerification() {
       {status?.status === 'pending' && (
         <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
           <Clock className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
+            <div>
             <p className="font-medium text-amber-900">Verification Pending</p>
             <p className="text-sm text-amber-800 mt-0.5">
               Your request is being reviewed. You'll be notified once it's processed.
-            </p>
+              </p>
           </div>
         </div>
       )}
@@ -169,7 +169,7 @@ export function SuperhostVerification() {
       {status?.status === 'rejected' && status.pending_request?.rejection_reason && (
         <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
           <XCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-          <div>
+            <div>
             <p className="font-medium text-red-900">Request Not Approved</p>
             <p className="text-sm text-red-800 mt-0.5">{status.pending_request.rejection_reason}</p>
           </div>
@@ -200,7 +200,7 @@ export function SuperhostVerification() {
                   <div className="flex items-center gap-2">
                     <Icon className={`h-4 w-4 ${isMet ? 'text-emerald-500' : 'text-muted-foreground'}`} />
                     <span className="font-medium">{req.label}</span>
-                  </div>
+            </div>
                   <div className="flex items-center gap-2">
                     <span className={isMet ? 'text-emerald-600 font-medium' : ''}>
                       {req.format ? req.format(req.value) : req.value}
@@ -214,13 +214,13 @@ export function SuperhostVerification() {
                     ) : (
                       <XCircle className="h-4 w-4 text-muted-foreground" />
                     )}
-                  </div>
-                </div>
-                <Progress 
+            </div>
+            </div>
+            <Progress 
                   value={progress} 
                   className={`h-2 ${isMet ? '[&>div]:bg-emerald-500' : ''}`}
-                />
-              </div>
+            />
+          </div>
             )
           })}
 
@@ -242,45 +242,45 @@ export function SuperhostVerification() {
       {!status?.is_superhost && status?.status !== 'pending' && (
         <Card>
           <CardContent className="pt-6">
-            {eligibility?.eligible ? (
-              <div className="space-y-4">
+          {eligibility?.eligible ? (
+            <div className="space-y-4">
                 <div className="flex items-start gap-3 p-4 bg-emerald-50 rounded-lg">
                   <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                  <div>
+                <div>
                     <p className="font-medium text-emerald-900">
                       You're eligible for superhost status!
-                    </p>
+                  </p>
                     <p className="text-sm text-emerald-800 mt-0.5">
-                      Submit your request and our team will review it within 2-3 business days.
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Message to Admin (Optional)
-                  </label>
-                  <Textarea
-                    value={requestMessage}
-                    onChange={(e) => setRequestMessage(e.target.value)}
-                    placeholder="Tell us why you'd be a great superhost..."
-                    rows={3}
-                    maxLength={500}
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {requestMessage.length}/500 characters
+                    Submit your request and our team will review it within 2-3 business days.
                   </p>
                 </div>
-
-                <Button
-                  onClick={handleRequestVerification}
-                  disabled={submitting}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                >
-                  {submitting ? 'Submitting...' : 'Request Superhost Verification'}
-                </Button>
               </div>
-            ) : (
+
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Message to Admin (Optional)
+                </label>
+                <Textarea
+                  value={requestMessage}
+                  onChange={(e) => setRequestMessage(e.target.value)}
+                  placeholder="Tell us why you'd be a great superhost..."
+                    rows={3}
+                  maxLength={500}
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  {requestMessage.length}/500 characters
+                </p>
+              </div>
+
+              <Button
+                onClick={handleRequestVerification}
+                disabled={submitting}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
+              >
+                {submitting ? 'Submitting...' : 'Request Superhost Verification'}
+              </Button>
+            </div>
+          ) : (
               <div className="flex items-start gap-3 p-4 bg-blue-50 rounded-lg">
                 <TrendingUp className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                 <div>
@@ -289,8 +289,8 @@ export function SuperhostVerification() {
                     Complete all requirements above to become eligible for verification.
                   </p>
                 </div>
-              </div>
-            )}
+                </div>
+              )}
           </CardContent>
         </Card>
       )}
@@ -299,20 +299,20 @@ export function SuperhostVerification() {
       {status?.is_superhost && (
         <Card className="bg-gradient-to-r from-emerald-50 to-emerald-100/50">
           <CardContent className="pt-6">
-            <div className="flex items-start gap-4">
+          <div className="flex items-start gap-4">
               <Award className="w-12 h-12 text-emerald-600 flex-shrink-0" />
-              <div>
+            <div>
                 <h3 className="text-xl font-bold">You're a Superhost!</h3>
                 <p className="text-muted-foreground mt-1">
-                  Your properties are now marked with a superhost badge, helping you stand out to guests.
+                Your properties are now marked with a superhost badge, helping you stand out to guests.
+              </p>
+              {status.approved_at && (
+                <p className="text-sm text-muted-foreground mt-2">
+                  Verified on {new Date(status.approved_at).toLocaleDateString()}
                 </p>
-                {status.approved_at && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Verified on {new Date(status.approved_at).toLocaleDateString()}
-                  </p>
-                )}
-              </div>
+              )}
             </div>
+          </div>
           </CardContent>
         </Card>
       )}
